@@ -2,8 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-light tracking-tight;
+    letter-spacing: -0.03em;
+  }
+  
+  h1 {
+    @apply text-4xl sm:text-5xl md:text-6xl lg:text-7xl;
+  }
+  
+  h2 {
+    @apply text-3xl sm:text-4xl md:text-5xl;
+  }
+  
+  h3 {
+    @apply text-2xl sm:text-3xl md:text-4xl;
+  }
+}
+
+/* Mystery elements */
+.mystery-glow {
+  box-shadow: 0 0 80px 10px rgba(161, 114, 255, 0.15);
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60;
+}
+
+.enigma-gradient {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(20, 5, 40, 0.95));
 }
 
 @layer utilities {

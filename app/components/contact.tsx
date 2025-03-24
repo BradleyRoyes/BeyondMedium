@@ -46,9 +46,9 @@ export default function Contact() {
           viewport={{ once: true }}
           className="mx-auto max-w-2xl text-center"
         >
-          <h2 className="mb-4 text-3xl font-bold tracking-tighter sm:text-4xl">Get in Touch</h2>
+          <h2 className="mb-4 font-light gradient-text">Connect With Us</h2>
           <p className="mb-8 text-gray-400">
-            Interested in collaborating or commissioning a piece? Let's create something amazing together.
+            Be among the first to experience our sensory integration space in Berlin in 2025.
           </p>
         </motion.div>
         <motion.div
@@ -65,9 +65,9 @@ export default function Contact() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel className="font-light">Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your name" {...field} />
+                      <Input placeholder="Your name" {...field} className="font-light" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -78,9 +78,9 @@ export default function Contact() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="font-light">Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="your@email.com" {...field} />
+                      <Input placeholder="your@email.com" {...field} className="font-light" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -91,22 +91,29 @@ export default function Contact() {
                 name="message"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Message</FormLabel>
+                    <FormLabel className="font-light">Message</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Tell me about your project..." className="min-h-[120px]" {...field} />
+                      <Textarea placeholder="I'm interested in..." className="min-h-[120px] font-light" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Send Message
+              <Button type="submit" className="w-full font-light">
+                Join the Waitlist
               </Button>
+              <p className="mt-4 text-center text-sm font-light text-gray-400">
+                Or email us directly at{" "}
+                <a href="mailto:connect@beyondmedium.com" className="text-white hover:underline">
+                  connect@beyondmedium.com
+                </a>
+              </p>
             </form>
           </Form>
         </motion.div>
       </div>
-      <div className="absolute inset-0 z-0 opacity-30">
+      <div className="absolute inset-0 z-0 opacity-15">
+        <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[70vh] h-[70vh] rounded-full mystery-glow opacity-20"></div>
         <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           {Array.from({ length: 50 }).map((_, i) => (
             <line key={i} x1={i * 2} y1="0" x2={i * 2} y2="100" stroke="white" strokeWidth="0.1" />
