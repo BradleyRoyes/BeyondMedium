@@ -7,7 +7,7 @@ interface HoverButtonProps {
   children: React.ReactNode
   onClick?: () => void
   className?: string
-  variant?: 'primary' | 'secondary' | 'accent' | 'lavender' | 'mint'
+  variant?: 'primary' | 'secondary' | 'accent'
   size?: 'sm' | 'md' | 'lg'
   fullWidth?: boolean
   type?: 'button' | 'submit' | 'reset'
@@ -32,23 +32,23 @@ export function HoverButton({
   const y = useMotionValue(0)
   
   // Smooth springs for the animation
-  const springConfig = { damping: 18, stiffness: 120 } // More gentle springs
+  const springConfig = { damping: 15, stiffness: 150 }
   const xSpring = useSpring(x, springConfig)
   const ySpring = useSpring(y, springConfig)
   
-  // Transform the x/y values into rotation values (reduced for subtlety)
-  const rotateX = useTransform(ySpring, [-0.5, 0.5], [6, -6])
-  const rotateY = useTransform(xSpring, [-0.5, 0.5], [-6, 6])
+  // Transform the x/y values into rotation values
+  const rotateX = useTransform(ySpring, [-0.5, 0.5], [8, -8])
+  const rotateY = useTransform(xSpring, [-0.5, 0.5], [-8, 8])
   
   // Shadow effect based on rotation
   const boxShadow = useTransform(
     [rotateX, rotateY],
     ([latestRotateX, latestRotateY]) => {
-      const shadowX = latestRotateY * -0.5 // Reduced for subtlety
+      const shadowX = latestRotateY * -0.5
       const shadowY = latestRotateX * 0.5
       return isHovered && !disabled
-        ? `${shadowX}px ${shadowY}px 15px rgba(0, 0, 0, 0.15)`
-        : '0px 2px 4px rgba(0, 0, 0, 0.1)'
+        ? `${shadowX}px ${shadowY}px 15px rgba(42, 38, 66, 0.25)`
+        : '0px 2px 4px rgba(0, 0, 0, 0.15)'
     }
   )
 
@@ -78,32 +78,26 @@ export function HoverButton({
   }
   
   // Base styles
-  const baseStyles = "relative overflow-hidden transition-colors duration-300 font-light tracking-wide"
+  const baseStyles = "relative overflow-hidden transition-colors font-light"
   
-  // Updated variant styles with pastel colors
+  // Variant styles with more subtle pastel hues
   const variantStyles = {
     primary: !disabled
-      ? "bg-gradient-to-br from-[#2d2157]/90 to-[#38366b]/90 text-white/90"
-      : "bg-zinc-600/80 text-zinc-300/80",
+      ? "bg-gradient-to-br from-[#534a73] to-[#655987] text-white"
+      : "bg-zinc-600 text-zinc-300",
     secondary: !disabled
-      ? "bg-zinc-800/60 hover:bg-zinc-700/60 text-white/80 border border-zinc-700/30"
-      : "bg-zinc-600/60 text-zinc-300/80 border border-zinc-700/30",
+      ? "bg-[#2a2642] hover:bg-[#352f50] text-white border border-[#534a73]/30"
+      : "bg-zinc-600 text-zinc-300 border border-zinc-700",
     accent: !disabled
-      ? "bg-gradient-to-r from-[#4c3a78]/90 via-[#554046]/80 to-[#38366b]/90 text-white/90"
-      : "bg-zinc-600/80 text-zinc-300/80",
-    lavender: !disabled
-      ? "bg-gradient-to-r from-[#4c3a78]/80 to-[#8667a8]/70 text-white/85"
-      : "bg-zinc-600/80 text-zinc-300/80",
-    mint: !disabled
-      ? "bg-gradient-to-r from-[#193732]/90 to-[#2a4d4a]/80 text-white/85"
-      : "bg-zinc-600/80 text-zinc-300/80",
+      ? "bg-gradient-to-r from-[#534a73] via-[#6f5fa9] to-[#655987] text-white"
+      : "bg-zinc-600 text-zinc-300",
   }
   
   // Size styles
   const sizeStyles = {
-    sm: "py-1.5 px-4 text-sm",
-    md: "py-2.5 px-7 text-md",
-    lg: "py-3.5 px-9 text-lg",
+    sm: "py-1 px-3 text-sm",
+    md: "py-2 px-6 text-md",
+    lg: "py-3 px-8 text-lg",
   }
   
   // Width style
@@ -131,10 +125,10 @@ export function HoverButton({
       }}
       whileTap={!disabled ? { scale: 0.98 } : {}}
     >
-      {/* Subtle glare effect */}
+      {/* Inner glare effect */}
       {!disabled && isHovered && (
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-10 pointer-events-none"
+          className="absolute inset-0 bg-gradient-to-br from-white to-transparent opacity-8 pointer-events-none"
           style={{
             rotateX: rotateX.get() * -1,
             rotateY: rotateY.get() * -1,
@@ -146,7 +140,7 @@ export function HoverButton({
       {/* Button content with slight 3D lift */}
       <motion.div
         style={{
-          transform: isHovered && !disabled ? "translateZ(1.5px)" : "none", // Reduced for subtlety
+          transform: isHovered && !disabled ? "translateZ(2px)" : "none",
           transformStyle: "preserve-3d",
         }}
       >

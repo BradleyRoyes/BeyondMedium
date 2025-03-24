@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { OpArt } from "./OpArt"
-import { ScanLines } from "./ScanLines"
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,34 +43,33 @@ export default function Hero() {
       <div className="absolute inset-0">
         <OpArt 
           variant="grid" 
-          intensity={1.3} 
-          speed={0.6} 
-          colorScheme="dusk" 
+          intensity={1.5} 
+          speed={0.5} 
+          colorScheme="custom"
+          customColors={['#2a2642', '#3e3a5c', '#5d517a']} 
           className="w-full h-full"
         />
       </div>
       
       {/* Secondary OpArt layer for depth */}
-      <div className="absolute inset-0 opacity-25 mix-blend-soft-light">
+      <div className="absolute inset-0 opacity-20">
         <OpArt 
           variant="circles" 
-          intensity={0.7} 
+          intensity={0.8} 
           speed={0.4} 
-          colorScheme="lavender" 
+          colorScheme="custom"
+          customColors={['#403a5f', '#695e8a', '#7a6c9c']}
           className="w-full h-full"
         />
       </div>
       
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
       
-      {/* Subtle fog effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black/50 opacity-40"></div>
-      
       <motion.div 
-        className="absolute inset-0 opacity-25"
+        className="absolute inset-0 opacity-20"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.25 }}
-        transition={{ duration: 2.5 }}
+        animate={{ opacity: 0.2 }}
+        transition={{ duration: 2 }}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vh] h-[40vh] rounded-full mystery-glow"></div>
       </motion.div>
@@ -80,26 +78,26 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 2 }}
+          transition={{ duration: 1.5 }}
           className="absolute top-0 inset-x-0 mt-8 sm:mt-16"
         >
-          <p className="text-xs sm:text-sm tracking-[0.25em] uppercase text-white/50">Unveiling in Berlin • 2025</p>
+          <p className="text-xs sm:text-sm tracking-[0.2em] uppercase text-white/60">Unveiling in Berlin • 2025</p>
         </motion.div>
         
         <motion.h1
           className="mb-4 font-light shimmer-text"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.2 }}
+          transition={{ duration: 0.8 }}
         >
           BeyondMedium
         </motion.h1>
         
         <motion.p
-          className="max-w-[600px] text-lg font-extralight text-gray-400 sm:text-xl mb-10"
+          className="max-w-[600px] text-lg font-light text-gray-400 sm:text-xl mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, delay: 0.4 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
           A Bespoke Sensory Integration Lab
         </motion.p>
@@ -107,61 +105,63 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.6 }}
-          whileHover={{ scale: 1.03 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
           className="glow-effect"
         >
-          <span className="inline-block py-2 px-8 border border-white/10 text-white/80 text-sm tracking-widest uppercase backdrop-blur-md bg-black/20 rounded-sm">
+          <span className="inline-block py-2 px-6 border border-white/20 text-white/90 text-sm tracking-widest uppercase backdrop-blur-sm bg-black/30 rounded-sm">
             Coming Soon
           </span>
         </motion.div>
         
-        {/* Floating elements - updated for more mystery */}
+        {/* Floating elements */}
         <motion.div 
-          className="absolute bottom-20 left-1/4 w-16 h-16 rounded-full bg-[#8667a8]/10 backdrop-blur-md"
+          className="absolute bottom-20 left-1/4 w-16 h-16 rounded-full bg-violet-400/10 backdrop-blur-md"
           animate={{
-            y: [0, -15, 0],
-            x: [0, 8, 0],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        
-        <motion.div 
-          className="absolute top-32 right-1/4 w-12 h-12 rounded-full bg-[#2a4d4a]/10 backdrop-blur-md"
-          animate={{
-            y: [0, 12, 0],
-            x: [0, -7, 0],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        />
-        
-        <motion.div 
-          className="absolute top-1/2 right-1/6 w-8 h-8 rounded-full bg-[#38366b]/10 backdrop-blur-md"
-          animate={{
-            y: [0, 8, 0],
-            x: [0, -4, 0],
+            y: [0, -20, 0],
+            x: [0, 10, 0],
           }}
           transition={{
             duration: 8,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 2,
+          }}
+        />
+        
+        <motion.div 
+          className="absolute top-32 right-1/4 w-12 h-12 rounded-full bg-indigo-300/10 backdrop-blur-md"
+          animate={{
+            y: [0, 15, 0],
+            x: [0, -10, 0],
+          }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1,
           }}
         />
       </div>
       
-      {/* Client-only scan line effect */}
-      <ScanLines count={60} opacity={0.05} />
+      {/* Scan line effect - Fixed opacity values to prevent hydration errors */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10">
+        {Array.from({ length: 50 }).map((_, i) => {
+          // Deterministic opacity pattern based on index
+          const opacity = 0.2 + (i % 5) * 0.06
+          
+          return (
+            <div 
+              key={i} 
+              className="h-px w-full bg-white/30" 
+              style={{ 
+                marginTop: `${(i * 3)}vh`,
+                opacity
+              }}
+            />
+          )
+        })}
+      </div>
     </div>
   )
 }
