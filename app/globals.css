@@ -37,10 +37,15 @@
     filter: blur(0px);
     transform: scale(1);
   }
-  50% {
-    opacity: 0.5;
-    filter: blur(2px);
-    transform: scale(0.95) translateY(2px);
+  30% {
+    opacity: 0.7;
+    filter: blur(1px);
+    transform: scale(0.98) translateY(1px);
+  }
+  70% {
+    opacity: 0.3;
+    filter: blur(4px);
+    transform: scale(0.9) translateY(3px);
   }
   100% {
     opacity: 0;
@@ -52,11 +57,20 @@
 .void-text {
   position: relative;
   display: inline-block;
-  transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+  opacity: 1 !important; /* Ensure initially visible */
+  transform: scale(1) translateY(0) !important; /* Ensure initially in position */
+  filter: blur(0px) !important; /* Ensure initially sharp */
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: opacity, filter, transform;
 }
 
 .void-text-active {
-  animation: voidEffect 1.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation: voidEffect 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  /* Important ensures animation takes precedence over inline styles */
+  opacity: 1 !important; 
+  filter: blur(0px) !important;
+  transform: scale(1) translateY(0) !important;
+  animation-delay: 0.2s;
 }
 
 .void-particles {
@@ -66,6 +80,7 @@
   background-color: rgba(255, 255, 255, 0.6);
   border-radius: 50%;
   pointer-events: none;
+  z-index: 5;
 }
 
 .enigma-gradient {

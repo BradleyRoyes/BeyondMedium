@@ -13,10 +13,23 @@ export default function Hero() {
   const [isMobile, setIsMobile] = useState(false)
   const [isDiumActive, setIsDiumActive] = useState(false)
   const [particles, setParticles] = useState<JSX.Element[]>([])
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  // Handle the "dium" fade effect
+  // Ensure dium is visible initially then handle auto-fade for mobile
   useEffect(() => {
     if (!diumRef.current) return
+    
+    // Make sure dium is visible on first load
+    if (isInitialLoad) {
+      gsap.to(diumRef.current, {
+        opacity: 1,
+        filter: "blur(0px)",
+        scale: 1, 
+        y: 0,
+        duration: 0,
+        onComplete: () => setIsInitialLoad(false)
+      });
+    }
 
     // Auto-fade for mobile
     const checkMobile = () => {
@@ -25,32 +38,65 @@ export default function Hero() {
       
       // For mobile, create an auto fade animation
       if (mobile && diumRef.current) {
-        gsap.timeline({repeat: -1, repeatDelay: 3})
-          .to(diumRef.current, {
-            opacity: 0,
-            filter: "blur(8px)",
-            scale: 0.8,
-            y: 5,
-            duration: 2.5,
-            ease: "power2.inOut",
-          })
-          .to(diumRef.current, {
-            opacity: 1,
-            filter: "blur(0px)",
-            scale: 1,
-            y: 0,
-            duration: 2.5,
-            delay: 2,
-            ease: "power2.inOut",
-          });
+        // Clear any existing animations
+        gsap.killTweensOf(diumRef.current)
+        
+        // Create repeating timeline
+        const timeline = gsap.timeline({repeat: -1})
+        
+        // First make sure it's visible
+        timeline.to(diumRef.current, {
+          opacity: 1,
+          filter: "blur(0px)",
+          scale: 1,
+          y: 0,
+          duration: 0.1
+        })
+        
+        // Then stay visible for a moment
+        timeline.to(diumRef.current, {
+          opacity: 1,
+          duration: 3
+        })
+        
+        // Then fade out
+        timeline.to(diumRef.current, {
+          opacity: 0,
+          filter: "blur(8px)",
+          scale: 0.8,
+          y: 5,
+          duration: 2.5,
+          ease: "power2.inOut",
+        })
+        
+        // Stay invisible for a moment
+        timeline.to(diumRef.current, {
+          opacity: 0,
+          duration: 2
+        })
+        
+        // Return to visible state
+        timeline.to(diumRef.current, {
+          opacity: 1,
+          filter: "blur(0px)",
+          scale: 1,
+          y: 0,
+          duration: 2.5,
+          ease: "power2.inOut",
+        })
       }
     }
     
     checkMobile()
     window.addEventListener("resize", checkMobile)
     
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
+    return () => {
+      window.removeEventListener("resize", checkMobile)
+      if (diumRef.current) {
+        gsap.killTweensOf(diumRef.current)
+      }
+    }
+  }, [isInitialLoad])
 
   // Create particles for the void effect
   const createVoidParticles = () => {
@@ -286,14 +332,24 @@ export default function Hero() {
     
     // Generate void particles
     createVoidParticles();
+    
+    // Create a timeline to return the dium after a delay
+    const timeline = gsap.timeline();
+    
+    // First fade out with particles (CSS handles this)
+    // Then wait 4 seconds
+    timeline.to({}, { duration: 4 });
+    
+    // Then restore visibility by removing the active class
+    timeline.to({}, { 
+      duration: 0.1,
+      onComplete: () => setIsDiumActive(false)
+    });
   };
 
   const handleTitleLeave = () => {
-    if (isMobile) return;
-    if (!diumRef.current) return;
-    
-    // Reset active state
-    setIsDiumActive(false);
+    // Do nothing on leave - we want the full cycle to complete
+    // The automatic timeline will handle restoring visibility
   };
 
   return (
@@ -332,6 +388,7 @@ export default function Hero() {
           <span 
             ref={diumRef} 
             className={`void-text ${isDiumActive ? 'void-text-active' : ''}`}
+            style={{opacity: 1, filter: 'blur(0px)', transform: 'scale(1) translateY(0)'}}
           >dium</span>
           {/* Void particles container */}
           {particles}
