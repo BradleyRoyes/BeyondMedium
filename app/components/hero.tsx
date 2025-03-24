@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { OpArt } from "./OpArt"
+import { ScanLines } from "./ScanLines"
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -159,19 +160,8 @@ export default function Hero() {
         />
       </div>
       
-      {/* Scan line effect - more subtle */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-5">
-        {Array.from({ length: 60 }).map((_, i) => (
-          <div 
-            key={i} 
-            className="h-px w-full bg-white/30" 
-            style={{ 
-              marginTop: `${(i * 2.5)}vh`,
-              opacity: 0.1 + Math.random() * 0.2
-            }}
-          />
-        ))}
-      </div>
+      {/* Client-only scan line effect */}
+      <ScanLines count={60} opacity={0.05} />
     </div>
   )
 }
