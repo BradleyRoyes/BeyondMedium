@@ -1,175 +1,39 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { gsap } from "gsap"
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const diumRef = useRef<HTMLSpanElement>(null)
-  const titleContainerRef = useRef<HTMLHeadingElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isHovering, setIsHovering] = useState(false)
+  const [isTitleHovered, setIsTitleHovered] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [isDiumActive, setIsDiumActive] = useState(false)
-  const [particles, setParticles] = useState<React.ReactElement[]>([])
-  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const [titleFaded, setTitleFaded] = useState(false)
 
-  // Ensure dium is visible initially then handle auto-fade for mobile
+  // Check if device is mobile on component mount
   useEffect(() => {
-    if (!diumRef.current) return
-    
-    // Make sure dium is visible on first load
-    if (isInitialLoad) {
-      gsap.to(diumRef.current, {
-        opacity: 1,
-        filter: "blur(0px)",
-        scale: 1, 
-        y: 0,
-        duration: 0,
-        onComplete: () => setIsInitialLoad(false)
-      });
-    }
-
-    // Auto-fade for mobile
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768
-      setIsMobile(mobile)
-      
-      // For mobile, create an auto fade animation
-      if (mobile && diumRef.current) {
-        // Clear any existing animations
-        gsap.killTweensOf(diumRef.current)
-        
-        // Create repeating timeline
-        const timeline = gsap.timeline({repeat: -1})
-        
-        // First make sure it's visible
-        timeline.to(diumRef.current, {
-          opacity: 1,
-          filter: "blur(0px)",
-          scale: 1,
-          y: 0,
-          duration: 0.1
-        })
-        
-        // Then stay visible for a moment
-        timeline.to(diumRef.current, {
-          opacity: 1,
-          duration: 3
-        })
-        
-        // Then fade out
-        timeline.to(diumRef.current, {
-          opacity: 0,
-          filter: "blur(8px)",
-          scale: 0.8,
-          y: 5,
-          duration: 2.5,
-          ease: "power2.inOut",
-        })
-        
-        // Stay invisible for a moment
-        timeline.to(diumRef.current, {
-          opacity: 0,
-          duration: 2
-        })
-        
-        // Return to visible state
-        timeline.to(diumRef.current, {
-          opacity: 1,
-          filter: "blur(0px)",
-          scale: 1,
-          y: 0,
-          duration: 2.5,
-          ease: "power2.inOut",
-        })
-      }
+      setIsMobile(window.innerWidth < 768)
     }
     
     checkMobile()
-    window.addEventListener("resize", checkMobile)
+    window.addEventListener('resize', checkMobile)
     
-    return () => {
-      window.removeEventListener("resize", checkMobile)
-      if (diumRef.current) {
-        gsap.killTweensOf(diumRef.current)
+    // For mobile devices, create a subtle pulsing effect on the "dium" part
+    if (window.innerWidth < 768) {
+      const interval = setInterval(() => {
+        setTitleFaded(prev => !prev)
+      }, 5000) // Slow pulse every 5 seconds
+      
+      return () => {
+        clearInterval(interval)
+        window.removeEventListener('resize', checkMobile)
       }
     }
-  }, [isInitialLoad])
-
-  // Create particles for the void effect
-  const createVoidParticles = () => {
-    if (!diumRef.current || !titleContainerRef.current) return;
-
-    const diumRect = diumRef.current.getBoundingClientRect();
-    const titleRect = titleContainerRef.current.getBoundingClientRect();
-
-    // Calculate relative position within the title container
-    const centerX = diumRect.left - titleRect.left + diumRect.width / 2;
-    const centerY = diumRect.top - titleRect.top + diumRect.height / 2;
     
-    const newParticles: React.ReactElement[] = [];
-    
-    // Create 15 particles
-    for (let i = 0; i < 15; i++) {
-      const x = centerX + (Math.random() - 0.5) * diumRect.width;
-      const y = centerY + (Math.random() - 0.5) * diumRect.height;
-      
-      // Calculate a random position to animate to (towards the center/void)
-      const toX = centerX;
-      const toY = centerY;
-      
-      // Random delay and duration
-      const delay = Math.random() * 0.5;
-      const duration = 0.5 + Math.random() * 1;
-      
-      const size = 1 + Math.random() * 2;
-      const opacity = 0.3 + Math.random() * 0.7;
-      
-      const particleStyle = {
-        left: `${x}px`,
-        top: `${y}px`,
-        width: `${size}px`,
-        height: `${size}px`,
-        opacity: opacity,
-        backgroundColor: 'rgba(255, 255, 255, ' + opacity + ')',
-      };
-      
-      // Use GSAP to animate the particle
-      const particleRef = React.createRef<HTMLDivElement>();
-      
-      newParticles.push(
-        <div 
-          key={`particle-${i}`}
-          ref={particleRef}
-          className="void-particles absolute"
-          style={particleStyle}
-        />
-      );
-      
-      // Animate after rendering
-      setTimeout(() => {
-        if (particleRef.current) {
-          gsap.to(particleRef.current, {
-            left: toX,
-            top: toY,
-            opacity: 0,
-            scale: 0.5,
-            duration: duration,
-            delay: delay,
-            ease: "power2.in",
-            onComplete: () => {
-              // Remove this particle when animation completes
-              setParticles(prev => prev.filter(p => p.key !== `particle-${i}`));
-            }
-          });
-        }
-      }, 10);
-    }
-    
-    setParticles(newParticles);
-  };
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -322,36 +186,6 @@ export default function Hero() {
     }
   }, [mousePosition, isHovering])
 
-  // Handle the hover effect for the "dium" part
-  const handleTitleHover = () => {
-    if (isMobile) return;
-    if (!diumRef.current) return;
-    
-    // Set active state for CSS animation
-    setIsDiumActive(true);
-    
-    // Generate void particles
-    createVoidParticles();
-    
-    // Create a timeline to return the dium after a delay
-    const timeline = gsap.timeline();
-    
-    // First fade out with particles (CSS handles this)
-    // Then wait 4 seconds
-    timeline.to({}, { duration: 4 });
-    
-    // Then restore visibility by removing the active class
-    timeline.to({}, { 
-      duration: 0.1,
-      onComplete: () => setIsDiumActive(false)
-    });
-  };
-
-  const handleTitleLeave = () => {
-    // Do nothing on leave - we want the full cycle to complete
-    // The automatic timeline will handle restoring visibility
-  };
-
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full enigma-gradient cursor-none" />
@@ -375,23 +209,25 @@ export default function Hero() {
         </motion.div>
         
         <motion.h1
-          ref={titleContainerRef}
           className="mb-4 font-light gradient-text relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          onMouseEnter={handleTitleHover}
-          onMouseLeave={handleTitleLeave}
+          onMouseEnter={() => !isMobile && setIsTitleHovered(true)}
+          onMouseLeave={() => !isMobile && setIsTitleHovered(false)}
         >
-          <span className="inline-block">Beyond</span>
-          <span className="inline-block">Me</span>
+          <span>Beyond</span>
+          <span>Me</span>
           <span 
-            ref={diumRef} 
-            className={`void-text ${isDiumActive ? 'void-text-active' : ''}`}
-            style={{opacity: 1, filter: 'blur(0px)', transform: 'scale(1) translateY(0)'}}
+            className={`
+              transition-all duration-1000 inline-block
+              ${(isTitleHovered || (isMobile && titleFaded)) ? 'opacity-0 scale-90 translate-y-1' : 'opacity-100'}
+            `}
+            style={{
+              textShadow: (isTitleHovered || (isMobile && titleFaded)) ? '0 0 15px rgba(255,255,255,0.5)' : 'none',
+              transformOrigin: 'left center'
+            }}
           >dium</span>
-          {/* Void particles container */}
-          {particles}
         </motion.h1>
         
         <motion.p

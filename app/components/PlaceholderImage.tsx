@@ -36,16 +36,16 @@ export function PlaceholderImage({
     
     switch(category?.toLowerCase()) {
       case 'workshops':
-        gradientColors = ['#271557', '#433399', '#8d54b0'] // Deep purple to lavender
+        gradientColors = ['#1A0633', '#4A1058', '#8B2E8B'] // Deep violet to magenta
         break
       case 'listening':
-        gradientColors = ['#0d1433', '#1a2e63', '#324f94'] // Deep blue to royal blue
+        gradientColors = ['#000B18', '#00253E', '#003B5C'] // Deep navy blue
         break
       case 'events':
-        gradientColors = ['#1a1542', '#2c2b68', '#40387b'] // Midnight to indigo
+        gradientColors = ['#080322', '#1E0B46', '#33167A'] // Mysterious purple
         break
       default:
-        gradientColors = ['#121212', '#25222f', '#3c3354'] // Dark slate with purple undertones
+        gradientColors = ['#111111', '#1C1C1C', '#262626'] // Sophisticated dark gray
     }
     
     const gradient = ctx.createLinearGradient(0, 0, 0, height)
@@ -84,20 +84,8 @@ export function PlaceholderImage({
     ctx.font = 'bold 300px sans-serif'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)'
     ctx.fillText(firstLetter, width / 2, height / 2)
-    
-    // Add subtle vignette effect
-    const outerRadius = Math.max(width, height) * 0.95
-    const innerRadius = Math.max(width, height) * 0.5
-    const vignette = ctx.createRadialGradient(
-      width / 2, height / 2, innerRadius,
-      width / 2, height / 2, outerRadius
-    )
-    vignette.addColorStop(0, 'rgba(0,0,0,0)')
-    vignette.addColorStop(1, 'rgba(0,0,0,0.4)')
-    ctx.fillStyle = vignette
-    ctx.fillRect(0, 0, width, height)
     
   }, [width, height, title, category])
   
@@ -106,30 +94,16 @@ export function PlaceholderImage({
   )
 }
 
-// Helper function to get accent color based on category
-function getAccentColor(category?: string): string {
-  switch(category?.toLowerCase()) {
-    case 'workshops':
-      return 'rgba(196, 132, 255, 0.2)' // Lavender accent
-    case 'listening':
-      return 'rgba(99, 152, 255, 0.2)' // Blue accent
-    case 'events':
-      return 'rgba(147, 130, 255, 0.2)' // Purple-blue accent
-    default:
-      return 'rgba(180, 160, 230, 0.15)' // Subtle purple accent
-  }
-}
-
 // Pattern drawing functions
-function drawCirclesPattern(
-  ctx: CanvasRenderingContext2D, 
-  width: number, 
-  height: number, 
-  category?: string
-) {
+function drawCirclesPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
   const circleCount = 15
-  const accentColor = getAccentColor(category)
   ctx.globalCompositeOperation = 'screen'
+  
+  // Choose accent color based on category
+  let accentColor = 'rgba(255, 255, 255, 0.15)'
+  if (category === 'workshops') accentColor = 'rgba(220, 165, 255, 0.12)'
+  if (category === 'listening') accentColor = 'rgba(120, 195, 255, 0.12)'
+  if (category === 'events') accentColor = 'rgba(170, 150, 255, 0.12)'
   
   for (let i = 0; i < circleCount; i++) {
     const x = Math.random() * width
@@ -149,17 +123,19 @@ function drawCirclesPattern(
   ctx.globalCompositeOperation = 'source-over'
 }
 
-function drawWavePattern(
-  ctx: CanvasRenderingContext2D, 
-  width: number, 
-  height: number, 
-  category?: string
-) {
+function drawWavePattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
   const waveCount = 5
   const amplitude = height / 15
   
   ctx.globalCompositeOperation = 'screen'
-  ctx.strokeStyle = getAccentColor(category)
+  
+  // Choose accent color based on category
+  let strokeColor = 'rgba(255, 255, 255, 0.08)'
+  if (category === 'workshops') strokeColor = 'rgba(220, 165, 255, 0.08)'
+  if (category === 'listening') strokeColor = 'rgba(120, 195, 255, 0.08)'
+  if (category === 'events') strokeColor = 'rgba(170, 150, 255, 0.08)'
+  
+  ctx.strokeStyle = strokeColor
   ctx.lineWidth = 2
   
   for (let i = 0; i < waveCount; i++) {
@@ -183,15 +159,16 @@ function drawWavePattern(
   ctx.globalCompositeOperation = 'source-over'
 }
 
-function drawGridPattern(
-  ctx: CanvasRenderingContext2D, 
-  width: number, 
-  height: number, 
-  category?: string
-) {
+function drawGridPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
   const cellSize = 40
   
-  ctx.strokeStyle = getAccentColor(category)
+  // Choose accent color based on category
+  let strokeColor = 'rgba(255, 255, 255, 0.07)'
+  if (category === 'workshops') strokeColor = 'rgba(220, 165, 255, 0.07)'
+  if (category === 'listening') strokeColor = 'rgba(120, 195, 255, 0.07)'
+  if (category === 'events') strokeColor = 'rgba(170, 150, 255, 0.07)'
+  
+  ctx.strokeStyle = strokeColor
   ctx.lineWidth = 1
   
   // Vertical lines
@@ -211,15 +188,16 @@ function drawGridPattern(
   }
 }
 
-function drawDotsPattern(
-  ctx: CanvasRenderingContext2D, 
-  width: number, 
-  height: number, 
-  category?: string
-) {
+function drawDotsPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
   const spacing = 30
   
-  ctx.fillStyle = getAccentColor(category)
+  // Choose accent color based on category
+  let fillColor = 'rgba(255, 255, 255, 0.15)'
+  if (category === 'workshops') fillColor = 'rgba(220, 165, 255, 0.15)'
+  if (category === 'listening') fillColor = 'rgba(120, 195, 255, 0.15)'
+  if (category === 'events') fillColor = 'rgba(170, 150, 255, 0.15)'
+  
+  ctx.fillStyle = fillColor
   
   for (let x = spacing; x < width; x += spacing) {
     for (let y = spacing; y < height; y += spacing) {
@@ -233,15 +211,16 @@ function drawDotsPattern(
   }
 }
 
-function drawLinesPattern(
-  ctx: CanvasRenderingContext2D, 
-  width: number, 
-  height: number, 
-  category?: string
-) {
+function drawLinesPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
   const lineCount = 20
   
-  ctx.strokeStyle = getAccentColor(category)
+  // Choose accent color based on category
+  let strokeColor = 'rgba(255, 255, 255, 0.08)'
+  if (category === 'workshops') strokeColor = 'rgba(220, 165, 255, 0.08)'
+  if (category === 'listening') strokeColor = 'rgba(120, 195, 255, 0.08)'
+  if (category === 'events') strokeColor = 'rgba(170, 150, 255, 0.08)'
+  
+  ctx.strokeStyle = strokeColor
   ctx.lineWidth = 1
   
   for (let i = 0; i < lineCount; i++) {
@@ -254,15 +233,24 @@ function drawLinesPattern(
   }
 }
 
-function drawNeuralPattern(
-  ctx: CanvasRenderingContext2D, 
-  width: number, 
-  height: number, 
-  category?: string
-) {
+function drawNeuralPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
   const nodeCount = 15
   const nodes = []
-  const accentColor = getAccentColor(category)
+  
+  // Choose accent colors based on category
+  let strokeColor = 'rgba(255, 255, 255, 0.05)'
+  let fillColor = 'rgba(255, 255, 255, 0.15)'
+  
+  if (category === 'workshops') {
+    strokeColor = 'rgba(220, 165, 255, 0.05)'
+    fillColor = 'rgba(220, 165, 255, 0.15)'
+  } else if (category === 'listening') {
+    strokeColor = 'rgba(120, 195, 255, 0.05)'
+    fillColor = 'rgba(120, 195, 255, 0.15)'
+  } else if (category === 'events') {
+    strokeColor = 'rgba(170, 150, 255, 0.05)'
+    fillColor = 'rgba(170, 150, 255, 0.15)'
+  }
   
   // Create nodes
   for (let i = 0; i < nodeCount; i++) {
@@ -274,7 +262,7 @@ function drawNeuralPattern(
   }
   
   // Draw connections between nearby nodes
-  ctx.strokeStyle = accentColor.replace(/[\d.]+\)$/g, '0.05)')
+  ctx.strokeStyle = strokeColor
   ctx.lineWidth = 1
   
   for (let i = 0; i < nodeCount; i++) {
@@ -293,7 +281,7 @@ function drawNeuralPattern(
   }
   
   // Draw nodes
-  ctx.fillStyle = accentColor
+  ctx.fillStyle = fillColor
   
   for (const node of nodes) {
     ctx.beginPath()
