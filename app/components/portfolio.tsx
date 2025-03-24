@@ -58,24 +58,24 @@ export default function Portfolio() {
       // These are the active button styles
       switch(category) {
         case 'workshops':
-          return 'bg-gradient-to-r from-purple-600 to-pink-500 text-white border-none';
+          return 'bg-gradient-to-r from-[#271557] via-[#433399] to-[#8d54b0] text-white border-none shadow-[0_0_15px_rgba(137,84,176,0.25)]';
         case 'listening':
-          return 'bg-gradient-to-r from-blue-700 to-blue-500 text-white border-none';
+          return 'bg-gradient-to-r from-[#0d1433] via-[#1a2e63] to-[#324f94] text-white border-none shadow-[0_0_15px_rgba(50,79,148,0.25)]';
         case 'events':
-          return 'bg-gradient-to-r from-indigo-600 to-cyan-500 text-white border-none';
+          return 'bg-gradient-to-r from-[#1a1542] via-[#2c2b68] to-[#40387b] text-white border-none shadow-[0_0_15px_rgba(64,56,123,0.25)]';
         default: // 'all'
-          return 'bg-white text-zinc-800 border-none font-medium';
+          return 'bg-gradient-to-r from-zinc-100 to-white text-zinc-800 border-none font-medium shadow-[0_0_15px_rgba(255,255,255,0.15)]';
       }
     } else {
       // These are the inactive button styles
-      return 'bg-transparent hover:bg-zinc-800 text-zinc-300 border border-zinc-700 hover:text-white hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:border-zinc-500';
+      return 'bg-transparent hover:bg-zinc-800/50 text-zinc-300 border border-zinc-700 hover:text-white hover:shadow-[0_0_15px_rgba(137,84,176,0.15)] hover:border-zinc-500 backdrop-blur-sm';
     }
   };
 
   return (
-    <section className="bg-black py-20">
+    <section className="bg-gradient-to-b from-black to-[#0c0a1a] py-20">
       <div className="container mx-auto px-4">
-        <h2 className="mb-8 text-center font-light">Our Offerings</h2>
+        <h2 className="mb-8 text-center font-light gradient-text">Our Offerings</h2>
         <div className="mb-12 flex flex-wrap justify-center gap-4">
           {categories.map((category) => (
             <Button
@@ -98,7 +98,7 @@ export default function Portfolio() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <Card className="overflow-hidden bg-zinc-900">
+                <Card className="overflow-hidden bg-zinc-900 border border-zinc-800/50">
                   <CardContent className="p-0">
                     <div className="group relative">
                       <PlaceholderImage
@@ -108,7 +108,7 @@ export default function Portfolio() {
                         category={work.category}
                         className="w-full transition-transform duration-500 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-black/80 to-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100 backdrop-blur-sm">
                         <h3 className="text-xl font-light text-white">{work.title}</h3>
                         <p className="mt-2 text-sm text-gray-300">{work.year}</p>
                       </div>

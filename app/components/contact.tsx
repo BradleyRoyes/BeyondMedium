@@ -3,14 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { motion, useInView } from "framer-motion"
-import { useRef } from "react"
+import { motion } from "framer-motion"
 
+import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { OpArt } from "./OpArt"
-import { HoverButton } from "./HoverButton"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -34,190 +32,130 @@ export default function Contact() {
     },
   })
 
-  const sectionRef = useRef(null)
-  const isInView = useInView(sectionRef, { once: false, amount: 0.2 })
-
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values)
   }
 
-  // Animation variants for form fields
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: "spring", stiffness: 100 }
-    }
-  }
-
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[#1a1729] py-24">
-      {/* OpArt background */}
-      <div className="absolute inset-0 z-0">
-        <OpArt 
-          variant="moiré"
-          intensity={1}
-          speed={0.6}
-          colorScheme="custom"
-          customColors={['#2a2642', '#3e3a5c', '#534a73']}
-          className="w-full h-full opacity-40"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1a1729]/60 via-transparent to-[#1a1729]/80"></div>
-      </div>
-
+    <section className="relative overflow-hidden bg-zinc-900 py-20">
       <div className="container relative z-10 mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
           className="mx-auto max-w-2xl text-center"
         >
           <h2 className="mb-4 font-light gradient-text">Connect With Us</h2>
-          <p className="mb-8 text-[#a79fc2]">
+          <p className="mb-8 text-gray-400">
             Be among the first to experience our sensory integration space in Berlin in 2025.
           </p>
         </motion.div>
-        
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-          className="mx-auto max-w-md backdrop-blur-md bg-[#2b2640]/50 p-8 rounded-lg border border-[#534a73]/20 shadow-xl"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          viewport={{ once: true }}
+          className="mx-auto max-w-md"
         >
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <motion.div variants={itemVariants}>
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-light text-white/80">Name</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Your name" 
-                          {...field} 
-                          className="font-light bg-[#2a2642]/60 border-[#534a73]/30 focus:border-[#8a7fb2] transition-all duration-300" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </motion.div>
-              
-              <motion.div variants={itemVariants}>
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-light text-white/80">Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="your@email.com" 
-                          {...field} 
-                          className="font-light bg-[#2a2642]/60 border-[#534a73]/30 focus:border-[#8a7fb2] transition-all duration-300" 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </motion.div>
-              
-              <motion.div variants={itemVariants}>
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-light text-white/80">Message</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="I'm interested in..." 
-                          className="min-h-[120px] font-light bg-[#2a2642]/60 border-[#534a73]/30 focus:border-[#8a7fb2] transition-all duration-300" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </motion.div>
-
-              <motion.div variants={itemVariants}>
-                <HoverButton type="submit" variant="accent" fullWidth>
-                  Join the Waitlist
-                </HoverButton>
-              </motion.div>
-              
-              <motion.p 
-                variants={itemVariants}
-                className="mt-4 text-center text-sm font-light text-[#a79fc2]"
-              >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 bg-black/30 p-8 rounded-lg backdrop-blur-sm border border-zinc-800 shadow-[0_0_35px_rgba(93,63,211,0.15)]">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-light">Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your name" {...field} className="font-light" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-light">Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="your@email.com" {...field} className="font-light" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-light">Message</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="I'm interested in..." className="min-h-[120px] font-light" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full font-light bg-gradient-to-r from-indigo-900 via-purple-800 to-indigo-900 hover:from-indigo-800 hover:to-purple-900 hover:shadow-[0_0_15px_rgba(93,63,211,0.3)] transition-all duration-300">
+                Join the Waitlist
+              </Button>
+              <p className="mt-4 text-center text-sm font-light text-gray-400">
                 Or email us directly at{" "}
-                <a href="mailto:connect@beyondmedium.com" className="text-white hover:underline hover:text-[#c0b9de] transition-colors">
+                <a href="mailto:connect@beyondmedium.com" className="text-white hover:underline">
                   connect@beyondmedium.com
                 </a>
-              </motion.p>
+              </p>
             </form>
           </Form>
         </motion.div>
       </div>
-      
-      {/* Interactive shapes with opacity defined by constants, not random values */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 z-0 overflow-hidden">
+      <div className="absolute inset-0">
+        {/* Primary background layer */}
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-[#14162c] to-black opacity-80"></div>
+        
+        {/* Animated orbs */}
         <motion.div 
-          className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full opacity-10 bg-[#6f5fa9]"
-          animate={{
-            x: [0, 10, 0],
-            y: [0, -10, 0],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-        <motion.div 
-          className="absolute -bottom-10 right-1/3 w-48 h-48 rounded-full opacity-10 bg-[#8674bd]"
+          className="absolute top-1/4 right-1/4 w-[40vh] h-[40vh] rounded-full bg-gradient-to-r from-purple-900/20 to-indigo-900/20 blur-[80px]"
           animate={{
             x: [0, -20, 0],
-            y: [0, 15, 0],
+            y: [0, 30, 0],
           }}
           transition={{
-            duration: 10,
+            duration: 15,
             repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1.5,
+            repeatType: "reverse",
           }}
         />
+        
         <motion.div 
-          className="absolute -bottom-5 right-1/4 w-32 h-32 rounded-full opacity-10 bg-[#9e90c9]"
+          className="absolute bottom-1/4 left-1/4 w-[30vh] h-[30vh] rounded-full bg-gradient-to-r from-indigo-900/20 to-purple-800/20 blur-[80px]"
           animate={{
-            x: [0, 15, 0],
-            y: [0, 5, 0],
+            x: [0, 30, 0],
+            y: [0, -20, 0],
           }}
           transition={{
-            duration: 7,
+            duration: 18,
             repeat: Infinity,
-            ease: "easeInOut",
-            delay: 0.8,
+            repeatType: "reverse",
           }}
         />
+        
+        {/* Grid overlay */}
+        <div className="absolute inset-0 opacity-20">
+          <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {/* Vertical lines */}
+            {Array.from({ length: 50 }).map((_, i) => (
+              <line key={`v-${i}`} x1={i * 2} y1="0" x2={i * 2} y2="100" stroke="white" strokeWidth="0.1" />
+            ))}
+            {/* Horizontal lines */}
+            {Array.from({ length: 25 }).map((_, i) => (
+              <line key={`h-${i}`} x1="0" y1={i * 4} x2="100" y2={i * 4} stroke="white" strokeWidth="0.1" />
+            ))}
+          </svg>
+        </div>
       </div>
     </section>
   )

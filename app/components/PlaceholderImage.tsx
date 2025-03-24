@@ -36,16 +36,16 @@ export function PlaceholderImage({
     
     switch(category?.toLowerCase()) {
       case 'workshops':
-        gradientColors = ['#3a1c71', '#d76d77', '#ffaf7b'] // Purple to orange
+        gradientColors = ['#271557', '#433399', '#8d54b0'] // Deep purple to lavender
         break
       case 'listening':
-        gradientColors = ['#000428', '#004e92', '#2c3e50'] // Deep blue
+        gradientColors = ['#0d1433', '#1a2e63', '#324f94'] // Deep blue to royal blue
         break
       case 'events':
-        gradientColors = ['#16222A', '#3A6073', '#4286f4'] // Dark blue to light blue
+        gradientColors = ['#1a1542', '#2c2b68', '#40387b'] // Midnight to indigo
         break
       default:
-        gradientColors = ['#232526', '#414345', '#232526'] // Dark gray
+        gradientColors = ['#121212', '#25222f', '#3c3354'] // Dark slate with purple undertones
     }
     
     const gradient = ctx.createLinearGradient(0, 0, 0, height)
@@ -60,22 +60,22 @@ export function PlaceholderImage({
     // Choose and draw pattern based on uniquePattern value
     switch(uniquePattern.current) {
       case 0: // Circles pattern
-        drawCirclesPattern(ctx, width, height)
+        drawCirclesPattern(ctx, width, height, category)
         break
       case 1: // Wave pattern
-        drawWavePattern(ctx, width, height)
+        drawWavePattern(ctx, width, height, category)
         break
       case 2: // Grid pattern
-        drawGridPattern(ctx, width, height)
+        drawGridPattern(ctx, width, height, category)
         break
       case 3: // Dots pattern
-        drawDotsPattern(ctx, width, height)
+        drawDotsPattern(ctx, width, height, category)
         break
       case 4: // Lines pattern
-        drawLinesPattern(ctx, width, height)
+        drawLinesPattern(ctx, width, height, category)
         break
       case 5: // Neural pattern
-        drawNeuralPattern(ctx, width, height)
+        drawNeuralPattern(ctx, width, height, category)
         break
     }
     
@@ -87,6 +87,18 @@ export function PlaceholderImage({
     ctx.fillStyle = 'rgba(255, 255, 255, 0.08)'
     ctx.fillText(firstLetter, width / 2, height / 2)
     
+    // Add subtle vignette effect
+    const outerRadius = Math.max(width, height) * 0.95
+    const innerRadius = Math.max(width, height) * 0.5
+    const vignette = ctx.createRadialGradient(
+      width / 2, height / 2, innerRadius,
+      width / 2, height / 2, outerRadius
+    )
+    vignette.addColorStop(0, 'rgba(0,0,0,0)')
+    vignette.addColorStop(1, 'rgba(0,0,0,0.4)')
+    ctx.fillStyle = vignette
+    ctx.fillRect(0, 0, width, height)
+    
   }, [width, height, title, category])
   
   return (
@@ -94,9 +106,29 @@ export function PlaceholderImage({
   )
 }
 
+// Helper function to get accent color based on category
+function getAccentColor(category?: string): string {
+  switch(category?.toLowerCase()) {
+    case 'workshops':
+      return 'rgba(196, 132, 255, 0.2)' // Lavender accent
+    case 'listening':
+      return 'rgba(99, 152, 255, 0.2)' // Blue accent
+    case 'events':
+      return 'rgba(147, 130, 255, 0.2)' // Purple-blue accent
+    default:
+      return 'rgba(180, 160, 230, 0.15)' // Subtle purple accent
+  }
+}
+
 // Pattern drawing functions
-function drawCirclesPattern(ctx: CanvasRenderingContext2D, width: number, height: number) {
+function drawCirclesPattern(
+  ctx: CanvasRenderingContext2D, 
+  width: number, 
+  height: number, 
+  category?: string
+) {
   const circleCount = 15
+  const accentColor = getAccentColor(category)
   ctx.globalCompositeOperation = 'screen'
   
   for (let i = 0; i < circleCount; i++) {
@@ -105,7 +137,7 @@ function drawCirclesPattern(ctx: CanvasRenderingContext2D, width: number, height
     const radius = Math.random() * 100 + 50
     
     const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius)
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)')
+    gradient.addColorStop(0, accentColor)
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
     
     ctx.beginPath()
@@ -117,12 +149,17 @@ function drawCirclesPattern(ctx: CanvasRenderingContext2D, width: number, height
   ctx.globalCompositeOperation = 'source-over'
 }
 
-function drawWavePattern(ctx: CanvasRenderingContext2D, width: number, height: number) {
+function drawWavePattern(
+  ctx: CanvasRenderingContext2D, 
+  width: number, 
+  height: number, 
+  category?: string
+) {
   const waveCount = 5
   const amplitude = height / 15
   
   ctx.globalCompositeOperation = 'screen'
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+  ctx.strokeStyle = getAccentColor(category)
   ctx.lineWidth = 2
   
   for (let i = 0; i < waveCount; i++) {
@@ -146,10 +183,15 @@ function drawWavePattern(ctx: CanvasRenderingContext2D, width: number, height: n
   ctx.globalCompositeOperation = 'source-over'
 }
 
-function drawGridPattern(ctx: CanvasRenderingContext2D, width: number, height: number) {
+function drawGridPattern(
+  ctx: CanvasRenderingContext2D, 
+  width: number, 
+  height: number, 
+  category?: string
+) {
   const cellSize = 40
   
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+  ctx.strokeStyle = getAccentColor(category)
   ctx.lineWidth = 1
   
   // Vertical lines
@@ -169,10 +211,15 @@ function drawGridPattern(ctx: CanvasRenderingContext2D, width: number, height: n
   }
 }
 
-function drawDotsPattern(ctx: CanvasRenderingContext2D, width: number, height: number) {
+function drawDotsPattern(
+  ctx: CanvasRenderingContext2D, 
+  width: number, 
+  height: number, 
+  category?: string
+) {
   const spacing = 30
   
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+  ctx.fillStyle = getAccentColor(category)
   
   for (let x = spacing; x < width; x += spacing) {
     for (let y = spacing; y < height; y += spacing) {
@@ -186,10 +233,15 @@ function drawDotsPattern(ctx: CanvasRenderingContext2D, width: number, height: n
   }
 }
 
-function drawLinesPattern(ctx: CanvasRenderingContext2D, width: number, height: number) {
+function drawLinesPattern(
+  ctx: CanvasRenderingContext2D, 
+  width: number, 
+  height: number, 
+  category?: string
+) {
   const lineCount = 20
   
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
+  ctx.strokeStyle = getAccentColor(category)
   ctx.lineWidth = 1
   
   for (let i = 0; i < lineCount; i++) {
@@ -202,9 +254,15 @@ function drawLinesPattern(ctx: CanvasRenderingContext2D, width: number, height: 
   }
 }
 
-function drawNeuralPattern(ctx: CanvasRenderingContext2D, width: number, height: number) {
+function drawNeuralPattern(
+  ctx: CanvasRenderingContext2D, 
+  width: number, 
+  height: number, 
+  category?: string
+) {
   const nodeCount = 15
   const nodes = []
+  const accentColor = getAccentColor(category)
   
   // Create nodes
   for (let i = 0; i < nodeCount; i++) {
@@ -216,7 +274,7 @@ function drawNeuralPattern(ctx: CanvasRenderingContext2D, width: number, height:
   }
   
   // Draw connections between nearby nodes
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+  ctx.strokeStyle = accentColor.replace(/[\d.]+\)$/g, '0.05)')
   ctx.lineWidth = 1
   
   for (let i = 0; i < nodeCount; i++) {
@@ -235,7 +293,7 @@ function drawNeuralPattern(ctx: CanvasRenderingContext2D, width: number, height:
   }
   
   // Draw nodes
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'
+  ctx.fillStyle = accentColor
   
   for (const node of nodes) {
     ctx.beginPath()
