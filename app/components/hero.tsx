@@ -12,7 +12,7 @@ export default function Hero() {
   const [isHovering, setIsHovering] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isDiumActive, setIsDiumActive] = useState(false)
-  const [particles, setParticles] = useState<JSX.Element[]>([])
+  const [particles, setParticles] = useState<React.ReactElement[]>([])
   const [isInitialLoad, setIsInitialLoad] = useState(true)
 
   // Ensure dium is visible initially then handle auto-fade for mobile
@@ -109,7 +109,7 @@ export default function Hero() {
     const centerX = diumRect.left - titleRect.left + diumRect.width / 2;
     const centerY = diumRect.top - titleRect.top + diumRect.height / 2;
     
-    const newParticles: JSX.Element[] = [];
+    const newParticles: React.ReactElement[] = [];
     
     // Create 15 particles
     for (let i = 0; i < 15; i++) {
