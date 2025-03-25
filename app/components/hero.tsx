@@ -107,17 +107,15 @@ export default function Hero() {
   // Timer for mobile auto-fade effect
   useEffect(() => {
     if (isMobile) {
-      const interval = setInterval(() => {
-        setIsDiumFading(true);
-        
-        const timer = setTimeout(() => {
-          setIsDiumFading(false);
-        }, 3000);
-        
-        return () => clearTimeout(timer);
-      }, 20000);
+      // Begin with dium faded out on mobile
+      setIsDiumFading(true);
       
-      return () => clearInterval(interval);
+      // After a few seconds, fade it back in and let particles disperse
+      const initialTimer = setTimeout(() => {
+        setIsDiumFading(false);
+      }, 4000);
+      
+      return () => clearTimeout(initialTimer);
     }
   }, [isMobile]);
 
@@ -239,7 +237,23 @@ export default function Hero() {
         
         // Special behavior for dium particles when activated
         if (this.isDiumParticle && diumPosition.active) {
-          // Calculate a target position within the "dium" text area
+          // Mobile devices: just keep particles at dium position without gradual movement
+          if (isMobile) {
+            // Just place the particle directly at a position within the dium text
+            const spreadX = diumPosition.width / 2
+            const spreadY = diumPosition.height / 2
+            
+            this.x = diumPosition.x + (Math.cos(this.angleOffset) * spreadX * 0.8)
+            this.y = diumPosition.y + (Math.sin(this.angleOffset) * spreadY * 0.8)
+            
+            // Increase size and opacity for dium particles when active
+            this.size = Math.max(0.1, this.baseSize * 1.5 + Math.sin(this.phase) * 0.3)
+            this.opacity = Math.min(0.9, this.baseOpacity * 2)
+            
+            return // Skip further movement
+          }
+          
+          // Desktop behavior: calculate a target position within the "dium" text area
           if (!this.isReturning) {
             // Assign a random position within the dium text area when becoming active
             const spreadX = diumPosition.width / 2
@@ -257,11 +271,9 @@ export default function Hero() {
           const distance = Math.sqrt(dx * dx + dy * dy)
           
           if (distance > 0.5) {
-            // Use slower movement for a more gradual effect
-            // Mobile devices get slightly faster movement to ensure they reach target
-            const adjustedSpeed = isMobile ? this.returnSpeed * 1.2 : this.returnSpeed * 0.8
-            this.x += dx * adjustedSpeed
-            this.y += dy * adjustedSpeed
+            // Use slower movement for a more gradual effect on desktop
+            this.x += dx * this.returnSpeed * 0.8
+            this.y += dy * this.returnSpeed * 0.8
           }
           
           // Increase size and opacity for dium particles when active
@@ -355,11 +367,17 @@ export default function Hero() {
     for (let i = 0; i < diumParticleCount; i++) {
       const particle = new Particle(true);
       
-      // Start dium particles closer to where they might end up
-      // This helps them track better, especially on mobile
-      if (diumPositionRef.current.x && diumPositionRef.current.y) {
-        // Start particles in a wider area around the dium text
-        const spreadFactor = 2;
+      // On mobile: always position dium particles around the text initially
+      if (isMobile && diumPositionRef.current.x && diumPositionRef.current.y) {
+        const spreadX = diumPositionRef.current.width ? diumPositionRef.current.width / 2 : 40;
+        const spreadY = diumPositionRef.current.height ? diumPositionRef.current.height / 2 : 20;
+        const angle = Math.random() * Math.PI * 2;
+        
+        particle.x = diumPositionRef.current.x + Math.cos(angle) * spreadX * 0.8;
+        particle.y = diumPositionRef.current.y + Math.sin(angle) * spreadY * 0.8;
+      } 
+      // On desktop: start particles in a wider area around the dium text
+      else if (diumPositionRef.current.x && diumPositionRef.current.y) {
         const randomAngle = Math.random() * Math.PI * 2;
         const randomDistance = Math.random() * canvas.width / 4;
         
