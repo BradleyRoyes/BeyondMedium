@@ -80,5 +80,35 @@
         "timestamp": "2025-03-25T21:19:59.912Z"
       }
     ]
+  },
+  {
+    "id": "wl_1742940210905_6sbknse",
+    "email": "test-api@example.com",
+    "timestamp": "2025-03-25T22:03:30.905Z",
+    "responded": false,
+    "conversations": [
+      {
+        "from": "system",
+        "to": "test-api@example.com",
+        "subject": "Welcome to the BeyondMedium Waitlist",
+        "message": "Thank you for joining our waitlist! We'll keep you updated on our progress.",
+        "timestamp": "2025-03-25T22:03:30.905Z"
+      }
+    ]
+  },
+  {
+    "id": "wl_1742940262614_y1th4zk",
+    "email": "another-test@example.com",
+    "timestamp": "2025-03-25T22:04:22.614Z",
+    "responded": false,
+    "conversations": [
+      {
+        "from": "system",
+        "to": "another-test@example.com",
+        "subject": "Welcome to the BeyondMedium Waitlist",
+        "message": "Thank you for joining our waitlist! We'll keep you updated on our progress.",
+        "timestamp": "2025-03-25T22:04:22.614Z"
+      }
+    ]
   }
 ]

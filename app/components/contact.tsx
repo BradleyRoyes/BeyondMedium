@@ -102,16 +102,17 @@ export default function Contact() {
       .then((response) => {
         console.log('Subscription response:', response);
         
+        // Set submission state to false regardless of the response
+        setIsSubmitting(false);
+        
         if (!response.success) {
           // Handle API error with successful response but failure flag
           setSubmitError(response.message || 'Failed to join waitlist. Please try again.');
-          setIsSubmitting(false);
           return;
         }
         
         // Reset form and show success message
         form.reset();
-        setIsSubmitting(false);
         setIsSubmitted(true);
         
         // Hide success message after 5 seconds
@@ -164,7 +165,10 @@ export default function Contact() {
             </motion.div>
           ) : (
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={(e) => {
+                e.preventDefault(); // Explicitly prevent default form submission behavior
+                form.handleSubmit(onSubmit)(e);
+              }} className="space-y-6">
                 <div className="flex items-stretch rounded-md overflow-hidden bg-zinc-800 border border-zinc-700 transition-all hover:border-[#a4c2c2]/50 focus-within:border-[#a4c2c2]/70 focus-within:ring-2 focus-within:ring-[#a4c2c2]/20">
                   <FormField
                     control={form.control}

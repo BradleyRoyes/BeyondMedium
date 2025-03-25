@@ -150,129 +150,214 @@ const saveCustomEmails = () => {
 
 // Add a new waitlist entry
 export const addWaitlistEntry = (email: string): WaitlistEntry => {
-  const id = `wl_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  const timestamp = new Date().toISOString();
-  
-  const entry: WaitlistEntry = {
-    id,
-    email,
-    timestamp,
-    responded: false,
-    conversations: [{
-      from: 'system',
-      to: email,
-      subject: 'Welcome to the BeyondMedium Waitlist',
-      message: 'Thank you for joining our waitlist! We\'ll keep you updated on our progress.',
-      timestamp
-    }]
-  };
-  
-  // Add to local storage
-  waitlistEntries.push(entry);
-  saveEntries();
-  
-  // Try to add to Supabase if configured
-  if (isSupabaseConfigured()) {
-    addWaitlistEntryToSupabase(entry)
-      .then(success => {
-        if (!success) {
-          console.warn('Failed to add waitlist entry to Supabase, but saved locally');
-        }
-      })
-      .catch(error => {
-        console.error('Error adding waitlist entry to Supabase:', error);
-      });
+  try {
+    console.log('Adding waitlist entry for email:', email);
+    
+    const id = `wl_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const timestamp = new Date().toISOString();
+    
+    const entry: WaitlistEntry = {
+      id,
+      email,
+      timestamp,
+      responded: false,
+      conversations: [{
+        from: 'system',
+        to: email,
+        subject: 'Welcome to the BeyondMedium Waitlist',
+        message: 'Thank you for joining our waitlist! We\'ll keep you updated on our progress.',
+        timestamp
+      }]
+    };
+    
+    // Add to local storage
+    waitlistEntries.push(entry);
+    saveEntries();
+    
+    // Try to add to Supabase if configured, but don't wait for it
+    if (isSupabaseConfigured()) {
+      try {
+        // Use Promise to handle this asynchronously without waiting
+        addWaitlistEntryToSupabase(entry)
+          .then(success => {
+            if (!success) {
+              console.warn('Failed to add waitlist entry to Supabase, but saved locally');
+            } else {
+              console.log('Successfully added waitlist entry to Supabase');
+            }
+          })
+          .catch(error => {
+            console.error('Error adding waitlist entry to Supabase (non-blocking):', error);
+          });
+      } catch (supabaseError) {
+        // Catch and log any immediate errors, but don't block the function
+        console.error('Error initiating Supabase add operation:', supabaseError);
+      }
+    } else {
+      console.log('Supabase not configured, using local storage only');
+    }
+    
+    return entry;
+  } catch (error) {
+    console.error('Error in addWaitlistEntry:', error);
+    
+    // Create a fallback entry even if something fails
+    const fallbackEntry: WaitlistEntry = {
+      id: `wl_fallback_${Date.now()}`,
+      email,
+      timestamp: new Date().toISOString(),
+      responded: false,
+      conversations: []
+    };
+    
+    // Add even the fallback to local storage
+    try {
+      waitlistEntries.push(fallbackEntry);
+      saveEntries();
+    } catch (saveError) {
+      console.error('Error even saving fallback entry:', saveError);
+    }
+    
+    return fallbackEntry;
   }
-  
-  return entry;
 };
 
 // Record a custom email sent
 export const recordCustomEmail = (to: string, subject: string, message: string): CustomEmail => {
-  const id = `email_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  const timestamp = new Date().toISOString();
-  
-  const email: CustomEmail = {
-    id,
-    to,
-    subject,
-    message,
-    timestamp
-  };
-  
-  // Add to local storage
-  customEmails.push(email);
-  saveCustomEmails();
-  
-  // Try to add to Supabase if configured
-  if (isSupabaseConfigured()) {
-    addCustomEmailToSupabase(email)
-      .then(success => {
-        if (!success) {
-          console.warn('Failed to add custom email to Supabase, but saved locally');
-        }
-      })
-      .catch(error => {
-        console.error('Error adding custom email to Supabase:', error);
-      });
+  try {
+    const id = `email_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const timestamp = new Date().toISOString();
+    
+    const email: CustomEmail = {
+      id,
+      to,
+      subject,
+      message,
+      timestamp
+    };
+    
+    // Add to local storage
+    customEmails.push(email);
+    saveCustomEmails();
+    
+    // Try to add to Supabase if configured, but don't wait for it
+    if (isSupabaseConfigured()) {
+      try {
+        // Use Promise to handle this asynchronously without waiting
+        addCustomEmailToSupabase(email)
+          .then(success => {
+            if (!success) {
+              console.warn('Failed to add custom email to Supabase, but saved locally');
+            } else {
+              console.log('Successfully added custom email to Supabase');
+            }
+          })
+          .catch(error => {
+            console.error('Error adding custom email to Supabase (non-blocking):', error);
+          });
+      } catch (supabaseError) {
+        // Catch and log any immediate errors, but don't block the function
+        console.error('Error initiating Supabase add operation for email:', supabaseError);
+      }
+    } else {
+      console.log('Supabase not configured, using local storage only for custom email');
+    }
+    
+    return email;
+  } catch (error) {
+    console.error('Error in recordCustomEmail:', error);
+    
+    // Create a fallback email record even if something fails
+    const fallbackEmail: CustomEmail = {
+      id: `email_fallback_${Date.now()}`,
+      to,
+      subject,
+      message,
+      timestamp: new Date().toISOString()
+    };
+    
+    // Add even the fallback to local storage
+    try {
+      customEmails.push(fallbackEmail);
+      saveCustomEmails();
+    } catch (saveError) {
+      console.error('Error even saving fallback email:', saveError);
+    }
+    
+    return fallbackEmail;
   }
-  
-  return email;
 };
 
 // Get all waitlist entries
 export const getWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
-  // Try to get from Supabase first if configured
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseEntries = await getWaitlistEntriesFromSupabase();
-      if (supabaseEntries.length > 0) {
-        // Update local cache
-        waitlistEntries = supabaseEntries;
-        saveEntries();
-        return supabaseEntries;
+  try {
+    // Try to get from Supabase first if configured
+    if (isSupabaseConfigured()) {
+      try {
+        const supabaseEntries = await getWaitlistEntriesFromSupabase();
+        if (supabaseEntries.length > 0) {
+          // Update local cache
+          waitlistEntries = supabaseEntries;
+          saveEntries();
+          return supabaseEntries;
+        }
+      } catch (error) {
+        console.error('Error fetching waitlist entries from Supabase:', error);
+        // Continue to local storage fallback
       }
-    } catch (error) {
-      console.error('Error fetching waitlist entries from Supabase:', error);
     }
+    
+    // Fall back to local storage
+    if (typeof window === 'undefined') {
+      waitlistEntries = loadEntriesFromFile();
+    }
+    return [...waitlistEntries];
+  } catch (error) {
+    console.error('Error in getWaitlistEntries:', error);
+    return []; // Return empty array on error
   }
-  
-  // Fall back to local storage
-  if (typeof window === 'undefined') {
-    waitlistEntries = loadEntriesFromFile();
-  }
-  return [...waitlistEntries];
 };
 
 // Get all custom emails
 export const getCustomEmails = async (): Promise<CustomEmail[]> => {
-  // Try to get from Supabase first if configured
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseEmails = await getCustomEmailsFromSupabase();
-      if (supabaseEmails.length > 0) {
-        // Update local cache
-        customEmails = supabaseEmails;
-        saveCustomEmails();
-        return supabaseEmails;
+  try {
+    // Try to get from Supabase first if configured
+    if (isSupabaseConfigured()) {
+      try {
+        const supabaseEmails = await getCustomEmailsFromSupabase();
+        if (supabaseEmails.length > 0) {
+          // Update local cache
+          customEmails = supabaseEmails;
+          saveCustomEmails();
+          return supabaseEmails;
+        }
+      } catch (error) {
+        console.error('Error fetching custom emails from Supabase:', error);
+        // Continue to local storage fallback
       }
-    } catch (error) {
-      console.error('Error fetching custom emails from Supabase:', error);
     }
+    
+    // Fall back to local storage
+    if (typeof window === 'undefined') {
+      customEmails = loadCustomEmailsFromFile();
+    }
+    return [...customEmails];
+  } catch (error) {
+    console.error('Error in getCustomEmails:', error);
+    return []; // Return empty array on error
   }
-  
-  // Fall back to local storage
-  if (typeof window === 'undefined') {
-    customEmails = loadCustomEmailsFromFile();
-  }
-  return [...customEmails];
 };
 
 // Get a specific waitlist entry
 export const getWaitlistEntry = async (id: string): Promise<WaitlistEntry | undefined> => {
-  // Refresh entries to ensure latest data
-  const entries = await getWaitlistEntries();
-  return entries.find(entry => entry.id === id);
+  try {
+    // Refresh entries to ensure latest data
+    const entries = await getWaitlistEntries();
+    return entries.find(entry => entry.id === id);
+  } catch (error) {
+    console.error('Error in getWaitlistEntry:', error);
+    return undefined;
+  }
 };
 
 // Add a response to a waitlist entry
@@ -281,41 +366,52 @@ export const addResponseToEntry = async (
   subject: string, 
   message: string
 ): Promise<WaitlistEntry | null> => {
-  // Refresh entries to ensure latest data
-  const entries = await getWaitlistEntries();
-  const entryIndex = entries.findIndex(entry => entry.id === id);
-  
-  if (entryIndex === -1) return null;
-  
-  const entry = entries[entryIndex];
-  
-  const newConversation: Conversation = {
-    from: 'connect@beyondmedium.com',
-    to: entry.email,
-    subject,
-    message,
-    timestamp: new Date().toISOString()
-  };
-  
-  entry.conversations.push(newConversation);
-  entry.responded = true;
-  
-  // Update in local storage
-  waitlistEntries[entryIndex] = entry;
-  saveEntries();
-  
-  // Try to update in Supabase if configured
-  if (isSupabaseConfigured()) {
-    updateWaitlistEntryInSupabase(entry)
-      .then(success => {
-        if (!success) {
-          console.warn('Failed to update waitlist entry in Supabase, but saved locally');
-        }
-      })
-      .catch(error => {
-        console.error('Error updating waitlist entry in Supabase:', error);
-      });
+  try {
+    // Refresh entries to ensure latest data
+    const entries = await getWaitlistEntries();
+    const entryIndex = entries.findIndex(entry => entry.id === id);
+    
+    if (entryIndex === -1) return null;
+    
+    const entry = entries[entryIndex];
+    
+    const newConversation: Conversation = {
+      from: 'connect@beyondmedium.com',
+      to: entry.email,
+      subject,
+      message,
+      timestamp: new Date().toISOString()
+    };
+    
+    entry.conversations.push(newConversation);
+    entry.responded = true;
+    
+    // Update in local storage
+    waitlistEntries[entryIndex] = entry;
+    saveEntries();
+    
+    // Try to update in Supabase if configured, but don't block execution
+    if (isSupabaseConfigured()) {
+      try {
+        updateWaitlistEntryInSupabase(entry)
+          .then(success => {
+            if (!success) {
+              console.warn('Failed to update waitlist entry in Supabase, but saved locally');
+            } else {
+              console.log('Successfully updated waitlist entry in Supabase');
+            }
+          })
+          .catch(error => {
+            console.error('Error updating waitlist entry in Supabase (non-blocking):', error);
+          });
+      } catch (supabaseError) {
+        console.error('Error initiating Supabase update operation:', supabaseError);
+      }
+    }
+    
+    return entry;
+  } catch (error) {
+    console.error('Error in addResponseToEntry:', error);
+    return null;
   }
-  
-  return entry;
 }; 
