@@ -22,7 +22,7 @@ export default function RootLayout({
 import './globals.css'
 
 export const metadata = {
-  title: 'BeyondMedium | Sensory Room & Integration Lab',
-  description: 'BeyondMedium is a sensory room & integration lab offering innovative tools and immersive experiences for neurodiverse people in Berlin.',
+  title: 'BeyondMedium | Sensory Exploration & Integration Center',
+  description: 'BeyondMedium is a sensory exploration & integration center offering innovative tools and immersive experiences for neurodiverse people in Berlin.',
   generator: 'v0.dev'
 };
