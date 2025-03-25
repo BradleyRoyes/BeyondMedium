@@ -9,7 +9,7 @@ import { PlaceholderImage } from "./PlaceholderImage"
 export default function Portfolio() {
   const [selectedCategory, setSelectedCategory] = useState("all")
 
-  const categories = ["all", "workshops", "experiences", "aids"]
+  const categories = ["all", "workshops", "experiences", "toys"]
 
   const works = [
     {
@@ -33,7 +33,7 @@ export default function Portfolio() {
     {
       id: 4,
       title: "Sensory Integration Tools",
-      category: "aids",
+      category: "toys",
       year: "Coming Soon",
     },
     {
@@ -45,7 +45,7 @@ export default function Portfolio() {
     {
       id: 6,
       title: "Neurodiversity Solutions",
-      category: "aids",
+      category: "toys",
       year: "Monthly",
     },
   ]
@@ -61,7 +61,7 @@ export default function Portfolio() {
           return 'bg-gradient-to-r from-[#a18daa] to-[#c9b6de] text-zinc-800 border-none';
         case 'experiences':
           return 'bg-gradient-to-r from-[#7e9a9a] to-[#a4c2c2] text-zinc-800 border-none';
-        case 'aids':
+        case 'toys':
           return 'bg-gradient-to-r from-[#aa9b84] to-[#d4c9bb] text-zinc-800 border-none';
         default: // 'all'
           return 'bg-[#94a897] text-zinc-800 border-none font-medium';
@@ -75,7 +75,7 @@ export default function Portfolio() {
   return (
     <section className="bg-black py-20">
       <div className="container mx-auto px-4">
-        <h2 className="mb-8 text-center font-light">What We'll Offer</h2>
+        <h2 className="mb-8 text-center font-light">Our Offerings</h2>
         <div className="mb-12 flex flex-wrap justify-center gap-4">
           {categories.map((category) => (
             <Button
