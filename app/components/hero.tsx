@@ -39,6 +39,26 @@ export default function Hero() {
   
   // Very subtly changing colors for ultra-smooth transitions
   const colorPairs = [
+    // Start with teal/mint range
+    { from: 'rgba(5, 20, 20, 0.95)', to: 'rgba(5, 21, 21, 0.95)' },
+    { from: 'rgba(5, 21, 21, 0.95)', to: 'rgba(5, 22, 22, 0.95)' },
+    { from: 'rgba(5, 22, 22, 0.95)', to: 'rgba(6, 23, 23, 0.95)' },
+    { from: 'rgba(6, 23, 23, 0.95)', to: 'rgba(7, 24, 24, 0.95)' },
+    { from: 'rgba(7, 24, 24, 0.95)', to: 'rgba(8, 25, 25, 0.95)' }, 
+    { from: 'rgba(8, 25, 25, 0.95)', to: 'rgba(9, 27, 27, 0.95)' },
+    { from: 'rgba(9, 27, 27, 0.95)', to: 'rgba(10, 29, 29, 0.95)' },
+    { from: 'rgba(10, 29, 29, 0.95)', to: 'rgba(10, 30, 30, 0.95)' },
+    
+    // Transition to blue range
+    { from: 'rgba(10, 30, 30, 0.95)', to: 'rgba(11, 28, 32, 0.95)' },
+    { from: 'rgba(11, 28, 32, 0.95)', to: 'rgba(12, 26, 33, 0.95)' },
+    { from: 'rgba(12, 26, 33, 0.95)', to: 'rgba(13, 24, 34, 0.95)' },
+    { from: 'rgba(13, 24, 34, 0.95)', to: 'rgba(14, 22, 35, 0.95)' },
+    { from: 'rgba(14, 22, 35, 0.95)', to: 'rgba(15, 20, 36, 0.95)' },
+    { from: 'rgba(15, 20, 36, 0.95)', to: 'rgba(16, 16, 37, 0.95)' },
+    { from: 'rgba(16, 16, 37, 0.95)', to: 'rgba(18, 10, 38, 0.95)' },
+    { from: 'rgba(18, 10, 38, 0.95)', to: 'rgba(20, 5, 40, 0.95)' },
+    
     // Dark purple range
     { from: 'rgba(20, 5, 40, 0.95)', to: 'rgba(19, 6, 38, 0.95)' },
     { from: 'rgba(19, 6, 38, 0.95)', to: 'rgba(18, 7, 36, 0.95)' },
@@ -49,7 +69,7 @@ export default function Hero() {
     { from: 'rgba(14, 9, 28, 0.95)', to: 'rgba(13, 10, 26, 0.95)' },
     { from: 'rgba(13, 10, 26, 0.95)', to: 'rgba(12, 10, 24, 0.95)' },
     
-    // Transition to blue range
+    // Transition back to blue
     { from: 'rgba(12, 10, 24, 0.95)', to: 'rgba(11, 10, 22, 0.95)' },
     { from: 'rgba(11, 10, 22, 0.95)', to: 'rgba(10, 10, 20, 0.95)' },
     { from: 'rgba(10, 10, 20, 0.95)', to: 'rgba(9, 11, 20, 0.95)' },
@@ -58,26 +78,6 @@ export default function Hero() {
     { from: 'rgba(7, 14, 20, 0.95)', to: 'rgba(6, 16, 20, 0.95)' },
     { from: 'rgba(6, 16, 20, 0.95)', to: 'rgba(5, 18, 20, 0.95)' },
     { from: 'rgba(5, 18, 20, 0.95)', to: 'rgba(5, 20, 20, 0.95)' },
-    
-    // Transition to teal range
-    { from: 'rgba(5, 20, 20, 0.95)', to: 'rgba(5, 21, 21, 0.95)' },
-    { from: 'rgba(5, 21, 21, 0.95)', to: 'rgba(5, 22, 22, 0.95)' },
-    { from: 'rgba(5, 22, 22, 0.95)', to: 'rgba(6, 23, 23, 0.95)' },
-    { from: 'rgba(6, 23, 23, 0.95)', to: 'rgba(7, 24, 24, 0.95)' },
-    { from: 'rgba(7, 24, 24, 0.95)', to: 'rgba(8, 25, 25, 0.95)' }, 
-    { from: 'rgba(8, 25, 25, 0.95)', to: 'rgba(9, 27, 27, 0.95)' },
-    { from: 'rgba(9, 27, 27, 0.95)', to: 'rgba(10, 29, 29, 0.95)' },
-    { from: 'rgba(10, 29, 29, 0.95)', to: 'rgba(10, 30, 30, 0.95)' },
-    
-    // Transition back to purple
-    { from: 'rgba(10, 30, 30, 0.95)', to: 'rgba(11, 28, 32, 0.95)' },
-    { from: 'rgba(11, 28, 32, 0.95)', to: 'rgba(12, 26, 33, 0.95)' },
-    { from: 'rgba(12, 26, 33, 0.95)', to: 'rgba(13, 24, 34, 0.95)' },
-    { from: 'rgba(13, 24, 34, 0.95)', to: 'rgba(14, 22, 35, 0.95)' },
-    { from: 'rgba(14, 22, 35, 0.95)', to: 'rgba(15, 20, 36, 0.95)' },
-    { from: 'rgba(15, 20, 36, 0.95)', to: 'rgba(16, 16, 37, 0.95)' },
-    { from: 'rgba(16, 16, 37, 0.95)', to: 'rgba(18, 10, 38, 0.95)' },
-    { from: 'rgba(18, 10, 38, 0.95)', to: 'rgba(20, 5, 40, 0.95)' },
   ];
   
   // Effect to update CSS variables when background index changes
@@ -89,9 +89,9 @@ export default function Hero() {
   
   // Effect to handle initial setup and background color animation
   useEffect(() => {
-    // Set initial custom properties on :root
-    document.documentElement.style.setProperty('--bg-from', 'rgba(20, 5, 40, 0.95)');
-    document.documentElement.style.setProperty('--bg-to', 'rgba(20, 5, 40, 0.95)');
+    // Set initial custom properties on :root - start with mint tint
+    document.documentElement.style.setProperty('--bg-from', 'rgba(5, 20, 20, 0.95)');
+    document.documentElement.style.setProperty('--bg-to', 'rgba(5, 20, 20, 0.95)');
     
     // Function to advance the gradient to the next state
     const nextGradient = () => {
@@ -110,12 +110,30 @@ export default function Hero() {
       // Begin with dium faded out on mobile
       setIsDiumFading(true);
       
+      // Add a small delay to ensure DOM layout is stable before starting animations
+      const preloadDelay = setTimeout(() => {
+        // Force a position update to make sure diumPositionRef is accurate
+        if (diumTextRef.current) {
+          const rect = diumTextRef.current.getBoundingClientRect();
+          diumPositionRef.current = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            width: rect.width,
+            height: rect.height,
+            active: true
+          };
+        }
+      }, 100);
+      
       // After a few seconds, fade it back in and let particles disperse
       const initialTimer = setTimeout(() => {
         setIsDiumFading(false);
       }, 4000);
       
-      return () => clearTimeout(initialTimer);
+      return () => {
+        clearTimeout(initialTimer);
+        clearTimeout(preloadDelay);
+      };
     }
   }, [isMobile]);
 
@@ -141,6 +159,17 @@ export default function Hero() {
     window.addEventListener('resize', updateDiumPosition);
     window.addEventListener('scroll', updateDiumPosition);
     
+    // Schedule multiple position updates at staggered intervals for more reliable tracking
+    // This helps catch any delayed layout shifts, especially in deployment environments
+    const initialTimeouts: NodeJS.Timeout[] = [];
+    if (isMobile) {
+      // More frequent early checks for mobile
+      [50, 100, 300, 500, 1000, 2000].forEach(delay => {
+        const timeoutId = setTimeout(updateDiumPosition, delay);
+        initialTimeouts.push(timeoutId);
+      });
+    }
+    
     // Update position more frequently on mobile devices to ensure reliable tracking
     const positionInterval = setInterval(updateDiumPosition, isMobile ? 50 : 100);
     
@@ -161,6 +190,7 @@ export default function Hero() {
       window.removeEventListener('resize', updateDiumPosition);
       window.removeEventListener('scroll', updateDiumPosition);
       clearInterval(positionInterval);
+      initialTimeouts.forEach(clearTimeout);
     };
   }, [isDiumFading, isMobile]);
 
@@ -250,15 +280,23 @@ export default function Hero() {
           // Mobile devices: just keep particles at dium position without gradual movement
           if (isMobile) {
             // Just place the particle directly at a position within the dium text
-            const spreadX = diumPosition.width / 2
-            const spreadY = diumPosition.height / 2
+            // Use reliable positioning with fallbacks for more consistent deployment behavior
+            const spreadX = diumPosition.width ? diumPosition.width / 2 : Math.min(100, window.innerWidth * 0.1);
+            const spreadY = diumPosition.height ? diumPosition.height / 2 : Math.min(50, window.innerHeight * 0.05);
             
-            this.x = diumPosition.x + (Math.cos(this.angleOffset) * spreadX * 0.8)
-            this.y = diumPosition.y + (Math.sin(this.angleOffset) * spreadY * 0.8)
-            
-            // Increase size and opacity for dium particles when active
-            this.size = Math.max(0.1, this.baseSize * 1.5 + Math.sin(this.phase) * 0.3)
-            this.opacity = Math.min(0.9, this.baseOpacity * 2)
+            // Check if dium position is valid before applying
+            if (diumPosition.x > 0 && diumPosition.y > 0) {
+              // Apply small random variations for a more natural look
+              const jitter = Math.sin(this.phase) * 0.5;
+              
+              // Directly position at text location
+              this.x = diumPosition.x + (Math.cos(this.angleOffset) * spreadX * 0.8) + jitter;
+              this.y = diumPosition.y + (Math.sin(this.angleOffset) * spreadY * 0.8) + jitter;
+              
+              // Increase size and opacity for dium particles when active
+              this.size = Math.max(0.1, this.baseSize * 1.5 + Math.sin(this.phase) * 0.3);
+              this.opacity = Math.min(0.9, this.baseOpacity * 2.5);
+            }
             
             return // Skip further movement
           }
@@ -379,12 +417,25 @@ export default function Hero() {
       
       // On mobile: always position dium particles around the text initially
       if (isMobile && diumPositionRef.current.x && diumPositionRef.current.y) {
-        const spreadX = diumPositionRef.current.width ? diumPositionRef.current.width / 2 : 40;
-        const spreadY = diumPositionRef.current.height ? diumPositionRef.current.height / 2 : 20;
-        const angle = Math.random() * Math.PI * 2;
+        // Use more reliable positioning for mobile
+        // Calculate position based on viewport size and text element position
+        // This ensures better consistency across different devices and browsers
         
-        particle.x = diumPositionRef.current.x + Math.cos(angle) * spreadX * 0.8;
-        particle.y = diumPositionRef.current.y + Math.sin(angle) * spreadY * 0.8;
+        const spreadX = diumPositionRef.current.width ? diumPositionRef.current.width / 2 : 
+                        Math.min(100, window.innerWidth * 0.1); // Fallback based on viewport
+        const spreadY = diumPositionRef.current.height ? diumPositionRef.current.height / 2 : 
+                        Math.min(50, window.innerHeight * 0.05); // Fallback based on viewport
+        
+        // Use more consistent random distribution for better visual pattern
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 0.8; // Keep within 80% of the target area
+        
+        // Position particles with slightly more precision
+        particle.x = diumPositionRef.current.x + Math.cos(angle) * spreadX * radius;
+        particle.y = diumPositionRef.current.y + Math.sin(angle) * spreadY * radius;
+        
+        // Set initial opacity higher for better visibility during animation
+        particle.opacity = Math.min(0.9, particle.baseOpacity * 2);
       } 
       // On desktop: start particles in a wider area around the dium text
       else if (diumPositionRef.current.x && diumPositionRef.current.y) {
@@ -506,6 +557,22 @@ export default function Hero() {
       // Calculate delta time for smoother animation
       const deltaTime = currentTime - lastFrameTime
       lastFrameTime = currentTime
+      
+      // On the first few frames, ensure dium particle positions are correct if on mobile
+      const isStartupFrame = lastFrameTime < 1000 && isMobile;
+      if (isStartupFrame && isDiumFading && diumPositionRef.current.x) {
+        // Reposition dium particles during startup frames to ensure they're correct
+        for (const particle of diumParticles) {
+          if (particle.isDiumParticle) {
+            const spreadX = diumPositionRef.current.width ? diumPositionRef.current.width / 2 : 40;
+            const spreadY = diumPositionRef.current.height ? diumPositionRef.current.height / 2 : 20;
+            
+            // Position directly at dium text
+            particle.x = diumPositionRef.current.x + (Math.cos(particle.angleOffset) * spreadX * 0.8);
+            particle.y = diumPositionRef.current.y + (Math.sin(particle.angleOffset) * spreadY * 0.8);
+          }
+        }
+      }
       
       // Only clear with a semi-transparent overlay for smoother transitions on connections
       // This creates a trail effect that reduces flickering
