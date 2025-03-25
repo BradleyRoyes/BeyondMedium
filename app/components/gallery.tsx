@@ -62,11 +62,11 @@ export default function Gallery() {
           </div>
         </motion.div>
 
-        <div className="mb-8 md:mb-12">
+        <div className="mb-8 md:mb-12 text-right">
           <h3 className="text-3xl md:text-4xl text-white mb-2 md:mb-4 font-medium">
             Bringing 20+ Years of Collective Experience
           </h3>
-          <p className="mt-4 max-w-lg text-gray-400">
+          <p className="mt-4 max-w-lg ml-auto text-gray-400">
             We're building Berlin's first dedicated space for sensory-inclusive design. Our team combines expertise in cognitive science, design, healthcare and movement practices to create meaningful tools and experiences.
           </p>
         </div>
