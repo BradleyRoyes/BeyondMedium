@@ -8,19 +8,14 @@ const isDemoMode = () => {
   return !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'demo';
 };
 
-// Use Resend's provided test domain if your domain is not verified yet
+// Use verified domain for email sending
 const getSenderEmail = () => {
-  return process.env.NODE_ENV === 'production' 
-    ? 'Beyond Medium <connect@beyondmedium.com>'
-    : 'Beyond Medium <onboarding@resend.dev>';
+  return 'Beyond Medium <connect@updates.beyondmedium.com>';
 };
 
-// Utility function to handle admin notification logic
+// Admin notification email
 const getAdminEmail = () => {
-  // In testing mode with Resend's free tier, we can only send to the account owner's email
-  return process.env.NODE_ENV === 'production'
-    ? 'connect@beyondmedium.com'
-    : 'bradroyes@gmail.com'; // The verified owner email
+  return 'connect@beyondmedium.com';
 };
 
 export async function POST(request: NextRequest): Promise<Response> {
@@ -56,13 +51,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
     
     try {
-      // Get the appropriate sender email
+      // Get the sender email
       const senderEmail = getSenderEmail();
-
-      // When testing, we can only send to the account owner's email when using Resend's free tier
-      const recipientEmail = process.env.NODE_ENV === 'production' 
-        ? email 
-        : 'bradroyes@gmail.com'; // The verified owner email
       
       // HTML template for subscriber confirmation
       const userHtml = `
@@ -109,7 +99,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       // Send confirmation email to the user
       const userResult = await resend.emails.send({
         from: senderEmail,
-        to: [recipientEmail],
+        to: [email],
         subject: 'Welcome to the BeyondMedium Waitlist',
         html: userHtml,
         headers: {
@@ -123,25 +113,21 @@ export async function POST(request: NextRequest): Promise<Response> {
         console.warn('User email response details:', JSON.stringify(userResult));
       }
       
-      // Send notification email to admin - only in production, to avoid hitting free tier limits
-      if (process.env.NODE_ENV === 'production') {
-        const adminResult = await resend.emails.send({
-          from: senderEmail,
-          to: [getAdminEmail()],
-          subject: 'New BeyondMedium Waitlist Signup',
-          html: adminHtml,
-          headers: {
-            'X-Entity-Ref-ID': `waitlist-notification-${entry.id}`, // Helps avoid duplicate emails
-          },
-        });
-        
-        // Log more details about the response
-        console.log(`Notification email sent to admin with ID: ${adminResult?.data?.id || 'unknown'}`);
-        if (!adminResult?.data?.id) {
-          console.warn('Admin email response details:', JSON.stringify(adminResult));
-        }
-      } else {
-        console.log('Skipping admin notification email in development mode to save on email quota');
+      // Send notification email to admin
+      const adminResult = await resend.emails.send({
+        from: senderEmail,
+        to: [getAdminEmail()],
+        subject: 'New BeyondMedium Waitlist Signup',
+        html: adminHtml,
+        headers: {
+          'X-Entity-Ref-ID': `waitlist-notification-${entry.id}`, // Helps avoid duplicate emails
+        },
+      });
+      
+      // Log more details about the response
+      console.log(`Notification email sent to admin with ID: ${adminResult?.data?.id || 'unknown'}`);
+      if (!adminResult?.data?.id) {
+        console.warn('Admin email response details:', JSON.stringify(adminResult));
       }
       
       // Return success response

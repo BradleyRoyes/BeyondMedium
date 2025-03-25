@@ -22,14 +22,14 @@ async function testResendIntegration() {
   const resend = new Resend(apiKey);
   
   try {
-    // Skip domain verification check since we're using a restricted API key
-    console.log('Using Resend\'s verified domain for testing');
+    // Using verified domain
+    console.log('Using verified domain updates.beyondmedium.com for testing');
     
-    // Test sending an email to the verified owner email
+    // Test sending an email
     console.log('Sending test email...');
     const testEmail = await resend.emails.send({
-      from: 'Beyond Medium <onboarding@resend.dev>',
-      to: ['bradroyes@gmail.com'], // The verified owner email
+      from: 'Beyond Medium <connect@updates.beyondmedium.com>',
+      to: ['bradroyes@gmail.com'],
       subject: 'Resend API Test',
       html: '<p>This is a test email from the Resend API test script</p>',
     });

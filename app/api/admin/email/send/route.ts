@@ -25,11 +25,9 @@ const isDemoMode = () => {
   return !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'demo';
 };
 
-// Use Resend's provided test domain if your domain is not verified yet
+// Use verified domain for email sending
 const getSenderEmail = () => {
-  return process.env.NODE_ENV === 'production' 
-    ? 'Beyond Medium <connect@beyondmedium.com>'
-    : 'Beyond Medium <onboarding@resend.dev>';
+  return 'Beyond Medium <connect@updates.beyondmedium.com>';
 };
 
 // Get appropriate recipient email based on environment
@@ -73,9 +71,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     // Initialize Resend with API key
     const resend = new Resend(process.env.RESEND_API_KEY || 'demo');
     
-    // Get the appropriate sender and recipient emails
+    // Get the sender email
     const senderEmail = getSenderEmail();
-    const recipientEmail = getRecipientEmail(to);
     
     // Enhanced HTML template for emails with improved styling
     const enhancedHtml = `
@@ -117,7 +114,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         // Send the actual email through Resend
         emailResult = await resend.emails.send({
           from: senderEmail,
-          to: [recipientEmail],
+          to: [to],
           subject,
           text: message,
           html: enhancedHtml,
