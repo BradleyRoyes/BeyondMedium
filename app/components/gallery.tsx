@@ -64,11 +64,11 @@ export default function Gallery() {
 
         <div className="mb-8 md:mb-12">
           <h3 className="text-3xl md:text-4xl text-white mb-2 md:mb-4 font-medium">
-            20+ Years of Collective Sensory Design Experience
+            Bringing 20+ Years of Collective Experience
           </h3>
           <p className="text-zinc-400 max-w-2xl text-lg md:text-xl">
-            Bringing innovative accessibility tools and our Sensory Exploration & Integration Center to Berlin. 
-            Our interdisciplinary team comes from cognitive science, interaction design, healthcare, and movement therapy backgrounds.
+            Our team delivers innovative accessibility tools and sensory design to our Integration Center in Berlin. 
+            We combine expertise from cognitive science, interaction design, healthcare, and movement therapy to create meaningful experiences.
           </p>
         </div>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
