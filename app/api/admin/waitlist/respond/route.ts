@@ -25,6 +25,21 @@ const isDemoMode = () => {
   return !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'demo';
 };
 
+// Use Resend's provided test domain if your domain is not verified yet
+const getSenderEmail = () => {
+  return process.env.NODE_ENV === 'production' 
+    ? 'Beyond Medium <connect@beyondmedium.com>'
+    : 'Beyond Medium <onboarding@resend.dev>';
+};
+
+// Get appropriate recipient email based on environment
+const getRecipientEmail = (email: string) => {
+  // When testing, we can only send to the account owner's email when using Resend's free tier
+  return process.env.NODE_ENV === 'production' 
+    ? email 
+    : 'bradroyes@gmail.com'; // The verified owner email
+};
+
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     // Validate admin token
@@ -58,6 +73,10 @@ export async function POST(request: NextRequest): Promise<Response> {
     
     // Initialize Resend with API key
     const resend = new Resend(process.env.RESEND_API_KEY || 'demo');
+    
+    // Get the appropriate sender and recipient emails
+    const senderEmail = getSenderEmail();
+    const recipientEmail = getRecipientEmail(entry.email);
     
     // Enhanced HTML template for admin responses with improved styling
     const enhancedHtml = `
@@ -94,18 +113,26 @@ export async function POST(request: NextRequest): Promise<Response> {
       console.log('⚠️ Running in DEMO mode. No actual emails will be sent.');
       console.log(`Would have sent waitlist response to: ${entry.email}`);
       console.log(`Subject: ${subject}`);
-      emailResult = { id: 'demo-mode' };
+      emailResult = { data: { id: 'demo-mode' } };
     } else {
       try {
         // Send the actual response email through Resend
         emailResult = await resend.emails.send({
-          from: 'Beyond Medium <connect@beyondmedium.com>',
-          to: [entry.email],
+          from: senderEmail,
+          to: [recipientEmail],
           subject,
           text: message,
           html: enhancedHtml,
+          headers: {
+            'X-Entity-Ref-ID': `waitlist-response-${id}-${Date.now()}`, // Helps avoid duplicate emails
+          },
         });
-        console.log(`Waitlist response sent to ${entry.email} from admin panel`);
+        
+        // Log more details about the response
+        console.log(`Waitlist response sent to ${entry.email} with ID: ${emailResult?.data?.id || 'unknown'}`);
+        if (!emailResult?.data?.id) {
+          console.warn('Response email details:', JSON.stringify(emailResult));
+        }
       } catch (emailError) {
         console.error('Resend API Error:', emailError);
         return Response.json(

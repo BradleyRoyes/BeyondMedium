@@ -8,6 +8,21 @@ const isDemoMode = () => {
   return !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'demo';
 };
 
+// Use Resend's provided test domain if your domain is not verified yet
+const getSenderEmail = () => {
+  return process.env.NODE_ENV === 'production' 
+    ? 'Beyond Medium <connect@beyondmedium.com>'
+    : 'Beyond Medium <onboarding@resend.dev>';
+};
+
+// Utility function to handle admin notification logic
+const getAdminEmail = () => {
+  // In testing mode with Resend's free tier, we can only send to the account owner's email
+  return process.env.NODE_ENV === 'production'
+    ? 'connect@beyondmedium.com'
+    : 'bradroyes@gmail.com'; // The verified owner email
+};
+
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     // Parse the request body
@@ -31,7 +46,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (isDemoMode()) {
       console.log('⚠️ Running in DEMO mode. No actual emails will be sent.');
       console.log(`Would have sent welcome email to: ${email}`);
-      console.log(`Would have sent notification email to: connect@beyondmedium.com`);
+      console.log(`Would have sent notification email to: ${getAdminEmail()}`);
       
       // Return success response
       return Response.json(
@@ -41,6 +56,14 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
     
     try {
+      // Get the appropriate sender email
+      const senderEmail = getSenderEmail();
+
+      // When testing, we can only send to the account owner's email when using Resend's free tier
+      const recipientEmail = process.env.NODE_ENV === 'production' 
+        ? email 
+        : 'bradroyes@gmail.com'; // The verified owner email
+      
       // HTML template for subscriber confirmation
       const userHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #e0e0e0; background-color: #000; border-radius: 8px;">
@@ -85,8 +108,8 @@ export async function POST(request: NextRequest): Promise<Response> {
       
       // Send confirmation email to the user
       const userResult = await resend.emails.send({
-        from: 'Beyond Medium <connect@beyondmedium.com>',
-        to: [email],
+        from: senderEmail,
+        to: [recipientEmail],
         subject: 'Welcome to the BeyondMedium Waitlist',
         html: userHtml,
         headers: {
@@ -94,20 +117,32 @@ export async function POST(request: NextRequest): Promise<Response> {
         },
       });
       
-      console.log(`Welcome email sent to ${email} with ID: ${userResult.id || 'unknown'}`);
+      // Log more details about the response
+      console.log(`Welcome email sent to ${email} with ID: ${userResult?.data?.id || 'unknown'}`);
+      if (!userResult?.data?.id) {
+        console.warn('User email response details:', JSON.stringify(userResult));
+      }
       
-      // Send notification email to admin
-      const adminResult = await resend.emails.send({
-        from: 'Beyond Medium <connect@beyondmedium.com>',
-        to: ['connect@beyondmedium.com'],
-        subject: 'New BeyondMedium Waitlist Signup',
-        html: adminHtml,
-        headers: {
-          'X-Entity-Ref-ID': `waitlist-notification-${entry.id}`, // Helps avoid duplicate emails
-        },
-      });
-      
-      console.log(`Notification email sent to admin with ID: ${adminResult.id || 'unknown'}`);
+      // Send notification email to admin - only in production, to avoid hitting free tier limits
+      if (process.env.NODE_ENV === 'production') {
+        const adminResult = await resend.emails.send({
+          from: senderEmail,
+          to: [getAdminEmail()],
+          subject: 'New BeyondMedium Waitlist Signup',
+          html: adminHtml,
+          headers: {
+            'X-Entity-Ref-ID': `waitlist-notification-${entry.id}`, // Helps avoid duplicate emails
+          },
+        });
+        
+        // Log more details about the response
+        console.log(`Notification email sent to admin with ID: ${adminResult?.data?.id || 'unknown'}`);
+        if (!adminResult?.data?.id) {
+          console.warn('Admin email response details:', JSON.stringify(adminResult));
+        }
+      } else {
+        console.log('Skipping admin notification email in development mode to save on email quota');
+      }
       
       // Return success response
       return Response.json(

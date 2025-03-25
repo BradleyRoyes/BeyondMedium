@@ -25,6 +25,21 @@ const isDemoMode = () => {
   return !process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 'demo';
 };
 
+// Use Resend's provided test domain if your domain is not verified yet
+const getSenderEmail = () => {
+  return process.env.NODE_ENV === 'production' 
+    ? 'Beyond Medium <connect@beyondmedium.com>'
+    : 'Beyond Medium <onboarding@resend.dev>';
+};
+
+// Get appropriate recipient email based on environment
+const getRecipientEmail = (to: string) => {
+  // When testing, we can only send to the account owner's email when using Resend's free tier
+  return process.env.NODE_ENV === 'production' 
+    ? to 
+    : 'bradroyes@gmail.com'; // The verified owner email
+};
+
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     // Validate admin token
@@ -57,6 +72,10 @@ export async function POST(request: NextRequest): Promise<Response> {
     
     // Initialize Resend with API key
     const resend = new Resend(process.env.RESEND_API_KEY || 'demo');
+    
+    // Get the appropriate sender and recipient emails
+    const senderEmail = getSenderEmail();
+    const recipientEmail = getRecipientEmail(to);
     
     // Enhanced HTML template for emails with improved styling
     const enhancedHtml = `
@@ -92,13 +111,13 @@ export async function POST(request: NextRequest): Promise<Response> {
       console.log('⚠️ Running in DEMO mode. No actual emails will be sent.');
       console.log(`Would have sent custom email to: ${to}`);
       console.log(`Subject: ${subject}`);
-      emailResult = { id: 'demo-mode' };
+      emailResult = { data: { id: 'demo-mode' } };
     } else {
       try {
         // Send the actual email through Resend
         emailResult = await resend.emails.send({
-          from: 'Beyond Medium <connect@beyondmedium.com>',
-          to: [to],
+          from: senderEmail,
+          to: [recipientEmail],
           subject,
           text: message,
           html: enhancedHtml,
@@ -106,7 +125,12 @@ export async function POST(request: NextRequest): Promise<Response> {
             'X-Entity-Ref-ID': `custom-email-${Date.now()}`, // Helps avoid duplicate emails
           },
         });
-        console.log(`Custom email sent to ${to} from admin panel with ID: ${emailResult.id || 'unknown'}`);
+        
+        // Log the result with the proper data structure
+        console.log(`Custom email sent to ${to} from admin panel with ID: ${emailResult?.data?.id || 'unknown'}`);
+        if (!emailResult?.data?.id) {
+          console.warn('Email response details:', JSON.stringify(emailResult));
+        }
       } catch (emailError) {
         console.error('Resend API Error:', emailError);
         return Response.json(

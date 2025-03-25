@@ -20,5 +20,35 @@
         "timestamp": "2025-03-25T20:29:12.105Z"
       }
     ]
+  },
+  {
+    "id": "wl_1742936004388_70fzuqx",
+    "email": "bradleyroyes@gmail.com",
+    "timestamp": "2025-03-25T20:53:24.388Z",
+    "responded": false,
+    "conversations": [
+      {
+        "from": "system",
+        "to": "bradleyroyes@gmail.com",
+        "subject": "Welcome to the BeyondMedium Waitlist",
+        "message": "Thank you for joining our waitlist! We'll keep you updated on our progress.",
+        "timestamp": "2025-03-25T20:53:24.388Z"
+      }
+    ]
+  },
+  {
+    "id": "wl_1742936063172_ahggbdi",
+    "email": "osnabrad@gmail.com",
+    "timestamp": "2025-03-25T20:54:23.172Z",
+    "responded": false,
+    "conversations": [
+      {
+        "from": "system",
+        "to": "osnabrad@gmail.com",
+        "subject": "Welcome to the BeyondMedium Waitlist",
+        "message": "Thank you for joining our waitlist! We'll keep you updated on our progress.",
+        "timestamp": "2025-03-25T20:54:23.172Z"
+      }
+    ]
   }
 ]
