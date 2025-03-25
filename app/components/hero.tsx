@@ -272,6 +272,14 @@ export default function Hero() {
       angleOffset: number
       // Add unique ID for connection stability
       id: number
+      // Special property for rare particles that can ignore repulsion
+      canIgnoreRepulsion: boolean
+      // Timer for occasional special behavior
+      specialBehaviorTimer: number
+      // Current special behavior state
+      isInSpecialState: boolean
+      // Type of special behavior (0: none, 1: through center, 2: spiral, 3: zigzag)
+      specialBehaviorType: number
 
       constructor(isDiumParticle = false) {
         this.x = Math.random() * canvas.width
@@ -299,11 +307,43 @@ export default function Hero() {
         this.angleOffset = Math.random() * Math.PI * 2
         // Add unique ID for stable connection references
         this.id = Math.random() * 100000 | 0
+        
+        // Only non-dium particles can occasionally ignore repulsion (1% chance)
+        this.canIgnoreRepulsion = !isDiumParticle && Math.random() < 0.01
+        
+        // Initialize special behavior timer with random values
+        // This ensures special behaviors occur at different times
+        this.specialBehaviorTimer = Math.random() * 1000
+        this.isInSpecialState = false
+        this.specialBehaviorType = 0
       }
 
       update(mouseX: number, mouseY: number, isHovering: boolean, diumPosition: { x: number, y: number, width: number, height: number, active: boolean }) {
         // Update phase for oscillation effects
         this.phase += this.phaseSpeed
+        
+        // Update special behavior timer
+        if (this.canIgnoreRepulsion) {
+          this.specialBehaviorTimer -= 1
+          
+          // Reset timer and possibly trigger special behavior
+          if (this.specialBehaviorTimer <= 0) {
+            // Reset timer (occur approximately every 1000-3000 frames)
+            this.specialBehaviorTimer = 1000 + Math.random() * 2000
+            
+            // 20% chance to trigger special behavior when timer expires
+            if (Math.random() < 0.2) {
+              this.isInSpecialState = true
+              // Choose a random special behavior type
+              this.specialBehaviorType = Math.floor(Math.random() * 3) + 1
+              // Special state lasts between 100-300 frames
+              setTimeout(() => {
+                this.isInSpecialState = false
+                this.specialBehaviorType = 0
+              }, 2000 + Math.random() * 3000)
+            }
+          }
+        }
         
         // Check distance from center area for repulsion
         const centerArea = centerAreaRef.current;
@@ -311,8 +351,55 @@ export default function Hero() {
         const dyFromCenter = this.y - centerArea.y;
         const distanceFromCenter = Math.sqrt(dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter);
         
+        // Handle special behavior for particles that can ignore repulsion
+        if (this.isInSpecialState && this.canIgnoreRepulsion) {
+          // Temporarily increase size and opacity for these special particles
+          this.size = this.baseSize * (1.5 + Math.sin(this.phase) * 0.5)
+          this.opacity = Math.min(0.9, this.baseOpacity * 2)
+          
+          // Different special behaviors
+          switch (this.specialBehaviorType) {
+            case 1: // Travel through center
+              // Calculate angle to center
+              const angleToCenter = Math.atan2(centerArea.y - this.y, centerArea.x - this.x)
+              // Move directly through center
+              this.speedX = Math.cos(angleToCenter) * 1.0
+              this.speedY = Math.sin(angleToCenter) * 1.0
+              break
+              
+            case 2: // Spiral around center
+              // Create spiral motion
+              const spiralAngle = this.phase * 2
+              const spiralRadius = Math.max(5, distanceFromCenter * 0.8)
+              this.x = centerArea.x + Math.cos(spiralAngle) * spiralRadius
+              this.y = centerArea.y + Math.sin(spiralAngle) * spiralRadius
+              return // Skip normal movement
+              
+            case 3: // Zigzag through
+              // Create zigzag motion through center
+              const zigzagFactor = Math.sin(this.phase * 5) * 20
+              const zigzagAngle = Math.atan2(centerArea.y - this.y, centerArea.x - this.x)
+              const perpAngle = zigzagAngle + Math.PI/2
+              this.speedX = Math.cos(zigzagAngle) * 1.0 + Math.cos(perpAngle) * zigzagFactor * 0.05
+              this.speedY = Math.sin(zigzagAngle) * 1.0 + Math.sin(perpAngle) * zigzagFactor * 0.05
+              break
+          }
+          
+          // Normal movement with updated speeds
+          this.x += this.speedX
+          this.y += this.speedY
+          
+          // Screen wrapping
+          if (this.x > canvas.width) this.x = 0
+          if (this.x < 0) this.x = canvas.width
+          if (this.y > canvas.height) this.y = 0
+          if (this.y < 0) this.y = canvas.height
+          
+          return // Skip the rest of update logic during special state
+        }
+        
         // Apply repulsion from center area - with stronger effect on mobile
-        if (distanceFromCenter < centerArea.radius) {
+        if (distanceFromCenter < centerArea.radius && !this.isInSpecialState) {
           // Calculate repulsion force - stronger near the center and on mobile
           const repulsionForce = (centerArea.radius - distanceFromCenter) / centerArea.radius;
           const adjustedForce = isMobile ? repulsionForce * 1.3 : repulsionForce;
@@ -462,8 +549,19 @@ export default function Hero() {
         
         // Create slight color variations for a sophisticated look
         const colorShift = Math.sin(this.phase) * 10
-        const colorBase = this.isDiumParticle && this.isReturning ? 190 : 210 // Slightly different color for dium particles
-        ctx.fillStyle = `hsla(${colorBase + this.hue + colorShift}, ${this.saturation}%, 100%, ${this.opacity})`
+        
+        // Special color for particles in special state
+        if (this.isInSpecialState && this.canIgnoreRepulsion) {
+          // Use a more noticeable but still elegant color
+          let specialHue = 180 + this.specialBehaviorType * 30 // Each behavior type gets slightly different hue
+          let specialSaturation = 20 + Math.sin(this.phase * 2) * 10 // Pulsing saturation
+          ctx.fillStyle = `hsla(${specialHue + colorShift}, ${specialSaturation}%, 100%, ${this.opacity})`
+        } else {
+          // Normal color logic
+          const colorBase = this.isDiumParticle && this.isReturning ? 190 : 210 // Slightly different color for dium particles
+          ctx.fillStyle = `hsla(${colorBase + this.hue + colorShift}, ${this.saturation}%, 100%, ${this.opacity})`
+        }
+        
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
