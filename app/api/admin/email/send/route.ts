@@ -30,6 +30,11 @@ const getSenderEmail = () => {
   return 'Beyond Medium <connect@updates.beyondmedium.com>';
 };
 
+// Contact email for users to reply to
+const getReplyToEmail = () => {
+  return 'connect@beyondmedium.com';
+};
+
 // Get appropriate recipient email based on environment
 const getRecipientEmail = (to: string) => {
   // When testing, we can only send to the account owner's email when using Resend's free tier
@@ -73,6 +78,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     
     // Get the sender email
     const senderEmail = getSenderEmail();
+    const replyToEmail = getReplyToEmail();
     
     // Enhanced HTML template for emails with improved styling
     const enhancedHtml = `
@@ -97,6 +103,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
           <p style="color: #666;">© ${new Date().getFullYear()} BeyondMedium. All rights reserved.</p>
           <p style="color: #666;">Berlin, Germany</p>
+          <p style="margin-top: 15px; font-size: 11px; color: #555;">Questions? Reply directly to this email or contact us at ${replyToEmail}</p>
         </div>
       </div>
     `;
@@ -114,6 +121,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         // Send the actual email through Resend
         emailResult = await resend.emails.send({
           from: senderEmail,
+          reply_to: replyToEmail,
           to: [to],
           subject,
           text: message,

@@ -29,9 +29,10 @@ async function testResendIntegration() {
     console.log('Sending test email...');
     const testEmail = await resend.emails.send({
       from: 'Beyond Medium <connect@updates.beyondmedium.com>',
+      reply_to: 'connect@beyondmedium.com',
       to: ['bradroyes@gmail.com'],
       subject: 'Resend API Test',
-      html: '<p>This is a test email from the Resend API test script</p>',
+      html: '<p>This is a test email from the Resend API test script</p><p>If you have questions, please reply to this email or contact connect@beyondmedium.com directly.</p>',
     });
     
     console.log('Test email result:', JSON.stringify(testEmail, null, 2));

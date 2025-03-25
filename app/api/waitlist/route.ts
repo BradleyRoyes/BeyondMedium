@@ -18,6 +18,11 @@ const getAdminEmail = () => {
   return 'connect@beyondmedium.com';
 };
 
+// Contact email for users to reply to
+const getReplyToEmail = () => {
+  return 'connect@beyondmedium.com';
+};
+
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     // Parse the request body
@@ -53,6 +58,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     try {
       // Get the sender email
       const senderEmail = getSenderEmail();
+      const replyToEmail = getReplyToEmail();
       
       // HTML template for subscriber confirmation
       const userHtml = `
@@ -75,6 +81,7 @@ export async function POST(request: NextRequest): Promise<Response> {
           <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
             <p style="color: #666;">© ${new Date().getFullYear()} BeyondMedium. All rights reserved.</p>
             <p style="color: #666;">Berlin, Germany</p>
+            <p style="margin-top: 15px; font-size: 11px; color: #555;">If you have any questions, please contact us at ${replyToEmail}</p>
           </div>
         </div>
       `;
@@ -99,6 +106,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       // Send confirmation email to the user
       const userResult = await resend.emails.send({
         from: senderEmail,
+        reply_to: replyToEmail,
         to: [email],
         subject: 'Welcome to the BeyondMedium Waitlist',
         html: userHtml,
@@ -116,6 +124,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       // Send notification email to admin
       const adminResult = await resend.emails.send({
         from: senderEmail,
+        reply_to: replyToEmail,
         to: [getAdminEmail()],
         subject: 'New BeyondMedium Waitlist Signup',
         html: adminHtml,

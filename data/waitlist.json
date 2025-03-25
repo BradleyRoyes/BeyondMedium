@@ -50,5 +50,20 @@
         "timestamp": "2025-03-25T20:54:23.172Z"
       }
     ]
+  },
+  {
+    "id": "wl_1742936927451_pmsm0b6",
+    "email": "hello@seks.design",
+    "timestamp": "2025-03-25T21:08:47.451Z",
+    "responded": false,
+    "conversations": [
+      {
+        "from": "system",
+        "to": "hello@seks.design",
+        "subject": "Welcome to the BeyondMedium Waitlist",
+        "message": "Thank you for joining our waitlist! We'll keep you updated on our progress.",
+        "timestamp": "2025-03-25T21:08:47.451Z"
+      }
+    ]
   }
 ]
