@@ -33,6 +33,50 @@ export default function Hero() {
   const isMobile = useIsMobile()
   const diumTextRef = useRef<HTMLSpanElement>(null)
   const diumPositionRef = useRef({ x: 0, y: 0, width: 0, height: 0, active: false })
+  
+  // Background color animation variables
+  const [backgroundColors, setBackgroundColors] = useState({
+    from: "rgba(20, 5, 40, 0.95)",
+    to: "rgba(20, 5, 40, 0.95)",
+    angle: 180
+  })
+  
+  // Effect to handle background color animation
+  useEffect(() => {
+    // Brand colors to transition between
+    const colors = [
+      { from: "rgba(20, 5, 40, 0.95)", to: "rgba(10, 10, 20, 0.95)" }, // Dark purple to dark blue
+      { from: "rgba(10, 10, 20, 0.95)", to: "rgba(5, 25, 20, 0.95)" },  // Dark blue to dark teal
+      { from: "rgba(5, 25, 20, 0.95)", to: "rgba(10, 30, 30, 0.95)" },  // Dark teal to mint dark
+      { from: "rgba(10, 30, 30, 0.95)", to: "rgba(20, 5, 40, 0.95)" }   // Mint dark to dark purple
+    ];
+    
+    let colorIndex = 0;
+    let angleDirection = 1; // 1 for increasing, -1 for decreasing
+    
+    const colorInterval = setInterval(() => {
+      // Update to the next color combination
+      setBackgroundColors(prev => {
+        // Update angle to create more dynamic movement
+        let newAngle = prev.angle + (5 * angleDirection);
+        if (newAngle > 210 || newAngle < 150) {
+          angleDirection *= -1;
+          newAngle = prev.angle + (5 * angleDirection);
+        }
+        
+        return {
+          from: colors[colorIndex].from,
+          to: colors[colorIndex].to,
+          angle: newAngle
+        };
+      });
+      
+      // Move to next color in sequence
+      colorIndex = (colorIndex + 1) % colors.length;
+    }, 10000); // Transition every 10 seconds
+    
+    return () => clearInterval(colorInterval);
+  }, []);
 
   // Timer for mobile auto-fade effect
   useEffect(() => {
@@ -442,7 +486,16 @@ export default function Hero() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full enigma-gradient cursor-none" />
+      {/* Animated background gradient */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-b transition-all duration-10000 ease-in-out"
+        style={{
+          background: `linear-gradient(${backgroundColors.angle}deg, ${backgroundColors.from}, ${backgroundColors.to})`,
+          transition: 'background 10s ease-in-out'
+        }}
+      />
+      
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full cursor-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
       <motion.div 
         className="absolute inset-0 opacity-30"
