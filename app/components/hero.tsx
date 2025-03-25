@@ -235,11 +235,11 @@ export default function Hero() {
     updateCenterArea()
 
     const particles: Particle[] = []
-    const particleCount = isMobile ? 80 : 150 // Reduce particle count on mobile for better performance
+    const particleCount = isMobile ? 60 : 150 // Further reduce particle count on mobile for better performance
     const mouseRadius = 100 // Area of influence around the mouse
     // Special particles to form "dium" when needed
     const diumParticles: Particle[] = []
-    const diumParticleCount = isMobile ? 60 : 120
+    const diumParticleCount = isMobile ? 40 : 120
     
     // Track previous frame time for smoother animations
     let lastFrameTime = 0
@@ -658,7 +658,7 @@ export default function Hero() {
       if (!ctx) return
       
       // Limit connections on mobile for performance
-      const connectionLimit = isMobile ? 3 : 6
+      const connectionLimit = isMobile ? 2 : 6
       
       // Clear the connection cache periodically but not every frame
       // This helps maintain some consistency while still allowing for updates
@@ -668,7 +668,7 @@ export default function Hero() {
       
       // For better stability, use a fixed sampling of particles for connections
       // This reduces the flickering effect caused by constantly changing connection patterns
-      const sampleSize = Math.min(particles.length, isMobile ? 40 : 80)
+      const sampleSize = Math.min(particles.length, isMobile ? 25 : 80)
       const sampledParticles = particles.slice(0, sampleSize)
       
       for (let i = 0; i < sampledParticles.length; i++) {
@@ -762,11 +762,11 @@ export default function Hero() {
       // and by reducing the frequency of connection updates on mobile
       
       // Create stable subsets for connection drawing to reduce flickering
-      const regularParticlesForConnections = particles.slice(0, isMobile ? 30 : 60);
-      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 15 : 30);
+      const regularParticlesForConnections = particles.slice(0, isMobile ? 20 : 60);
+      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 10 : 30);
       
-      // On mobile, skip some frames for connections to improve performance
-      const shouldDrawConnections = !isMobile || (Date.now() % 3 === 0);
+      // On mobile, skip more frames for connections to improve performance
+      const shouldDrawConnections = !isMobile || (Date.now() % 5 === 0);
       
       if (shouldDrawConnections) {
         // Draw connections between regular particles
@@ -777,7 +777,7 @@ export default function Hero() {
           // Use a stable subset of returning dium particles
           const returningDiumParticles = diumParticles
             .filter(p => p.isReturning)
-            .slice(0, isMobile ? 30 : 60);
+            .slice(0, isMobile ? 15 : 60);
             
           drawConnections(returningDiumParticles);
         }
