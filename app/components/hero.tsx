@@ -40,7 +40,7 @@ export default function Hero() {
     canvas.height = window.innerHeight
 
     const particles: Particle[] = []
-    const particleCount = 150 // Increased particle count for more mystery
+    const particleCount = isMobile ? 80 : 150 // Reduce particle count on mobile for better performance
     const mouseRadius = 100 // Area of influence around the mouse
 
     class Particle {
@@ -120,17 +120,20 @@ export default function Hero() {
             this.x += pushX + Math.sin(this.phase + distance * 0.01) * force * 0.5
             this.y += pushY + Math.cos(this.phase + distance * 0.01) * force * 0.5
             
-            // Increase size and opacity when near mouse with oscillation
-            this.size = this.baseSize + (force * 3) + Math.sin(this.phase) * force
+            // Ensure size is always positive by using Math.max with a minimum value
+            const oscillation = Math.sin(this.phase) * force * 0.6
+            this.size = Math.max(0.1, this.baseSize + (force * 3) + oscillation)
             this.opacity = Math.min(1, this.baseOpacity + force * 0.5)
           } else {
-            // Gradually return to normal with subtle oscillation
-            this.size = this.baseSize + Math.sin(this.phase) * 0.3
+            // Ensure size is always positive by using Math.max with a minimum value
+            const oscillation = Math.sin(this.phase) * 0.2
+            this.size = Math.max(0.1, this.baseSize + oscillation)
             this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
           }
         } else {
-          // No mouse interaction, but still maintain subtle oscillation
-          this.size = this.baseSize + Math.sin(this.phase) * 0.3
+          // Ensure size is always positive by using Math.max with a minimum value
+          const oscillation = Math.sin(this.phase) * 0.2
+          this.size = Math.max(0.1, this.baseSize + oscillation)
           this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
         }
       }
@@ -138,7 +141,10 @@ export default function Hero() {
       draw() {
         if (!ctx) return
         
-        // Create slight color variations for a more sophisticated look
+        // Safety check: only draw if size is positive
+        if (this.size <= 0) return
+        
+        // Create slight color variations for a sophisticated look
         const colorShift = Math.sin(this.phase) * 10
         ctx.fillStyle = `hsla(${210 + this.hue + colorShift}, ${this.saturation}%, 100%, ${this.opacity})`
         ctx.beginPath()
@@ -169,10 +175,17 @@ export default function Hero() {
     function drawConnections(particles: Particle[]) {
       if (!ctx) return
       
+      // Limit connections on mobile for performance
+      const connectionLimit = isMobile ? 3 : 6
+      
       for (let i = 0; i < particles.length; i++) {
         const particleA = particles[i]
+        let connectionsCount = 0
         
         for (let j = i + 1; j < particles.length; j++) {
+          // Stop after reaching connection limit for this particle
+          if (connectionsCount >= connectionLimit) break
+          
           const particleB = particles[j]
           
           const dx = particleA.x - particleB.x
@@ -195,8 +208,10 @@ export default function Hero() {
             gradient.addColorStop(1, `rgba(255, 255, 255, ${opacity * particleB.opacity})`)
             
             ctx.strokeStyle = gradient
-            ctx.lineWidth = Math.min(particleA.size, particleB.size) * 0.3
+            ctx.lineWidth = Math.max(0.1, Math.min(particleA.size, particleB.size) * 0.3)
             ctx.stroke()
+            
+            connectionsCount++
           }
         }
       }
@@ -212,8 +227,10 @@ export default function Hero() {
         particle.draw()
       }
       
-      // Draw connections between particles
-      drawConnections(particles)
+      // Draw connections between particles - skip on mobile for better performance
+      if (!isMobile || (isMobile && Math.random() > 0.7)) {
+        drawConnections(particles)
+      }
 
       requestAnimationFrame(animate)
     }
@@ -235,7 +252,7 @@ export default function Hero() {
       canvas.removeEventListener("mousemove", handleMouseMove)
       canvas.removeEventListener("mouseleave", handleMouseLeave)
     }
-  }, [mousePosition, isHovering])
+  }, [mousePosition, isHovering, isMobile])
 
   const handleDiumMouseEnter = () => {
     if (diumFadeTimerRef.current) {
