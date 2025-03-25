@@ -32,7 +32,31 @@ async function testResendIntegration() {
       reply_to: 'connect@beyondmedium.com',
       to: ['bradroyes@gmail.com'],
       subject: 'Resend API Test',
-      html: '<p>This is a test email from the Resend API test script</p><p>If you have questions, please reply to this email or contact connect@beyondmedium.com directly.</p>',
+      text: 'This is a test email from the Resend API test script\n\n---\nIf you have questions, please reply to this email or contact connect@beyondmedium.com directly.',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #e0e0e0; background-color: #000; border-radius: 8px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: white; font-weight: 300; margin-bottom: 5px; font-size: 28px;">BEYOND</h1>
+            <h2 style="color: white; font-weight: 300; margin-top: 0; font-size: 22px;">MEDIUM</h2>
+          </div>
+          
+          <div style="background-color: #1a1a1a; padding: 25px; border-radius: 5px; border: 1px solid #333;">
+            <h2 style="color: #a4c2c2; font-weight: 300; margin-top: 0; text-align: center; font-size: 24px;">Resend API Test</h2>
+            
+            <div style="color: #e0e0e0; font-weight: 300; line-height: 1.6; font-size: 16px;">
+              <p>This is a test email from the Resend API test script</p>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+            <p style="color: #666;">© ${new Date().getFullYear()} BeyondMedium. All rights reserved.</p>
+            <p style="color: #666;">Berlin, Germany</p>
+            <div style="margin-top: 15px; padding: 10px; background-color: #111; border-radius: 5px; border: 1px solid #333;">
+              <p style="font-size: 13px; color: #a4c2c2; margin: 0;">Questions? <strong>Reply directly to this email</strong> or contact us at <a href="mailto:connect@beyondmedium.com" style="color: #a4c2c2; text-decoration: underline;">connect@beyondmedium.com</a></p>
+            </div>
+          </div>
+        </div>
+      `,
     });
     
     console.log('Test email result:', JSON.stringify(testEmail, null, 2));

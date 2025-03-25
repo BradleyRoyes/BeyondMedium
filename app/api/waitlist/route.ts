@@ -81,7 +81,9 @@ export async function POST(request: NextRequest): Promise<Response> {
           <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
             <p style="color: #666;">© ${new Date().getFullYear()} BeyondMedium. All rights reserved.</p>
             <p style="color: #666;">Berlin, Germany</p>
-            <p style="margin-top: 15px; font-size: 11px; color: #555;">If you have any questions, please contact us at ${replyToEmail}</p>
+            <div style="margin-top: 15px; padding: 10px; background-color: #111; border-radius: 5px; border: 1px solid #333;">
+              <p style="font-size: 13px; color: #a4c2c2; margin: 0;">Questions? <strong>Reply directly to this email</strong> or contact us at <a href="mailto:${replyToEmail}" style="color: #a4c2c2; text-decoration: underline;">${replyToEmail}</a></p>
+            </div>
           </div>
         </div>
       `;
@@ -109,6 +111,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         reply_to: replyToEmail,
         to: [email],
         subject: 'Welcome to the BeyondMedium Waitlist',
+        text: `Thank you for joining the BeyondMedium waitlist!\n\nWe're excited to have you on board. We'll keep you updated on our progress and let you know when we're ready to launch.\n\nStay tuned for more information coming soon.\n\n---\nQuestions? Reply directly to this email or contact us at ${replyToEmail}`,
         html: userHtml,
         headers: {
           'X-Entity-Ref-ID': `waitlist-welcome-${entry.id}`, // Helps avoid duplicate emails

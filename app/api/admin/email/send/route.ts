@@ -103,7 +103,9 @@ export async function POST(request: NextRequest): Promise<Response> {
         <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
           <p style="color: #666;">© ${new Date().getFullYear()} BeyondMedium. All rights reserved.</p>
           <p style="color: #666;">Berlin, Germany</p>
-          <p style="margin-top: 15px; font-size: 11px; color: #555;">Questions? Reply directly to this email or contact us at ${replyToEmail}</p>
+          <div style="margin-top: 15px; padding: 10px; background-color: #111; border-radius: 5px; border: 1px solid #333;">
+            <p style="font-size: 13px; color: #a4c2c2; margin: 0;">Questions? <strong>Reply directly to this email</strong> or contact us at <a href="mailto:${replyToEmail}" style="color: #a4c2c2; text-decoration: underline;">${replyToEmail}</a></p>
+          </div>
         </div>
       </div>
     `;
@@ -124,7 +126,7 @@ export async function POST(request: NextRequest): Promise<Response> {
           reply_to: replyToEmail,
           to: [to],
           subject,
-          text: message,
+          text: `${message}\n\n---\nQuestions? Reply directly to this email or contact us at ${replyToEmail}`,
           html: enhancedHtml,
           headers: {
             'X-Entity-Ref-ID': `custom-email-${Date.now()}`, // Helps avoid duplicate emails
