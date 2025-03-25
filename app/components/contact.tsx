@@ -12,14 +12,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
   email: z.string().email({
     message: "Please enter a valid email address.",
-  }),
-  message: z.string().min(10, {
-    message: "Message must be at least 10 characters.",
   }),
 })
 
@@ -27,7 +21,7 @@ const formSchema = z.object({
 const errorStyles = {
   workshops: 'text-[#c9b6de]',
   experiences: 'text-[#a4c2c2]',
-  toys: 'text-[#d4c9bb]',
+  aids: 'text-[#d4c9bb]',
   default: 'text-[#b5c5b8]'
 }
 
@@ -35,9 +29,7 @@ export default function Contact() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
       email: "",
-      message: "",
     },
   })
 
@@ -129,9 +121,9 @@ export default function Contact() {
           viewport={{ once: true }}
           className="mx-auto max-w-2xl text-center"
         >
-          <h2 className="mb-4 font-light gradient-text">Connect With Us</h2>
+          <h2 className="mb-4 font-light gradient-text">Join Our Waitlist</h2>
           <p className="mb-8 text-gray-400">
-            Be the first to experience our Sensory Exploration & Integration Center when we open in Berlin. Sign up for updates on our progress or get in touch if you'd like to collaborate.
+            Be the first to experience our Sensory Exploration & Integration Center when we open in Berlin. Enter your email to receive exclusive updates on our progress.
           </p>
         </motion.div>
         <motion.div
@@ -150,83 +142,49 @@ export default function Contact() {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto mb-4 text-[#a4c2c2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <h3 className="mb-2 text-xl font-medium text-white">Thank You!</h3>
+              <h3 className="mb-2 text-xl font-medium text-white">You're on the list!</h3>
               <p className="text-zinc-400">
-                We've received your message and will be in touch soon.
+                Thanks for joining. We'll keep you updated on our progress.
               </p>
             </motion.div>
           ) : (
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-light text-white">Name</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Your name" 
-                          {...field} 
-                          className="font-light text-white bg-zinc-800 border-zinc-700 focus-visible:ring-[#a4c2c2] placeholder:text-zinc-400" 
-                        />
-                      </FormControl>
-                      <FormMessage className={errorStyles.experiences} />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-light text-white">Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="your@email.com" 
-                          {...field} 
-                          className="font-light text-white bg-zinc-800 border-zinc-700 focus-visible:ring-[#a4c2c2] placeholder:text-zinc-400" 
-                        />
-                      </FormControl>
-                      <FormMessage className={errorStyles.experiences} />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="message"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-light text-white">Message</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="I'm interested in..." 
-                          className="min-h-[120px] font-light text-white bg-zinc-800 border-zinc-700 focus-visible:ring-[#a4c2c2] placeholder:text-zinc-400" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage className={errorStyles.experiences} />
-                    </FormItem>
-                  )}
-                />
-                
-                <Button 
-                  type="submit" 
-                  className="w-full font-light bg-gradient-to-r from-[#7e9a9a] to-[#a4c2c2] text-zinc-800 hover:text-white hover:from-[#7e9a9a] hover:to-[#8aa3a3] border-none"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-zinc-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Sending...
-                    </span>
-                  ) : "Join the Waitlist"}
-                </Button>
+                <div className="flex items-stretch rounded-md overflow-hidden bg-zinc-800 border border-zinc-700 transition-all hover:border-[#a4c2c2]/50 focus-within:border-[#a4c2c2]/70 focus-within:ring-2 focus-within:ring-[#a4c2c2]/20">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 m-0">
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter your email address" 
+                            {...field} 
+                            className="flex-1 border-0 h-12 bg-transparent font-light text-white focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-zinc-400" 
+                          />
+                        </FormControl>
+                        <FormMessage className={errorStyles.experiences} />
+                      </FormItem>
+                    )}
+                  />
+                  <Button 
+                    type="submit" 
+                    className="m-0 h-12 rounded-l-none px-5 font-light bg-gradient-to-r from-[#7e9a9a] to-[#a4c2c2] text-zinc-800 hover:text-white hover:from-[#7e9a9a] hover:to-[#8aa3a3] border-none"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-zinc-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Joining...
+                      </span>
+                    ) : "Join"}
+                  </Button>
+                </div>
                 <p className="mt-4 text-center text-sm font-light text-gray-400">
-                  Or email us directly at{" "}
+                  Want to get in touch directly? Email us at{" "}
                   <a href="mailto:connect@beyondmedium.com" className="text-white hover:underline">
                     connect@beyondmedium.com
                   </a>
