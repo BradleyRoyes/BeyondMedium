@@ -173,6 +173,54 @@ export default function Hero() {
     };
   }, [isDiumFading, isMobile]);
 
+  // Add a reference for the center area to create a repulsion zone
+  const centerAreaRef = useRef({
+    x: 0,
+    y: 0,
+    radius: 0,
+    active: true
+  });
+  
+  // Update center area position and size
+  const updateCenterArea = () => {
+    if (canvasRef.current) {
+      const canvasWidth = canvasRef.current.width;
+      const canvasHeight = canvasRef.current.height;
+      
+      // Center of the canvas
+      const centerX = canvasWidth / 2;
+      const centerY = canvasHeight / 2;
+      
+      // Size the repulsion zone based on screen size
+      // Make it larger on desktop, appropriate size on mobile
+      const repulsionRadius = Math.min(canvasWidth, canvasHeight) * (isMobile ? 0.25 : 0.3);
+      
+      centerAreaRef.current = {
+        x: centerX,
+        y: centerY,
+        radius: repulsionRadius,
+        active: true
+      };
+    }
+  };
+  
+  // Update center area when resizing
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    
+    updateCenterArea();
+    
+    const handleResize = () => {
+      updateCenterArea();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMobile]);
+
   useEffect(() => {
     if (!canvasRef.current) return
 
@@ -182,6 +230,9 @@ export default function Hero() {
 
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
+    
+    // Initialize the center area repulsion zone
+    updateCenterArea()
 
     const particles: Particle[] = []
     const particleCount = isMobile ? 80 : 150 // Reduce particle count on mobile for better performance
@@ -253,6 +304,35 @@ export default function Hero() {
       update(mouseX: number, mouseY: number, isHovering: boolean, diumPosition: { x: number, y: number, width: number, height: number, active: boolean }) {
         // Update phase for oscillation effects
         this.phase += this.phaseSpeed
+        
+        // Check distance from center area for repulsion
+        const centerArea = centerAreaRef.current;
+        const dxFromCenter = this.x - centerArea.x;
+        const dyFromCenter = this.y - centerArea.y;
+        const distanceFromCenter = Math.sqrt(dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter);
+        
+        // Apply repulsion from center area
+        if (distanceFromCenter < centerArea.radius) {
+          // Calculate repulsion force - stronger near the center
+          const repulsionForce = (centerArea.radius - distanceFromCenter) / centerArea.radius;
+          
+          if (repulsionForce > 0.05) { // Only apply if force is significant
+            // Calculate angle from center to particle
+            const angle = Math.atan2(dyFromCenter, dxFromCenter);
+            
+            // Apply repulsion force
+            const repulsionX = Math.cos(angle) * repulsionForce * 1.5;
+            const repulsionY = Math.sin(angle) * repulsionForce * 1.5;
+            
+            // Move particle away from center
+            this.x += repulsionX;
+            this.y += repulsionY;
+            
+            // Adjust velocity slightly to maintain flow
+            this.speedX = this.speedX * 0.9 + repulsionX * 0.1;
+            this.speedY = this.speedY * 0.9 + repulsionY * 0.1;
+          }
+        }
         
         // Skip dium particle special behavior on mobile completely
         if (isMobile && this.isDiumParticle) {
@@ -524,13 +604,13 @@ export default function Hero() {
       // This creates a trail effect that reduces flickering
       if (isMobile) {
         // Clear fully on mobile for performance
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
       } else {
         // Use partial transparency clearing for desktop to reduce flicker
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
       }
-      
+
       // Update and draw regular particles
       for (const particle of particles) {
         particle.update(mousePosition.x, mousePosition.y, isHovering, diumPositionRef.current)
@@ -580,16 +660,19 @@ export default function Hero() {
       canvasRef.current.width = window.innerWidth
       canvasRef.current.height = window.innerHeight
       
+      // Update the center area repulsion zone
+      updateCenterArea()
+      
       // Also update dium position when resizing
       if (diumTextRef.current) {
-        const rect = diumTextRef.current.getBoundingClientRect();
+        const rect = diumTextRef.current.getBoundingClientRect()
         diumPositionRef.current = {
           ...diumPositionRef.current,
           x: rect.left + rect.width / 2,
           y: rect.top + rect.height / 2,
           width: rect.width,
           height: rect.height
-        };
+        }
       }
     }
 
@@ -601,11 +684,25 @@ export default function Hero() {
     canvas.addEventListener("touchcancel", handleTouchEnd)
     
     // Add scroll event listener to update particle positions relative to viewport
+    // Modify to avoid refreshing on mobile
     window.addEventListener("scroll", () => {
-      // Force a redraw on scroll to ensure particles match current viewport
-      if (canvasRef.current) {
+      // Only force redraw on scroll for desktop - skip this for mobile to avoid refresh flicker
+      if (!isMobile && canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d")
         if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
+      }
+      
+      // Simply update the center area and dium position on scroll without full redraw
+      updateCenterArea();
+      if (diumTextRef.current) {
+        const rect = diumTextRef.current.getBoundingClientRect();
+        diumPositionRef.current = {
+          ...diumPositionRef.current,
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+          width: rect.width,
+          height: rect.height
+        };
       }
     })
     
