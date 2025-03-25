@@ -74,17 +74,17 @@ export default function Contact() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-zinc-900 py-24">
-      <div className="container relative z-10 mx-auto px-6 md:px-8">
+    <section className="relative overflow-hidden bg-zinc-900 py-20">
+      <div className="container relative z-10 mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="mx-auto max-w-2xl text-center mb-10"
+          className="mx-auto max-w-2xl text-center"
         >
-          <h2 className="mb-6 font-light gradient-text text-3xl md:text-4xl">Connect With Us</h2>
-          <p className="mb-8 text-gray-400 px-4">
+          <h2 className="mb-4 font-light gradient-text">Connect With Us</h2>
+          <p className="mb-8 text-gray-400">
             Be the first to experience our Sensory Exploration & Integration Center when we open in Berlin. Sign up for updates on our progress or get in touch if you'd like to collaborate.
           </p>
         </motion.div>
@@ -179,7 +179,7 @@ export default function Contact() {
                     </span>
                   ) : "Join the Waitlist"}
                 </Button>
-                <p className="mt-6 text-center text-sm font-light text-gray-400 pb-2">
+                <p className="mt-4 text-center text-sm font-light text-gray-400">
                   Or email us directly at{" "}
                   <a href="mailto:connect@beyondmedium.com" className="text-white hover:underline">
                     connect@beyondmedium.com
@@ -190,9 +190,7 @@ export default function Contact() {
           )}
         </motion.div>
       </div>
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[60vh] h-[60vh] rounded-full mystery-glow opacity-5"></div>
-      </div>
+      <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[70vh] h-[70vh] rounded-full mystery-glow opacity-10"></div>
     </section>
   )
 }
