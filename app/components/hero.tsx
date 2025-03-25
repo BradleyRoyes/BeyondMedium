@@ -54,6 +54,11 @@ export default function Hero() {
       baseOpacity: number
       originalX: number
       originalY: number
+      connectionRadius: number
+      hue: number
+      saturation: number
+      phase: number
+      phaseSpeed: number
 
       constructor() {
         this.x = Math.random() * canvas.width
@@ -66,12 +71,20 @@ export default function Hero() {
         this.opacity = this.baseOpacity
         this.originalX = this.x
         this.originalY = this.y
+        this.connectionRadius = Math.random() * 120 + 60
+        this.hue = Math.random() * 60 - 30 // Subtle hue variation
+        this.saturation = Math.random() * 10 // Very slight saturation
+        this.phase = Math.random() * Math.PI * 2
+        this.phaseSpeed = 0.01 + Math.random() * 0.02
       }
 
       update(mouseX: number, mouseY: number, isHovering: boolean) {
-        // Normal particle movement
-        this.x += this.speedX
-        this.y += this.speedY
+        // Update phase for oscillation effects
+        this.phase += this.phaseSpeed
+        
+        // Normal particle movement with subtle oscillation
+        this.x += this.speedX + Math.sin(this.phase) * 0.2
+        this.y += this.speedY + Math.cos(this.phase) * 0.2
 
         // Screen wrapping
         if (this.x > canvas.width) this.x = 0
@@ -99,32 +112,35 @@ export default function Hero() {
             // Calculate force based on distance (closer = stronger)
             const force = (mouseRadius - distance) / mouseRadius
             
-            // Push particles away from mouse
-            const angleToMouse = Math.atan2(dy, dx)
-            const pushX = Math.cos(angleToMouse) * force * 2
-            const pushY = Math.sin(angleToMouse) * force * 2
+            // Create more complex movement patterns
+            const angle = Math.atan2(dy, dx) + (Math.sin(this.phase) * 0.5)
+            const pushX = Math.cos(angle) * force * 2
+            const pushY = Math.sin(angle) * force * 2
             
-            this.x += pushX
-            this.y += pushY
+            this.x += pushX + Math.sin(this.phase + distance * 0.01) * force * 0.5
+            this.y += pushY + Math.cos(this.phase + distance * 0.01) * force * 0.5
             
-            // Increase size and opacity when near mouse
-            this.size = this.baseSize + (force * 3)
+            // Increase size and opacity when near mouse with oscillation
+            this.size = this.baseSize + (force * 3) + Math.sin(this.phase) * force
             this.opacity = Math.min(1, this.baseOpacity + force * 0.5)
           } else {
-            // Gradually return to normal
-            this.size = this.baseSize
-            this.opacity = this.baseOpacity
+            // Gradually return to normal with subtle oscillation
+            this.size = this.baseSize + Math.sin(this.phase) * 0.3
+            this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
           }
         } else {
-          // No mouse interaction, return to normal
-          this.size = this.baseSize
-          this.opacity = this.baseOpacity
+          // No mouse interaction, but still maintain subtle oscillation
+          this.size = this.baseSize + Math.sin(this.phase) * 0.3
+          this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
         }
       }
 
       draw() {
         if (!ctx) return
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`
+        
+        // Create slight color variations for a more sophisticated look
+        const colorShift = Math.sin(this.phase) * 10
+        ctx.fillStyle = `hsla(${210 + this.hue + colorShift}, ${this.saturation}%, 100%, ${this.opacity})`
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
@@ -149,14 +165,55 @@ export default function Hero() {
       setIsHovering(false)
     }
 
+    // Function to draw connections between particles
+    function drawConnections(particles: Particle[]) {
+      if (!ctx) return
+      
+      for (let i = 0; i < particles.length; i++) {
+        const particleA = particles[i]
+        
+        for (let j = i + 1; j < particles.length; j++) {
+          const particleB = particles[j]
+          
+          const dx = particleA.x - particleB.x
+          const dy = particleA.y - particleB.y
+          const distance = Math.sqrt(dx * dx + dy * dy)
+          
+          // Only draw connections if particles are close enough
+          if (distance < particleA.connectionRadius) {
+            // Calculate connection opacity based on distance
+            const opacity = (1 - distance / particleA.connectionRadius) * 0.15
+            
+            // Draw connection line with gradient
+            ctx.beginPath()
+            ctx.moveTo(particleA.x, particleA.y)
+            ctx.lineTo(particleB.x, particleB.y)
+            
+            // Create dynamic gradient for connection
+            const gradient = ctx.createLinearGradient(particleA.x, particleA.y, particleB.x, particleB.y)
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * particleA.opacity})`)
+            gradient.addColorStop(1, `rgba(255, 255, 255, ${opacity * particleB.opacity})`)
+            
+            ctx.strokeStyle = gradient
+            ctx.lineWidth = Math.min(particleA.size, particleB.size) * 0.3
+            ctx.stroke()
+          }
+        }
+      }
+    }
+
     function animate() {
       if (!ctx) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+      // Update and draw particles
       for (const particle of particles) {
         particle.update(mousePosition.x, mousePosition.y, isHovering)
         particle.draw()
       }
+      
+      // Draw connections between particles
+      drawConnections(particles)
 
       requestAnimationFrame(animate)
     }
@@ -247,7 +304,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Sensory room & integration lab
+          Sensory Room & Integration Lab
         </motion.p>
         
         <motion.div

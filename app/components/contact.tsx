@@ -131,7 +131,7 @@ export default function Contact() {
         >
           <h2 className="mb-4 font-light gradient-text">Connect With Us</h2>
           <p className="mb-8 text-gray-400">
-            Be among the first to experience our sensory room & integration lab in Berlin in 2025.
+            Be among the first to experience our Sensory Room & Integration Lab in Berlin in 2025.
           </p>
         </motion.div>
         <motion.div
