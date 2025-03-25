@@ -107,33 +107,10 @@ export default function Hero() {
   // Timer for mobile auto-fade effect
   useEffect(() => {
     if (isMobile) {
-      // Begin with dium faded out on mobile
-      setIsDiumFading(true);
+      // On mobile, don't use the fading effect at all
+      setIsDiumFading(false);
       
-      // Add a small delay to ensure DOM layout is stable before starting animations
-      const preloadDelay = setTimeout(() => {
-        // Force a position update to make sure diumPositionRef is accurate
-        if (diumTextRef.current) {
-          const rect = diumTextRef.current.getBoundingClientRect();
-          diumPositionRef.current = {
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2,
-            width: rect.width,
-            height: rect.height,
-            active: true
-          };
-        }
-      }, 100);
-      
-      // After a few seconds, fade it back in and let particles disperse
-      const initialTimer = setTimeout(() => {
-        setIsDiumFading(false);
-      }, 4000);
-      
-      return () => {
-        clearTimeout(initialTimer);
-        clearTimeout(preloadDelay);
-      };
+      return () => {};
     }
   }, [isMobile]);
 
@@ -150,7 +127,8 @@ export default function Hero() {
         y: rect.top + rect.height / 2,
         width: rect.width,
         height: rect.height,
-        active: isDiumFading
+        // Only activate the gravity effect on desktop
+        active: !isMobile && isDiumFading
       };
     };
     
@@ -159,22 +137,23 @@ export default function Hero() {
     window.addEventListener('resize', updateDiumPosition);
     window.addEventListener('scroll', updateDiumPosition);
     
-    // Schedule multiple position updates at staggered intervals for more reliable tracking
-    // This helps catch any delayed layout shifts, especially in deployment environments
+    // Schedule multiple position updates at staggered intervals for desktop only
     const initialTimeouts: NodeJS.Timeout[] = [];
-    if (isMobile) {
-      // More frequent early checks for mobile
+    if (!isMobile) {
+      // Position updates only needed for desktop gravity effect
       [50, 100, 300, 500, 1000, 2000].forEach(delay => {
         const timeoutId = setTimeout(updateDiumPosition, delay);
         initialTimeouts.push(timeoutId);
       });
     }
     
-    // Update position more frequently on mobile devices to ensure reliable tracking
-    const positionInterval = setInterval(updateDiumPosition, isMobile ? 50 : 100);
+    // Update position more frequently on desktop where the effect is used
+    const positionInterval = setInterval(updateDiumPosition, 100);
     
-    // Also update position when isDiumFading changes
+    // Also update position when isDiumFading changes (desktop only)
     const diumFadingObserver = () => {
+      if (isMobile) return; // Skip on mobile
+      
       // Update position immediately when fading state changes
       updateDiumPosition();
       
@@ -275,32 +254,28 @@ export default function Hero() {
         // Update phase for oscillation effects
         this.phase += this.phaseSpeed
         
-        // Special behavior for dium particles when activated
-        if (this.isDiumParticle && diumPosition.active) {
-          // Mobile devices: just keep particles at dium position without gradual movement
-          if (isMobile) {
-            // Just place the particle directly at a position within the dium text
-            // Use reliable positioning with fallbacks for more consistent deployment behavior
-            const spreadX = diumPosition.width ? diumPosition.width / 2 : Math.min(100, window.innerWidth * 0.1);
-            const spreadY = diumPosition.height ? diumPosition.height / 2 : Math.min(50, window.innerHeight * 0.05);
-            
-            // Check if dium position is valid before applying
-            if (diumPosition.x > 0 && diumPosition.y > 0) {
-              // Apply small random variations for a more natural look
-              const jitter = Math.sin(this.phase) * 0.5;
-              
-              // Directly position at text location
-              this.x = diumPosition.x + (Math.cos(this.angleOffset) * spreadX * 0.8) + jitter;
-              this.y = diumPosition.y + (Math.sin(this.angleOffset) * spreadY * 0.8) + jitter;
-              
-              // Increase size and opacity for dium particles when active
-              this.size = Math.max(0.1, this.baseSize * 1.5 + Math.sin(this.phase) * 0.3);
-              this.opacity = Math.min(0.9, this.baseOpacity * 2.5);
-            }
-            
-            return // Skip further movement
-          }
+        // Skip dium particle special behavior on mobile completely
+        if (isMobile && this.isDiumParticle) {
+          // Just use normal particle behavior on mobile
+          this.x += this.speedX + Math.sin(this.phase) * 0.2
+          this.y += this.speedY + Math.cos(this.phase) * 0.2
+
+          // Screen wrapping
+          if (this.x > canvas.width) this.x = 0
+          if (this.x < 0) this.x = canvas.width
+          if (this.y > canvas.height) this.y = 0
+          if (this.y < 0) this.y = canvas.height
           
+          // Regular size and opacity fluctuations
+          const oscillation = Math.sin(this.phase) * 0.2
+          this.size = Math.max(0.1, this.baseSize + oscillation)
+          this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
+          
+          return // Skip the rest of the update logic
+        }
+        
+        // Special behavior for dium particles when activated (desktop only)
+        if (this.isDiumParticle && diumPosition.active) {
           // Desktop behavior: calculate a target position within the "dium" text area
           if (!this.isReturning) {
             // Assign a random position within the dium text area when becoming active
@@ -415,29 +390,13 @@ export default function Hero() {
     for (let i = 0; i < diumParticleCount; i++) {
       const particle = new Particle(true);
       
-      // On mobile: always position dium particles around the text initially
-      if (isMobile && diumPositionRef.current.x && diumPositionRef.current.y) {
-        // Use more reliable positioning for mobile
-        // Calculate position based on viewport size and text element position
-        // This ensures better consistency across different devices and browsers
-        
-        const spreadX = diumPositionRef.current.width ? diumPositionRef.current.width / 2 : 
-                        Math.min(100, window.innerWidth * 0.1); // Fallback based on viewport
-        const spreadY = diumPositionRef.current.height ? diumPositionRef.current.height / 2 : 
-                        Math.min(50, window.innerHeight * 0.05); // Fallback based on viewport
-        
-        // Use more consistent random distribution for better visual pattern
-        const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * 0.8; // Keep within 80% of the target area
-        
-        // Position particles with slightly more precision
-        particle.x = diumPositionRef.current.x + Math.cos(angle) * spreadX * radius;
-        particle.y = diumPositionRef.current.y + Math.sin(angle) * spreadY * radius;
-        
-        // Set initial opacity higher for better visibility during animation
-        particle.opacity = Math.min(0.9, particle.baseOpacity * 2);
-      } 
-      // On desktop: start particles in a wider area around the dium text
+      // On mobile, just initialize like normal particles
+      if (isMobile) {
+        // No special positioning for mobile
+        particle.x = Math.random() * canvas.width;
+        particle.y = Math.random() * canvas.height;
+      }
+      // On desktop: position particles around the dium text for the gravity effect
       else if (diumPositionRef.current.x && diumPositionRef.current.y) {
         const randomAngle = Math.random() * Math.PI * 2;
         const randomDistance = Math.random() * canvas.width / 4;
@@ -558,21 +517,8 @@ export default function Hero() {
       const deltaTime = currentTime - lastFrameTime
       lastFrameTime = currentTime
       
-      // On the first few frames, ensure dium particle positions are correct if on mobile
-      const isStartupFrame = lastFrameTime < 1000 && isMobile;
-      if (isStartupFrame && isDiumFading && diumPositionRef.current.x) {
-        // Reposition dium particles during startup frames to ensure they're correct
-        for (const particle of diumParticles) {
-          if (particle.isDiumParticle) {
-            const spreadX = diumPositionRef.current.width ? diumPositionRef.current.width / 2 : 40;
-            const spreadY = diumPositionRef.current.height ? diumPositionRef.current.height / 2 : 20;
-            
-            // Position directly at dium text
-            particle.x = diumPositionRef.current.x + (Math.cos(particle.angleOffset) * spreadX * 0.8);
-            particle.y = diumPositionRef.current.y + (Math.sin(particle.angleOffset) * spreadY * 0.8);
-          }
-        }
-      }
+      // Skip the mobile-specific startup frame positioning
+      // since we're removing the gravity effect on mobile
       
       // Only clear with a semi-transparent overlay for smoother transitions on connections
       // This creates a trail effect that reduces flickering
@@ -735,7 +681,8 @@ export default function Hero() {
             ref={diumTextRef}
             className="inline-block relative gradient-text"
             style={{
-              opacity: isDiumFading ? 0.1 : 1,
+              // Keep opacity at 1 on mobile devices, only use the fading effect on desktop
+              opacity: (!isMobile && isDiumFading) ? 0.1 : 1,
               transition: 'opacity 1.5s ease-in-out'
             }}
             onMouseEnter={!isMobile ? handleDiumMouseEnter : undefined}
