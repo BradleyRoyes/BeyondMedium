@@ -45,27 +45,6 @@ export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  // Animation state for the background pattern
-  const [linePatterns, setLinePatterns] = useState<Array<{ 
-    x1: number; 
-    y1: number; 
-    x2: number; 
-    y2: number;
-    delay: number;
-    duration: number;
-    opacity: number;
-  }>>([])
-
-  const [particles, setParticles] = useState<Array<{
-    id: number;
-    x: number;
-    y: number;
-    size: number;
-    speed: number;
-    opacity: number;
-    direction: number;
-  }>>([])
-
   // Track if we're mounted to avoid hydration issues
   const [isMounted, setIsMounted] = useState(false)
 
@@ -73,70 +52,6 @@ export default function Contact() {
   useEffect(() => {
     setIsMounted(true)
   }, [])
-
-  // Generate optimized background elements - client-side only
-  useEffect(() => {
-    if (!isMounted) return;
-    
-    // Generate fewer, more interesting lines
-    const patterns = []
-    
-    // Create a grid pattern with occasional breaks
-    for (let i = 0; i < 15; i++) {
-      const xPos = i * 7;
-      patterns.push({
-        x1: xPos,
-        y1: 0,
-        x2: xPos + (i % 3 === 0 ? 15 : 0),
-        y2: 100,
-        delay: i * 0.2,
-        duration: 20 + (i % 5) * 8,
-        opacity: 0.05 + (i % 3) * 0.03
-      });
-    }
-    
-    // Add horizontal connecting lines for a more structured feel
-    for (let i = 0; i < 8; i++) {
-      const yPos = i * 15;
-      patterns.push({
-        x1: 0,
-        y1: yPos,
-        x2: 100,
-        y2: yPos + (i % 2 === 0 ? 5 : -5),
-        delay: i * 0.3,
-        duration: 25 + (i % 4) * 8,
-        opacity: 0.06 + (i % 3) * 0.02
-      });
-    }
-
-    // Add a few diagonal accent lines for visual interest
-    for (let i = 0; i < 5; i++) {
-      patterns.push({
-        x1: i * 25,
-        y1: 0,
-        x2: (i + 1) * 25,
-        y2: 100,
-        delay: i * 0.4,
-        duration: 30,
-        opacity: 0.08
-      });
-    }
-    
-    setLinePatterns(patterns);
-
-    // Generate fewer, more interesting floating particles
-    const newParticles = Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 0.5 + Math.random() * 1.5,
-      speed: 0.5 + Math.random() * 1,
-      opacity: 0.2 + Math.random() * 0.4,
-      direction: Math.random() > 0.5 ? 1 : -1
-    }));
-    
-    setParticles(newParticles);
-  }, [isMounted]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
@@ -275,103 +190,8 @@ export default function Contact() {
           )}
         </motion.div>
       </div>
-      <div className="absolute inset-0 z-0 opacity-15">
-        <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[70vh] h-[70vh] rounded-full mystery-glow opacity-20"></div>
-        {isMounted && (
-          <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            {/* Structured line patterns */}
-            {linePatterns.map((line, i) => (
-              <motion.line 
-                key={`line-${i}`}
-                x1={line.x1} 
-                y1={line.y1} 
-                x2={line.x2} 
-                y2={line.y2} 
-                stroke="white" 
-                strokeWidth="0.15"
-                opacity={line.opacity}
-                animate={{
-                  x1: [line.x1, line.x1 + (Math.sin(i) * 4)],
-                  x2: [line.x2, line.x2 + (Math.cos(i) * 4)],
-                  opacity: [line.opacity, line.opacity * 1.5, line.opacity]
-                }}
-                transition={{
-                  duration: line.duration,
-                  repeat: Infinity,
-                  repeatType: "mirror",
-                  ease: "easeInOut",
-                  delay: line.delay,
-                }}
-              />
-            ))}
-
-            {/* More interesting moving particles */}
-            {particles.map(particle => (
-              <motion.g key={`particle-${particle.id}`}>
-                {/* Main circle */}
-                <motion.circle
-                  r={particle.size}
-                  fill="white"
-                  initial={{ cx: particle.x, cy: particle.y, opacity: particle.opacity }}
-                  animate={{ 
-                    cx: [
-                      particle.x, 
-                      particle.x + (15 * particle.direction), 
-                      particle.x
-                    ],
-                    cy: [
-                      particle.y, 
-                      particle.y + (Math.sin(particle.x) * 10), 
-                      particle.y
-                    ],
-                    opacity: [particle.opacity, particle.opacity * 1.3, particle.opacity]
-                  }}
-                  transition={{
-                    duration: 20 / particle.speed,
-                    repeat: Infinity,
-                    repeatType: "mirror",
-                    ease: "easeInOut"
-                  }}
-                />
-                
-                {/* Occasional particle with a halo effect */}
-                {particle.id % 3 === 0 && (
-                  <motion.circle
-                    r={particle.size * 3}
-                    initial={{ 
-                      cx: particle.x, 
-                      cy: particle.y, 
-                      opacity: particle.opacity * 0.3,
-                      fill: "transparent",
-                      stroke: "white",
-                      strokeWidth: 0.05
-                    }}
-                    animate={{ 
-                      cx: [
-                        particle.x, 
-                        particle.x + (15 * particle.direction), 
-                        particle.x
-                      ],
-                      cy: [
-                        particle.y, 
-                        particle.y + (Math.sin(particle.x) * 10), 
-                        particle.y
-                      ],
-                      opacity: [particle.opacity * 0.2, particle.opacity * 0.4, particle.opacity * 0.2],
-                      r: [particle.size * 3, particle.size * 4, particle.size * 3]
-                    }}
-                    transition={{
-                      duration: 25 / particle.speed,
-                      repeat: Infinity,
-                      repeatType: "mirror",
-                      ease: "easeInOut"
-                    }}
-                  />
-                )}
-              </motion.g>
-            ))}
-          </svg>
-        )}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[70vh] h-[70vh] rounded-full mystery-glow opacity-10"></div>
       </div>
     </section>
   )
