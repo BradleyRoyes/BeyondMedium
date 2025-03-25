@@ -23,6 +23,6 @@ import './globals.css'
 
 export const metadata = {
   title: 'BeyondMedium | Sensory Integration Lab',
-  description: 'BeyondMedium is a bespoke sensory integration lab offering innovative products and immersive experiences for neurodiverse people in Berlin.',
+  description: 'BeyondMedium is a sensory room & integration lab offering innovative tools and immersive experiences for neurodiverse people in Berlin.',
   generator: 'v0.dev'
 };
