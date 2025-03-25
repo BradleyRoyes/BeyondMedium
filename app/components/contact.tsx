@@ -56,6 +56,16 @@ export default function Contact() {
     opacity: number;
   }>>([])
 
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    x: number;
+    y: number;
+    size: number;
+    speed: number;
+    opacity: number;
+    direction: number;
+  }>>([])
+
   // Track if we're mounted to avoid hydration issues
   const [isMounted, setIsMounted] = useState(false)
 
@@ -64,40 +74,69 @@ export default function Contact() {
     setIsMounted(true)
   }, [])
 
-  // Generate the line patterns on component mount - client-side only
+  // Generate optimized background elements - client-side only
   useEffect(() => {
     if (!isMounted) return;
     
+    // Generate fewer, more interesting lines
     const patterns = []
-    // Vertical lines with slight variations
-    for (let i = 0; i < 40; i++) {
-      patterns.push({
-        x1: i * 2.5,
-        y1: 0,
-        x2: i * 2.5,
-        y2: 100,
-        delay: Math.random() * 5,
-        duration: 15 + Math.random() * 20,
-        opacity: 0.05 + Math.random() * 0.1
-      })
-    }
     
-    // Add some diagonal lines for more interest
+    // Create a grid pattern with occasional breaks
     for (let i = 0; i < 15; i++) {
-      const startX = Math.random() * 100
+      const xPos = i * 7;
       patterns.push({
-        x1: startX,
+        x1: xPos,
         y1: 0,
-        x2: startX + (Math.random() * 40 - 20),
+        x2: xPos + (i % 3 === 0 ? 15 : 0),
         y2: 100,
-        delay: Math.random() * 5,
-        duration: 25 + Math.random() * 15,
-        opacity: 0.03 + Math.random() * 0.05
-      })
+        delay: i * 0.2,
+        duration: 20 + (i % 5) * 8,
+        opacity: 0.05 + (i % 3) * 0.03
+      });
     }
     
-    setLinePatterns(patterns)
-  }, [isMounted])
+    // Add horizontal connecting lines for a more structured feel
+    for (let i = 0; i < 8; i++) {
+      const yPos = i * 15;
+      patterns.push({
+        x1: 0,
+        y1: yPos,
+        x2: 100,
+        y2: yPos + (i % 2 === 0 ? 5 : -5),
+        delay: i * 0.3,
+        duration: 25 + (i % 4) * 8,
+        opacity: 0.06 + (i % 3) * 0.02
+      });
+    }
+
+    // Add a few diagonal accent lines for visual interest
+    for (let i = 0; i < 5; i++) {
+      patterns.push({
+        x1: i * 25,
+        y1: 0,
+        x2: (i + 1) * 25,
+        y2: 100,
+        delay: i * 0.4,
+        duration: 30,
+        opacity: 0.08
+      });
+    }
+    
+    setLinePatterns(patterns);
+
+    // Generate fewer, more interesting floating particles
+    const newParticles = Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: 0.5 + Math.random() * 1.5,
+      speed: 0.5 + Math.random() * 1,
+      opacity: 0.2 + Math.random() * 0.4,
+      direction: Math.random() > 0.5 ? 1 : -1
+    }));
+    
+    setParticles(newParticles);
+  }, [isMounted]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
@@ -240,64 +279,97 @@ export default function Contact() {
         <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[70vh] h-[70vh] rounded-full mystery-glow opacity-20"></div>
         {isMounted && (
           <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {/* Structured line patterns */}
             {linePatterns.map((line, i) => (
               <motion.line 
-                key={i} 
+                key={`line-${i}`}
                 x1={line.x1} 
                 y1={line.y1} 
                 x2={line.x2} 
                 y2={line.y2} 
                 stroke="white" 
-                strokeWidth="0.1"
+                strokeWidth="0.15"
                 opacity={line.opacity}
                 animate={{
-                  x1: [line.x1, line.x1 + (Math.random() * 3 - 1.5)],
-                  x2: [line.x2, line.x2 + (Math.random() * 5 - 2.5)],
+                  x1: [line.x1, line.x1 + (Math.sin(i) * 4)],
+                  x2: [line.x2, line.x2 + (Math.cos(i) * 4)],
                   opacity: [line.opacity, line.opacity * 1.5, line.opacity]
                 }}
                 transition={{
                   duration: line.duration,
                   repeat: Infinity,
-                  repeatType: "reverse",
+                  repeatType: "mirror",
                   ease: "easeInOut",
                   delay: line.delay,
                 }}
               />
             ))}
-            {Array.from({ length: 15 }).map((_, i) => {
-              // Pre-calculate random values to avoid generating new ones during render
-              const radius = 0.3 + (0.5 * (i / 15))
-              const cx = 10 + ((100 - 20) * (i / 15))
-              const cy = 10 + ((100 - 20) * ((15 - i) / 15))
-              const opacity = 0.1 + (0.2 * (i / 15))
-              const duration = 20 + (30 * (i / 15))
-              const delay = 5 * (i / 15)
-              
-              return (
+
+            {/* More interesting moving particles */}
+            {particles.map(particle => (
+              <motion.g key={`particle-${particle.id}`}>
+                {/* Main circle */}
                 <motion.circle
-                  key={`particle-${i}`}
-                  r={radius}
+                  r={particle.size}
                   fill="white"
-                  initial={{ 
-                    cx: cx, 
-                    cy: cy,
-                    opacity: opacity
-                  }}
+                  initial={{ cx: particle.x, cy: particle.y, opacity: particle.opacity }}
                   animate={{ 
-                    cx: [cx, cx + 20, cx - 10, cx],
-                    cy: [cy, cy -.15, cy + 25, cy],
-                    opacity: [opacity, opacity * 2, opacity]
+                    cx: [
+                      particle.x, 
+                      particle.x + (15 * particle.direction), 
+                      particle.x
+                    ],
+                    cy: [
+                      particle.y, 
+                      particle.y + (Math.sin(particle.x) * 10), 
+                      particle.y
+                    ],
+                    opacity: [particle.opacity, particle.opacity * 1.3, particle.opacity]
                   }}
                   transition={{
-                    duration: duration,
+                    duration: 20 / particle.speed,
                     repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                    delay: delay
+                    repeatType: "mirror",
+                    ease: "easeInOut"
                   }}
                 />
-              )
-            })}
+                
+                {/* Occasional particle with a halo effect */}
+                {particle.id % 3 === 0 && (
+                  <motion.circle
+                    r={particle.size * 3}
+                    initial={{ 
+                      cx: particle.x, 
+                      cy: particle.y, 
+                      opacity: particle.opacity * 0.3,
+                      fill: "transparent",
+                      stroke: "white",
+                      strokeWidth: 0.05
+                    }}
+                    animate={{ 
+                      cx: [
+                        particle.x, 
+                        particle.x + (15 * particle.direction), 
+                        particle.x
+                      ],
+                      cy: [
+                        particle.y, 
+                        particle.y + (Math.sin(particle.x) * 10), 
+                        particle.y
+                      ],
+                      opacity: [particle.opacity * 0.2, particle.opacity * 0.4, particle.opacity * 0.2],
+                      r: [particle.size * 3, particle.size * 4, particle.size * 3]
+                    }}
+                    transition={{
+                      duration: 25 / particle.speed,
+                      repeat: Infinity,
+                      repeatType: "mirror",
+                      ease: "easeInOut"
+                    }}
+                  />
+                )}
+              </motion.g>
+            ))}
           </svg>
         )}
       </div>
