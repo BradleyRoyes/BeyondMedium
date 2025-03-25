@@ -411,16 +411,16 @@ export default function Hero() {
         </motion.div>
         
         <motion.h1
-          className="mb-4 font-light"
+          className="mb-4 text-3xl md:text-4xl lg:text-5xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <span className="gradient-text">Beyond</span>
-          <span className="gradient-text">Me</span>
+          <span className="gradient-text font-medium md:font-light">Beyond</span>
+          <span className="gradient-text font-medium md:font-light">Me</span>
           <span 
             ref={diumTextRef}
-            className="inline-block relative gradient-text"
+            className="inline-block relative gradient-text font-medium md:font-light"
             style={{
               opacity: isDiumFading ? 0.1 : 1,
               transition: 'opacity 1.5s ease-in-out'
