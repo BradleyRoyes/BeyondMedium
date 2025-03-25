@@ -66,9 +66,8 @@ export default function Gallery() {
           <h3 className="text-3xl md:text-4xl text-white mb-2 md:mb-4 font-medium">
             Bringing 20+ Years of Collective Experience
           </h3>
-          <p className="text-zinc-400 max-w-2xl text-lg md:text-xl">
-            Our team delivers innovative accessibility tools and sensory design to our Integration Center in Berlin. 
-            We combine expertise from cognitive science, interaction design, healthcare, and movement therapy to create meaningful experiences.
+          <p className="mx-auto mt-4 max-w-lg text-center text-gray-400">
+            We're a small, passionate team building Berlin's first dedicated space for sensory-inclusive design. Drawing from our backgrounds in cognitive science, design, healthcare and movement practices, we're creating tools and experiences that make a real difference.
           </p>
         </div>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
