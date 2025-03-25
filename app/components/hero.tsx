@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { useIsMobile } from "../../hooks/use-mobile"
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -11,6 +10,8 @@ export default function Hero() {
   const [isDiumFading, setIsDiumFading] = useState(false)
   const diumFadeTimerRef = useRef<NodeJS.Timeout | null>(null)
   const isMobile = useIsMobile()
+  const diumTextRef = useRef<HTMLSpanElement>(null)
+  const diumPositionRef = useRef({ x: 0, y: 0, width: 0, height: 0, active: false })
 
   // Timer for mobile auto-fade effect
   useEffect(() => {
@@ -29,6 +30,32 @@ export default function Hero() {
     }
   }, [isMobile]);
 
+  // Effect to track the position of the "dium" text element
+  useEffect(() => {
+    if (!diumTextRef.current) return;
+
+    const updateDiumPosition = () => {
+      if (!diumTextRef.current) return;
+      
+      const rect = diumTextRef.current.getBoundingClientRect();
+      diumPositionRef.current = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        width: rect.width,
+        height: rect.height,
+        active: isDiumFading
+      };
+    };
+    
+    // Initial update and then on resize
+    updateDiumPosition();
+    window.addEventListener('resize', updateDiumPosition);
+    
+    return () => {
+      window.removeEventListener('resize', updateDiumPosition);
+    };
+  }, [isDiumFading]);
+
   useEffect(() => {
     if (!canvasRef.current) return
 
@@ -42,6 +69,9 @@ export default function Hero() {
     const particles: Particle[] = []
     const particleCount = isMobile ? 80 : 150 // Reduce particle count on mobile for better performance
     const mouseRadius = 100 // Area of influence around the mouse
+    // Special particles to form "dium" when needed
+    const diumParticles: Particle[] = []
+    const diumParticleCount = isMobile ? 60 : 120
 
     class Particle {
       x: number
@@ -59,8 +89,15 @@ export default function Hero() {
       saturation: number
       phase: number
       phaseSpeed: number
+      // For "dium" reformation effect
+      isDiumParticle: boolean
+      targetX: number
+      targetY: number
+      isReturning: boolean
+      returnSpeed: number
+      angleOffset: number
 
-      constructor() {
+      constructor(isDiumParticle = false) {
         this.x = Math.random() * canvas.width
         this.y = Math.random() * canvas.height
         this.baseSize = Math.random() * 2.5 + 0.1
@@ -76,11 +113,51 @@ export default function Hero() {
         this.saturation = Math.random() * 10 // Very slight saturation
         this.phase = Math.random() * Math.PI * 2
         this.phaseSpeed = 0.01 + Math.random() * 0.02
+        // For "dium" reformation effect
+        this.isDiumParticle = isDiumParticle
+        this.targetX = 0
+        this.targetY = 0
+        this.isReturning = false
+        this.returnSpeed = 0.05 + Math.random() * 0.05
+        this.angleOffset = Math.random() * Math.PI * 2
       }
 
-      update(mouseX: number, mouseY: number, isHovering: boolean) {
+      update(mouseX: number, mouseY: number, isHovering: boolean, diumPosition: { x: number, y: number, width: number, height: number, active: boolean }) {
         // Update phase for oscillation effects
         this.phase += this.phaseSpeed
+        
+        // Special behavior for dium particles when activated
+        if (this.isDiumParticle && diumPosition.active) {
+          // Calculate a target position within the "dium" text area
+          if (!this.isReturning) {
+            // Assign a random position within the dium text area when becoming active
+            const spreadX = diumPosition.width / 2
+            const spreadY = diumPosition.height / 2
+            
+            this.targetX = diumPosition.x + (Math.cos(this.angleOffset) * spreadX * Math.random())
+            this.targetY = diumPosition.y + (Math.sin(this.angleOffset) * spreadY * Math.random())
+            this.isReturning = true
+          }
+          
+          // Move toward the target position
+          const dx = this.targetX - this.x
+          const dy = this.targetY - this.y
+          const distance = Math.sqrt(dx * dx + dy * dy)
+          
+          if (distance > 1) {
+            this.x += dx * this.returnSpeed
+            this.y += dy * this.returnSpeed
+          }
+          
+          // Increase size and opacity for dium particles when active
+          this.size = Math.max(0.1, this.baseSize * 1.5 + Math.sin(this.phase) * 0.3)
+          this.opacity = Math.min(0.9, this.baseOpacity * 2)
+          
+          return // Skip normal movement when reforming dium
+        } else if (this.isDiumParticle && this.isReturning) {
+          // Reset returning state when dium is no longer active
+          this.isReturning = false
+        }
         
         // Normal particle movement with subtle oscillation
         this.x += this.speedX + Math.sin(this.phase) * 0.2
@@ -146,15 +223,22 @@ export default function Hero() {
         
         // Create slight color variations for a sophisticated look
         const colorShift = Math.sin(this.phase) * 10
-        ctx.fillStyle = `hsla(${210 + this.hue + colorShift}, ${this.saturation}%, 100%, ${this.opacity})`
+        const colorBase = this.isDiumParticle && this.isReturning ? 190 : 210 // Slightly different color for dium particles
+        ctx.fillStyle = `hsla(${colorBase + this.hue + colorShift}, ${this.saturation}%, 100%, ${this.opacity})`
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
         ctx.fill()
       }
     }
 
+    // Initialize regular particles
     for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle())
+      particles.push(new Particle());
+    }
+    
+    // Initialize special particles for dium reformation
+    for (let i = 0; i < diumParticleCount; i++) {
+      diumParticles.push(new Particle(true));
     }
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -221,15 +305,26 @@ export default function Hero() {
       if (!ctx) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Update and draw particles
+      // Update and draw regular particles
       for (const particle of particles) {
-        particle.update(mousePosition.x, mousePosition.y, isHovering)
+        particle.update(mousePosition.x, mousePosition.y, isHovering, diumPositionRef.current)
+        particle.draw()
+      }
+      
+      // Update and draw dium particles
+      for (const particle of diumParticles) {
+        particle.update(mousePosition.x, mousePosition.y, isHovering, diumPositionRef.current)
         particle.draw()
       }
       
       // Draw connections between particles - skip on mobile for better performance
       if (!isMobile || (isMobile && Math.random() > 0.7)) {
-        drawConnections(particles)
+        drawConnections([...particles, ...diumParticles.filter(p => !p.isReturning)]);
+        
+        // Draw additional connections between dium particles when reforming
+        if (diumPositionRef.current.active) {
+          drawConnections(diumParticles.filter(p => p.isReturning));
+        }
       }
 
       requestAnimationFrame(animate)
@@ -303,9 +398,10 @@ export default function Hero() {
           <span className="gradient-text">Beyond</span>
           <span className="gradient-text">Me</span>
           <span 
+            ref={diumTextRef}
             className="inline-block relative gradient-text"
             style={{
-              opacity: isDiumFading ? 0.2 : 1,
+              opacity: isDiumFading ? 0.1 : 1,
               transition: 'opacity 1.5s ease-in-out'
             }}
             onMouseEnter={!isMobile ? handleDiumMouseEnter : undefined}
