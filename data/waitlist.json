@@ -1,0 +1,24 @@
+[
+  {
+    "id": "wl_1742934433839_2a0d1st",
+    "email": "Bradroyes@gmail.com",
+    "timestamp": "2025-03-25T20:27:13.839Z",
+    "responded": true,
+    "conversations": [
+      {
+        "from": "system",
+        "to": "Bradroyes@gmail.com",
+        "subject": "Welcome to the BeyondMedium Waitlist",
+        "message": "Thank you for joining our waitlist! We'll keep you updated on our progress.",
+        "timestamp": "2025-03-25T20:27:13.839Z"
+      },
+      {
+        "from": "connect@beyondmedium.com",
+        "to": "Bradroyes@gmail.com",
+        "subject": "howdy",
+        "message": "testing",
+        "timestamp": "2025-03-25T20:29:12.105Z"
+      }
+    ]
+  }
+]

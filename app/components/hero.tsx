@@ -891,8 +891,9 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <span className="inline-block py-2 px-6 border border-white/20 text-white/90 text-sm tracking-widest uppercase backdrop-blur-sm bg-black/30 rounded-sm">
-            Coming Soon
+          <span className="inline-block py-2 px-6 border border-white/20 text-white/90 text-sm tracking-widest uppercase backdrop-blur-sm bg-black/30 rounded-sm relative glow-pulse-container overflow-hidden">
+            <span className="relative z-10">Coming Soon</span>
+            <span className="absolute inset-0 bg-[#a4c2c2]/10 opacity-0 animate-mint-pulse z-0"></span>
           </span>
         </motion.div>
       </div>

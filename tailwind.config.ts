@@ -82,11 +82,26 @@ const config: Config = {
   				to: {
   					height: '0'
   				}
-  			}
+  			},
+            'mint-pulse': {
+                '0%': { 
+                    opacity: '0',
+                    boxShadow: '0 0 0 0 rgba(164, 194, 194, 0)'
+                },
+                '50%': { 
+                    opacity: '0.4',
+                    boxShadow: '0 0 20px 5px rgba(164, 194, 194, 0.3)'
+                },
+                '100%': { 
+                    opacity: '0', 
+                    boxShadow: '0 0 0 0 rgba(164, 194, 194, 0)'
+                }
+            }
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+            'mint-pulse': 'mint-pulse 3s ease-in-out infinite'
   		}
   	}
   },

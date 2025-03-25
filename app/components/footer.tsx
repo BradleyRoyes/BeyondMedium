@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="border-t border-zinc-800 bg-black py-8">
@@ -14,6 +16,9 @@ export default function Footer() {
             <a href="#" className="text-sm font-light text-gray-400 hover:text-white">
               Berlin
             </a>
+            <Link href="/admin/login" className="text-xs font-light text-gray-600 hover:text-gray-400">
+              Admin
+            </Link>
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { motion } from "framer-motion"
 import { useEffect, useState } from "react"
+import { subscribeToWaitlist } from "@/lib/api"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -94,21 +95,26 @@ export default function Contact() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
     
-    // Simulate an API call with setTimeout
-    setTimeout(() => {
-      // Log the form values (replace with actual API call in production)
-      console.log(values)
-      
-      // Reset form and show success message
-      form.reset()
-      setIsSubmitting(false)
-      setIsSubmitted(true)
-      
-      // Hide success message after 5 seconds
-      setTimeout(() => {
-        setIsSubmitted(false)
-      }, 5000)
-    }, 1500)
+    // Call the API to subscribe to the waitlist
+    subscribeToWaitlist(values.email)
+      .then((response) => {
+        console.log('Subscription response:', response);
+        
+        // Reset form and show success message
+        form.reset();
+        setIsSubmitting(false);
+        setIsSubmitted(true);
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+          setIsSubmitted(false);
+        }, 5000);
+      })
+      .catch((error) => {
+        console.error('Error subscribing to waitlist:', error);
+        setIsSubmitting(false);
+        // Could add error state handling here if needed
+      });
   }
 
   return (

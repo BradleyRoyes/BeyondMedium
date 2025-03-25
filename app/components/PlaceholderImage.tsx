@@ -23,7 +23,7 @@ export function PlaceholderImage({
   
   useEffect(() => {
     if (uniquePattern.current === null) {
-      uniquePattern.current = Math.floor(Math.random() * 6) // 0-5 pattern types
+      uniquePattern.current = Math.floor(Math.random() * 8) // Increased to 8 pattern types
       seedValue.current = Math.random() * 10000 | 0 // Integer seed for deterministic randomness
     }
     
@@ -82,6 +82,12 @@ export function PlaceholderImage({
         break
       case 5: // Abstract Rorschach
         drawAbstractRorschach(ctx, width, height, seedValue.current)
+        break
+      case 6: // Geometric Pattern
+        drawGeometricPattern(ctx, width, height, seedValue.current)
+        break
+      case 7: // Sacred Geometry
+        drawSacredGeometry(ctx, width, height, seedValue.current)
         break
     }
     
@@ -465,6 +471,104 @@ function drawAnimalSilhouette(ctx: CanvasRenderingContext2D, width: number, heig
 
 // 6. Abstract Rorschach - inspired by later cards in the official test
 function drawAbstractRorschach(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'multiply'
+  
+  const halfWidth = width / 2
+  const centerY = height / 2
+  
+  let rndSeed = seed;
+  
+  // Create more geometric abstract pattern
+  ctx.beginPath()
+  
+  // Base pattern height
+  const patternHeight = height * 0.7
+  
+  // Add a central line with geometric elements branching off
+  ctx.moveTo(halfWidth, centerY - patternHeight/2)
+  ctx.lineTo(halfWidth, centerY + patternHeight/2)
+  
+  // Add geometric branches
+  const branchCount = 4 + Math.floor(seededRandom(rndSeed++) * 3)
+  
+  for (let i = 0; i < branchCount; i++) {
+    const yPos = centerY - patternHeight/2 + patternHeight * (i / (branchCount - 1))
+    const branchLength = halfWidth * (0.3 + seededRandom(rndSeed++) * 0.4)
+    
+    // Choose a geometric pattern type
+    const patternType = Math.floor(seededRandom(rndSeed++) * 3)
+    
+    if (patternType === 0) {
+      // Angular zigzag branch
+      const zigzagCount = 2 + Math.floor(seededRandom(rndSeed++) * 3)
+      const segmentLength = branchLength / zigzagCount
+      
+      ctx.moveTo(halfWidth, yPos)
+      
+      for (let j = 0; j < zigzagCount; j++) {
+        const x = halfWidth - segmentLength * (j + 1)
+        const yOffset = (j % 2 === 0) ? 
+          segmentLength * 0.5 * seededRandom(rndSeed++) : 
+          -segmentLength * 0.5 * seededRandom(rndSeed++);
+        
+        ctx.lineTo(x, yPos + yOffset)
+      }
+    } 
+    else if (patternType === 1) {
+      // Stepped geometric branch
+      const stepCount = 3 + Math.floor(seededRandom(rndSeed++) * 2)
+      const stepWidth = branchLength / stepCount
+      const stepHeight = branchLength * 0.2
+      
+      ctx.moveTo(halfWidth, yPos)
+      
+      for (let j = 0; j < stepCount; j++) {
+        const x1 = halfWidth - stepWidth * j
+        const x2 = halfWidth - stepWidth * (j + 1)
+        const y1 = yPos
+        const y2 = yPos + (j % 2 === 0 ? stepHeight : -stepHeight)
+        
+        ctx.lineTo(x1, y2)
+        ctx.lineTo(x2, y2)
+      }
+    } 
+    else {
+      // Diamond chain
+      const diamondCount = 2 + Math.floor(seededRandom(rndSeed++) * 2)
+      const diamondWidth = branchLength / diamondCount
+      const diamondHeight = diamondWidth * (0.5 + seededRandom(rndSeed++) * 0.5)
+      
+      ctx.moveTo(halfWidth, yPos)
+      
+      for (let j = 0; j < diamondCount; j++) {
+        const centerX = halfWidth - diamondWidth * (j + 0.5)
+        
+        ctx.lineTo(centerX + diamondWidth * 0.5, yPos)
+        ctx.lineTo(centerX, yPos + diamondHeight * 0.5)
+        ctx.lineTo(centerX - diamondWidth * 0.5, yPos)
+        ctx.lineTo(centerX, yPos - diamondHeight * 0.5)
+        ctx.lineTo(centerX + diamondWidth * 0.5, yPos)
+      }
+    }
+  }
+  
+  // Fill with slightly higher opacity for better visibility
+  ctx.fillStyle = `rgba(255, 255, 255, 0.2)`
+  ctx.fill()
+  
+  // Draw mirror image on right side
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fillStyle = `rgba(255, 255, 255, 0.2)`
+  ctx.fill()
+  ctx.restore()
+  
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+// 6. Geometric Pattern - complex geometric shapes and patterns
+function drawGeometricPattern(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
   ctx.globalCompositeOperation = 'overlay'
   
   const halfWidth = width / 2
@@ -472,81 +576,161 @@ function drawAbstractRorschach(ctx: CanvasRenderingContext2D, width: number, hei
   
   let rndSeed = seed;
   
-  // Create multiple abstract forms with smaller details
+  // Draw symmetric geometric pattern
   ctx.beginPath()
   
-  // Main central shape
-  const mainHeight = height * 0.7
-  const mainWidth = halfWidth * 0.8
+  // Set base opacity
+  ctx.fillStyle = `rgba(255, 255, 255, 0.15)`
   
-  // Create a complex, multi-node shape
-  const nodeCount = 6 + Math.floor(seededRandom(rndSeed++) * 4)
-  const nodes = []
+  // Create a hexagonal grid
+  const hexSize = width * 0.12
+  const rows = Math.ceil(height / (hexSize * 1.5)) + 1
+  const cols = Math.ceil(halfWidth / hexSize) + 1
   
-  // Generate nodes in a rough oval pattern
-  for (let i = 0; i < nodeCount; i++) {
-    const angle = (i / nodeCount) * Math.PI * 2
-    
-    // Base position on oval
-    const x = halfWidth - (Math.cos(angle) * mainWidth * 0.5)
-    const y = centerY + (Math.sin(angle) * mainHeight * 0.4)
-    
-    // Add randomness
-    const randomX = x + (seededRandom(rndSeed++) - 0.5) * mainWidth * 0.4
-    const randomY = y + (seededRandom(rndSeed++) - 0.5) * mainHeight * 0.2
-    
-    nodes.push({ x: randomX, y: randomY })
+  for (let row = -1; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      // Staggered grid
+      const x = halfWidth - (col * hexSize * 1.5)
+      const y = centerY - (height / 2) + (row * hexSize * 1.732) + (col % 2 === 0 ? hexSize * 0.866 : 0)
+      
+      // Variation based on seed
+      const sizeVariation = 0.7 + seededRandom(rndSeed++) * 0.6
+      const actualSize = hexSize * sizeVariation
+      
+      // Various geometric shapes based on position
+      const shapeType = (col + row * 3 + Math.floor(seededRandom(rndSeed++) * 2)) % 3
+      
+      switch(shapeType) {
+        case 0: // Hexagon
+          drawHexagon(ctx, x, y, actualSize)
+          break
+        case 1: // Triangle
+          drawTriangle(ctx, x, y, actualSize * 1.2)
+          break
+        case 2: // Circle with rings
+          drawCircleWithRings(ctx, x, y, actualSize, rndSeed)
+          rndSeed += 2
+          break
+      }
+    }
   }
   
-  // Connect the nodes with bezier curves for smooth shape
-  ctx.moveTo(nodes[0].x, nodes[0].y)
-  
-  for (let i = 0; i < nodes.length; i++) {
-    const current = nodes[i]
-    const next = nodes[(i + 1) % nodes.length]
-    
-    const cp1x = current.x + (next.x - current.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 50
-    const cp1y = current.y + (seededRandom(rndSeed++) - 0.5) * 70
-    const cp2x = next.x - (next.x - current.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 50
-    const cp2y = next.y + (seededRandom(rndSeed++) - 0.5) * 70
-    
-    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, next.x, next.y)
-  }
-  
-  // Add some smaller details/offshoots
-  for (let i = 0; i < 4; i++) {
-    const baseNode = nodes[Math.floor(seededRandom(rndSeed++) * nodes.length)]
-    const detailSize = 10 + seededRandom(rndSeed++) * 30
-    
-    // Add a smaller shape connected to main form
-    ctx.moveTo(baseNode.x, baseNode.y)
-    
-    const angle = seededRandom(rndSeed++) * Math.PI * 2
-    const detailX = baseNode.x + Math.cos(angle) * detailSize * 2
-    const detailY = baseNode.y + Math.sin(angle) * detailSize * 2
-    
-    ctx.bezierCurveTo(
-      baseNode.x + Math.cos(angle) * detailSize * 0.5, baseNode.y + Math.sin(angle) * detailSize * 0.5,
-      detailX - Math.cos(angle) * detailSize * 0.3, detailY - Math.sin(angle) * detailSize * 0.3,
-      detailX, detailY
-    )
-    
-    // Complete the small shape
-    ctx.bezierCurveTo(
-      detailX + Math.cos(angle + Math.PI/2) * detailSize * 0.5, detailY + Math.sin(angle + Math.PI/2) * detailSize * 0.5,
-      detailX - Math.cos(angle - Math.PI/2) * detailSize * 0.5, detailY - Math.sin(angle - Math.PI/2) * detailSize * 0.5,
-      baseNode.x, baseNode.y
-    )
-  }
-  
-  // Fill with higher contrast
-  ctx.fillStyle = `rgba(255, 255, 255, 0.18)`
-  ctx.fill()
-  
-  // Draw mirror image on right side
+  // Mirror the pattern
   ctx.save()
   ctx.translate(width, 0)
   ctx.scale(-1, 1)
+  ctx.fillStyle = `rgba(255, 255, 255, 0.15)`
+  ctx.fill()
+  ctx.restore()
+  
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+// Helper function to draw a hexagon
+function drawHexagon(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+  ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0))
+  
+  for (let i = 1; i <= 6; i++) {
+    const angle = (Math.PI * 2 / 6) * i
+    ctx.lineTo(x + size * Math.cos(angle), y + size * Math.sin(angle))
+  }
+}
+
+// Helper function to draw a triangle
+function drawTriangle(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+  const height = size * 0.866
+  
+  ctx.moveTo(x, y - height / 2)
+  ctx.lineTo(x - size / 2, y + height / 2)
+  ctx.lineTo(x + size / 2, y + height / 2)
+  ctx.lineTo(x, y - height / 2)
+}
+
+// Helper function to draw a circle with rings
+function drawCircleWithRings(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, seed: number) {
+  let rndSeed = seed
+  
+  // Main circle
+  ctx.moveTo(x + size, y)
+  ctx.arc(x, y, size, 0, Math.PI * 2)
+  
+  // Add inner ring
+  const innerRingRadius = size * 0.65
+  ctx.moveTo(x + innerRingRadius, y)
+  ctx.arc(x, y, innerRingRadius, 0, Math.PI * 2, true) // Counterclockwise creates a hole
+  
+  // Add center dot
+  const centerDotRadius = size * 0.15
+  ctx.moveTo(x + centerDotRadius, y)
+  ctx.arc(x, y, centerDotRadius, 0, Math.PI * 2)
+}
+
+// 7. Sacred Geometry - featuring mandalas and sacred geometry patterns
+function drawSacredGeometry(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'multiply'
+  
+  const halfWidth = width / 2
+  const centerY = height / 2
+  
+  let rndSeed = seed;
+  
+  // Draw mandala-like sacred geometry pattern
+  ctx.beginPath()
+  
+  // Choose number of iterations and petals
+  const iterations = 3 + Math.floor(seededRandom(rndSeed++) * 3) // 3-5 iterations
+  const mainPetals = 6 + Math.floor(seededRandom(rndSeed++) * 6) * 2 // 6, 8, 10, 12, 14, 16
+  
+  // Base radius for the mandala
+  const maxRadius = Math.min(halfWidth, centerY) * 0.8
+  
+  // Draw radial lines (spokes)
+  for (let i = 0; i < mainPetals; i++) {
+    const angle = (Math.PI * 2 / mainPetals) * i
+    const endX = halfWidth - maxRadius * Math.cos(angle)
+    const endY = centerY + maxRadius * Math.sin(angle)
+    
+    ctx.moveTo(halfWidth, centerY)
+    ctx.lineTo(endX, endY)
+  }
+  
+  // Draw concentric circles
+  for (let i = 1; i <= iterations; i++) {
+    const radius = maxRadius * (i / iterations)
+    ctx.moveTo(halfWidth - radius, centerY)
+    ctx.arc(halfWidth, centerY, radius, 0, Math.PI * 2)
+  }
+  
+  // Draw flower of life pattern
+  const flowerPetals = mainPetals * 2
+  const flowerRadius = maxRadius * 0.7
+  
+  for (let i = 0; i < flowerPetals; i++) {
+    const angle = (Math.PI * 2 / flowerPetals) * i
+    const petalRadius = flowerRadius * 0.3
+    const distance = flowerRadius * 0.6
+    
+    const x = halfWidth - distance * Math.cos(angle)
+    const y = centerY + distance * Math.sin(angle)
+    
+    ctx.moveTo(x + petalRadius, y)
+    ctx.arc(x, y, petalRadius, 0, Math.PI * 2)
+  }
+  
+  // Add central element
+  const centerRadius = maxRadius * 0.15
+  ctx.moveTo(halfWidth + centerRadius, centerY)
+  ctx.arc(halfWidth, centerY, centerRadius, 0, Math.PI * 2)
+  
+  // Fill pattern
+  ctx.fillStyle = `rgba(255, 255, 255, 0.18)`
+  ctx.fill()
+  
+  // Mirror the pattern (though a mandala is already symmetric)
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fillStyle = `rgba(255, 255, 255, 0.18)`
   ctx.fill()
   ctx.restore()
   

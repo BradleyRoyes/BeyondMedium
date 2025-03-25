@@ -30,6 +30,16 @@
   @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 font-normal;
 }
 
+/* Mint glow effect for "Coming Soon" */
+.glow-pulse-container {
+  transition: all 0.3s ease-in-out;
+}
+
+.glow-pulse-container:hover {
+  border-color: rgba(164, 194, 194, 0.4);
+  box-shadow: 0 0 15px 2px rgba(164, 194, 194, 0.2);
+}
+
 /* Remove unused CSS classes */
 
 .enigma-gradient {
