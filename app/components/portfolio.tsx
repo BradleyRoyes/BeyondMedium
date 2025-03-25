@@ -111,6 +111,7 @@ export default function Portfolio() {
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                         <h3 className="text-xl font-light text-white">{work.title}</h3>
                         <p className="mt-2 text-sm text-gray-300">{work.year}</p>
+                        <p className="mt-3 text-sm text-[#a4c2c2] font-light">Coming Soon</p>
                       </div>
                     </div>
                   </CardContent>
