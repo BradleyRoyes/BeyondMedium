@@ -24,7 +24,7 @@ export default function Hero() {
     if (window.innerWidth < 768) {
       const interval = setInterval(() => {
         setTitleFaded(prev => !prev)
-      }, 5000) // Slow pulse every 5 seconds
+      }, 8000) // Slower pulse every 8 seconds for subtlety
       
       return () => {
         clearInterval(interval)
@@ -219,15 +219,17 @@ export default function Hero() {
           <span>Beyond</span>
           <span>Me</span>
           <span 
-            className={`
-              transition-all duration-1000 inline-block
-              ${(isTitleHovered || (isMobile && titleFaded)) ? 'opacity-0 scale-90 translate-y-1' : 'opacity-100'}
-            `}
+            className="inline-block"
             style={{
-              textShadow: (isTitleHovered || (isMobile && titleFaded)) ? '0 0 15px rgba(255,255,255,0.5)' : 'none',
-              transformOrigin: 'left center'
+              opacity: (isTitleHovered || (isMobile && titleFaded)) ? 0 : 1,
+              transform: (isTitleHovered || (isMobile && titleFaded)) ? 'scale(0.98) translateY(1px)' : 'scale(1) translateY(0)',
+              textShadow: (isTitleHovered || (isMobile && titleFaded)) ? '0 0 15px rgba(255,255,255,0.2)' : 'none',
+              transformOrigin: 'left center',
+              transition: 'opacity 2.8s cubic-bezier(0.4, 0.0, 0.2, 1), transform 3s cubic-bezier(0.4, 0.0, 0.2, 1), text-shadow 2.5s ease'
             }}
-          >dium</span>
+          >
+            dium
+          </span>
         </motion.h1>
         
         <motion.p
@@ -236,7 +238,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          A Bespoke Sensory Integration Lab
+          Bespoke Sensory Integration Lab
         </motion.p>
         
         <motion.div
