@@ -43,12 +43,12 @@ export default function Gallery() {
           transition={{ duration: 0.8 }}
         >
           <h2 className="text-2xl md:text-3xl text-white mb-4 font-light">
-            What is a Sensory Room?
+            What are Sensory Rooms?
           </h2>
           <div className="text-zinc-400 max-w-4xl space-y-3 text-lg">
-            <p>• A sensory room is a space built to help you balance your senses.</p>
-            <p>• It uses controlled light, sound, and textures to ease sensory overload.</p>
-            <p>• It offers relief for anyone who finds everyday stimuli too much.</p>
+            <p>• Sensory rooms are specially designed spaces that help people balance their senses.</p>
+            <p>• They use controlled light, sound, and textures to ease sensory overload.</p>
+            <p>• They offer relief for anyone who finds everyday stimuli overwhelming.</p>
             <p className="pt-2 text-zinc-500 text-sm">
               <a 
                 href="https://www.ot-innovations.com/clinical-practice/sensory-modulation/sensory-rooms-in-mental-health-3/" 
