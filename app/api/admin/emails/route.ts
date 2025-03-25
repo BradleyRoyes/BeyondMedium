@@ -28,8 +28,8 @@ export async function GET(request: NextRequest): Promise<Response> {
       );
     }
     
-    // Get all custom emails
-    const emails = getCustomEmails();
+    // Get all custom emails - now using async/await
+    const emails = await getCustomEmails();
     
     // Return emails
     return Response.json({

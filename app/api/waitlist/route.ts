@@ -37,7 +37,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     // Store this submission in our database
-    const entry = addWaitlistEntry(email);
+    const entry = await addWaitlistEntry(email);
 
     // Initialize Resend with API key (or dummy key for demo mode)
     const resend = new Resend(process.env.RESEND_API_KEY || 'demo');

@@ -28,8 +28,8 @@ export async function GET(request: NextRequest): Promise<Response> {
       );
     }
     
-    // Get all waitlist entries
-    const entries = getWaitlistEntries();
+    // Get all waitlist entries - now using async/await
+    const entries = await getWaitlistEntries();
     
     // Return entries
     return Response.json({

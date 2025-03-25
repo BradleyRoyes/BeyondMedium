@@ -65,7 +65,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
     
     // Get the waitlist entry
-    const entry = getWaitlistEntry(id);
+    const entry = await getWaitlistEntry(id);
     
     if (!entry) {
       return Response.json(
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
     
     // Add the response to the entry in our database
-    const updatedEntry = addResponseToEntry(id, subject, message);
+    const updatedEntry = await addResponseToEntry(id, subject, message);
     
     if (!updatedEntry) {
       return Response.json(

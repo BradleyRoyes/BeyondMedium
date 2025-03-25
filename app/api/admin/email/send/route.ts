@@ -153,7 +153,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
     
     // Record the email in the database
-    const emailRecord = recordCustomEmail(to, subject, message);
+    const emailRecord = await recordCustomEmail(to, subject, message);
     
     // Return success response
     return Response.json({
