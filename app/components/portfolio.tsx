@@ -90,18 +90,27 @@ export default function Portfolio() {
             </Button>
           ))}
         </div>
-        <motion.div layout className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <AnimatePresence>
+        <motion.div 
+          layout
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+        >
+          <AnimatePresence mode="wait">
             {filteredWorks.map((work) => (
               <motion.div
                 key={work.id}
                 layout
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ 
+                  duration: 0.4,
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 12
+                }}
               >
-                <Card className="overflow-hidden bg-zinc-900">
+                <Card className="overflow-hidden bg-zinc-900 h-full">
                   <CardContent className="p-0">
                     <div className="group relative">
                       <PlaceholderImage
