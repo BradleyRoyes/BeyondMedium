@@ -7,9 +7,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { PlaceholderImage } from "./PlaceholderImage"
 
 export default function Portfolio() {
-  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const categories = ["all", "workshops", "experiences", "aids"]
+  const categories = ["workshops", "experiences", "aids"]
 
   const works = [
     {
@@ -50,7 +50,9 @@ export default function Portfolio() {
     },
   ]
 
-  const filteredWorks = works.filter((work) => (selectedCategory === "all" ? true : work.category === selectedCategory))
+  const filteredWorks = works.filter((work) => 
+    selectedCategory === null || work.category === selectedCategory
+  )
 
   // Custom button styling based on category - using softer, earthy colors
   const getButtonStyle = (category: string) => {
@@ -63,8 +65,8 @@ export default function Portfolio() {
           return 'bg-gradient-to-r from-[#7e9a9a] to-[#a4c2c2] text-zinc-800 border-none';
         case 'aids':
           return 'bg-gradient-to-r from-[#aa9b84] to-[#d4c9bb] text-zinc-800 border-none';
-        default: // 'all'
-          return 'bg-[#94a897] text-zinc-800 border-none font-medium';
+        default:
+          return 'bg-transparent hover:bg-zinc-800 text-zinc-300 border border-zinc-700';
       }
     } else {
       // These are the inactive button styles - more subtle background and hover
@@ -75,7 +77,7 @@ export default function Portfolio() {
   return (
     <section className="bg-black py-20">
       <div className="container mx-auto px-4">
-        <h2 className="mb-4 text-center font-light">Our Offerings</h2>
+        <h2 className="mb-4 text-center font-light">What We'll Offer</h2>
         <p className="mb-8 text-center text-gray-400 max-w-2xl mx-auto">
           We will be offering workshops and interactive galleries during the day, intentional experience spaces in the evenings, as well as science-backed aids available for at-home use.
         </p>
@@ -83,7 +85,7 @@ export default function Portfolio() {
           {categories.map((category) => (
             <Button
               key={category}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
               className={`text-sm capitalize px-5 py-2 rounded-lg transition-all duration-300 ${getButtonStyle(category)}`}
             >
               {category}
