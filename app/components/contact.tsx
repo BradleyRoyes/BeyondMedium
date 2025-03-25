@@ -131,7 +131,7 @@ export default function Contact() {
         >
           <h2 className="mb-4 font-light gradient-text">Connect With Us</h2>
           <p className="mb-8 text-gray-400">
-            Be among the first to experience our Sensory Exploration & Integration Center in Berlin in 2025.
+            Join our community of early supporters and be first to experience our Sensory Exploration & Integration Center in Berlin. Register your interest to receive exclusive updates and opportunities.
           </p>
         </motion.div>
         <motion.div

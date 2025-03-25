@@ -75,7 +75,7 @@ export default function Portfolio() {
   return (
     <section className="bg-black py-20">
       <div className="container mx-auto px-4">
-        <h2 className="mb-8 text-center font-light">Our Offerings</h2>
+        <h2 className="mb-8 text-center font-light">What We'll Offer</h2>
         <div className="mb-12 flex flex-wrap justify-center gap-4">
           {categories.map((category) => (
             <Button
