@@ -34,57 +34,72 @@ export default function Hero() {
   const diumTextRef = useRef<HTMLSpanElement>(null)
   const diumPositionRef = useRef({ x: 0, y: 0, width: 0, height: 0, active: false })
   
-  // Background color animation variables
-  const [backgroundStyles, setBackgroundStyles] = useState({
-    background: "linear-gradient(180deg, rgba(20, 5, 40, 0.95), rgba(20, 5, 40, 0.95))",
-    opacity: 1
-  })
+  // Background color animation variables - using CSS custom properties for better performance
+  const [backgroundIndex, setBackgroundIndex] = useState(0)
   
-  // Effect to handle background color animation
+  // Very subtly changing colors for ultra-smooth transitions
+  const colorPairs = [
+    // Dark purple range
+    { from: 'rgba(20, 5, 40, 0.95)', to: 'rgba(19, 6, 38, 0.95)' },
+    { from: 'rgba(19, 6, 38, 0.95)', to: 'rgba(18, 7, 36, 0.95)' },
+    { from: 'rgba(18, 7, 36, 0.95)', to: 'rgba(17, 8, 34, 0.95)' },
+    { from: 'rgba(17, 8, 34, 0.95)', to: 'rgba(16, 8, 32, 0.95)' },
+    { from: 'rgba(16, 8, 32, 0.95)', to: 'rgba(15, 9, 30, 0.95)' },
+    { from: 'rgba(15, 9, 30, 0.95)', to: 'rgba(14, 9, 28, 0.95)' },
+    { from: 'rgba(14, 9, 28, 0.95)', to: 'rgba(13, 10, 26, 0.95)' },
+    { from: 'rgba(13, 10, 26, 0.95)', to: 'rgba(12, 10, 24, 0.95)' },
+    
+    // Transition to blue range
+    { from: 'rgba(12, 10, 24, 0.95)', to: 'rgba(11, 10, 22, 0.95)' },
+    { from: 'rgba(11, 10, 22, 0.95)', to: 'rgba(10, 10, 20, 0.95)' },
+    { from: 'rgba(10, 10, 20, 0.95)', to: 'rgba(9, 11, 20, 0.95)' },
+    { from: 'rgba(9, 11, 20, 0.95)', to: 'rgba(8, 12, 20, 0.95)' },
+    { from: 'rgba(8, 12, 20, 0.95)', to: 'rgba(7, 14, 20, 0.95)' },
+    { from: 'rgba(7, 14, 20, 0.95)', to: 'rgba(6, 16, 20, 0.95)' },
+    { from: 'rgba(6, 16, 20, 0.95)', to: 'rgba(5, 18, 20, 0.95)' },
+    { from: 'rgba(5, 18, 20, 0.95)', to: 'rgba(5, 20, 20, 0.95)' },
+    
+    // Transition to teal range
+    { from: 'rgba(5, 20, 20, 0.95)', to: 'rgba(5, 21, 21, 0.95)' },
+    { from: 'rgba(5, 21, 21, 0.95)', to: 'rgba(5, 22, 22, 0.95)' },
+    { from: 'rgba(5, 22, 22, 0.95)', to: 'rgba(6, 23, 23, 0.95)' },
+    { from: 'rgba(6, 23, 23, 0.95)', to: 'rgba(7, 24, 24, 0.95)' },
+    { from: 'rgba(7, 24, 24, 0.95)', to: 'rgba(8, 25, 25, 0.95)' }, 
+    { from: 'rgba(8, 25, 25, 0.95)', to: 'rgba(9, 27, 27, 0.95)' },
+    { from: 'rgba(9, 27, 27, 0.95)', to: 'rgba(10, 29, 29, 0.95)' },
+    { from: 'rgba(10, 29, 29, 0.95)', to: 'rgba(10, 30, 30, 0.95)' },
+    
+    // Transition back to purple
+    { from: 'rgba(10, 30, 30, 0.95)', to: 'rgba(11, 28, 32, 0.95)' },
+    { from: 'rgba(11, 28, 32, 0.95)', to: 'rgba(12, 26, 33, 0.95)' },
+    { from: 'rgba(12, 26, 33, 0.95)', to: 'rgba(13, 24, 34, 0.95)' },
+    { from: 'rgba(13, 24, 34, 0.95)', to: 'rgba(14, 22, 35, 0.95)' },
+    { from: 'rgba(14, 22, 35, 0.95)', to: 'rgba(15, 20, 36, 0.95)' },
+    { from: 'rgba(15, 20, 36, 0.95)', to: 'rgba(16, 16, 37, 0.95)' },
+    { from: 'rgba(16, 16, 37, 0.95)', to: 'rgba(18, 10, 38, 0.95)' },
+    { from: 'rgba(18, 10, 38, 0.95)', to: 'rgba(20, 5, 40, 0.95)' },
+  ];
+  
+  // Effect to update CSS variables when background index changes
   useEffect(() => {
-    // Brand colors to transition between - with intermediate steps for smoother transitions
-    const gradients = [
-      "linear-gradient(180deg, rgba(20, 5, 40, 0.95), rgba(15, 7, 30, 0.95))",     // Dark purple
-      "linear-gradient(180deg, rgba(15, 7, 30, 0.95), rgba(10, 10, 20, 0.95))",    // Dark purple to dark blue
-      "linear-gradient(180deg, rgba(10, 10, 20, 0.95), rgba(8, 17, 20, 0.95))",    // Dark blue 
-      "linear-gradient(180deg, rgba(8, 17, 20, 0.95), rgba(5, 25, 20, 0.95))",     // Dark blue to dark teal
-      "linear-gradient(180deg, rgba(5, 25, 20, 0.95), rgba(7, 27, 25, 0.95))",     // Dark teal
-      "linear-gradient(180deg, rgba(7, 27, 25, 0.95), rgba(10, 30, 30, 0.95))",    // Dark teal to mint dark
-      "linear-gradient(180deg, rgba(10, 30, 30, 0.95), rgba(15, 20, 35, 0.95))",   // Mint dark
-      "linear-gradient(180deg, rgba(15, 20, 35, 0.95), rgba(20, 5, 40, 0.95))"     // Mint dark to dark purple
-    ];
+    const { from, to } = colorPairs[backgroundIndex];
+    document.documentElement.style.setProperty('--bg-from', from);
+    document.documentElement.style.setProperty('--bg-to', to);
+  }, [backgroundIndex]);
+  
+  // Effect to handle initial setup and background color animation
+  useEffect(() => {
+    // Set initial custom properties on :root
+    document.documentElement.style.setProperty('--bg-from', 'rgba(20, 5, 40, 0.95)');
+    document.documentElement.style.setProperty('--bg-to', 'rgba(20, 5, 40, 0.95)');
     
-    let gradientIndex = 0;
-    let isTransitioning = false;
-    
-    // Function to start the next transition
-    const startNextTransition = () => {
-      if (isTransitioning) return;
-      
-      isTransitioning = true;
-      
-      // Set the new gradient
-      setBackgroundStyles({
-        background: gradients[gradientIndex],
-        opacity: 1
-      });
-      
-      // Move to the next gradient
-      gradientIndex = (gradientIndex + 1) % gradients.length;
-      
-      // After the transition is complete, prepare for the next one
-      setTimeout(() => {
-        isTransitioning = false;
-      }, 5000); // Match this with the CSS transition duration
+    // Function to advance the gradient to the next state
+    const nextGradient = () => {
+      setBackgroundIndex(prev => (prev + 1) % colorPairs.length);
     };
     
-    // Initial transition
-    startNextTransition();
-    
-    // Set up the interval for transitions
-    const transitionInterval = setInterval(() => {
-      startNextTransition();
-    }, 5500); // Slightly longer than the transition duration to avoid overlap
+    // Set up a longer interval to ensure super-smooth transitions
+    const transitionInterval = setInterval(nextGradient, 8000);
     
     return () => clearInterval(transitionInterval);
   }, []);
@@ -497,12 +512,12 @@ export default function Hero() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Animated background gradient - with improved transitions */}
+      {/* Ultra-smooth animated background gradient using CSS variables */}
       <div 
-        className="absolute inset-0"
+        className="absolute inset-0" 
         style={{
-          ...backgroundStyles,
-          transition: 'background 5s ease-in-out, opacity 5s ease-in-out'
+          background: 'linear-gradient(180deg, var(--bg-from), var(--bg-to))',
+          transition: 'background 8s cubic-bezier(0.4, 0.0, 0.2, 1)'
         }}
       />
       
