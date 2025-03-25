@@ -785,10 +785,11 @@ export default function Hero() {
       
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full cursor-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+      {/* Make the center glow extremely subtle - almost imperceptible */}
       <motion.div 
-        className="absolute inset-0 opacity-30"
+        className="absolute inset-0 opacity-10"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.3 }}
+        animate={{ opacity: 0.1 }}
         transition={{ duration: 2 }}
       >
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40vh] h-[40vh] rounded-full mystery-glow"></div>
