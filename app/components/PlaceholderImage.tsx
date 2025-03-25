@@ -18,11 +18,17 @@ export function PlaceholderImage({
   className = "" 
 }: PlaceholderImageProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const uniquePattern = useRef(Math.floor(Math.random() * 6)) // 0-5 pattern types
+  const uniquePattern = useRef<number | null>(null)
+  const seedValue = useRef<number | null>(null)
   
   useEffect(() => {
+    if (uniquePattern.current === null) {
+      uniquePattern.current = Math.floor(Math.random() * 6) // 0-5 pattern types
+      seedValue.current = Math.random() * 10000 | 0 // Integer seed for deterministic randomness
+    }
+    
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || uniquePattern.current === null || seedValue.current === null) return
     
     const ctx = canvas.getContext('2d')
     if (!ctx) return
@@ -36,16 +42,16 @@ export function PlaceholderImage({
     
     switch(category?.toLowerCase()) {
       case 'workshops':
-        gradientColors = ['#1A0633', '#4A1058', '#8B2E8B'] // Deep violet to magenta
+        gradientColors = ['#a18daa', '#c9b6de', '#e8d7f7'] // Soft purple lavender gradient (pastel)
         break
-      case 'listening':
-        gradientColors = ['#000B18', '#00253E', '#003B5C'] // Deep navy blue
+      case 'experiences':
+        gradientColors = ['#7e9a9a', '#a4c2c2', '#d6e6e6'] // Soft teal gradient (earthy)
         break
-      case 'events':
-        gradientColors = ['#080322', '#1E0B46', '#33167A'] // Mysterious purple
+      case 'toys':
+        gradientColors = ['#aa9b84', '#d4c9bb', '#efe6dd'] // Soft tan/beige gradient (earthy)
         break
       default:
-        gradientColors = ['#111111', '#1C1C1C', '#262626'] // Sophisticated dark gray
+        gradientColors = ['#94a897', '#b5c5b8', '#d2ddd4'] // Soft sage green gradient (earthy)
     }
     
     const gradient = ctx.createLinearGradient(0, 0, 0, height)
@@ -57,34 +63,34 @@ export function PlaceholderImage({
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, width, height)
     
-    // Choose and draw pattern based on uniquePattern value
+    // Choose and draw pattern based on uniquePattern value and seed
     switch(uniquePattern.current) {
-      case 0: // Circles pattern
-        drawCirclesPattern(ctx, width, height, category)
+      case 0: // Organic Circles
+        drawOrganicCircles(ctx, width, height, seedValue.current)
         break
-      case 1: // Wave pattern
-        drawWavePattern(ctx, width, height, category)
+      case 1: // Textured Grid
+        drawTexturedGrid(ctx, width, height, seedValue.current)
         break
-      case 2: // Grid pattern
-        drawGridPattern(ctx, width, height, category)
+      case 2: // Subtle Fractals
+        drawSubtleFractals(ctx, width, height, seedValue.current)
         break
-      case 3: // Dots pattern
-        drawDotsPattern(ctx, width, height, category)
+      case 3: // Abstract Flow Fields
+        drawAbstractFlowFields(ctx, width, height, seedValue.current)
         break
-      case 4: // Lines pattern
-        drawLinesPattern(ctx, width, height, category)
+      case 4: // Fluid Ripples
+        drawFluidRipples(ctx, width, height, seedValue.current)
         break
-      case 5: // Neural pattern
-        drawNeuralPattern(ctx, width, height, category)
+      case 5: // Ethereal Waves
+        drawEtherealWaves(ctx, width, height, seedValue.current)
         break
     }
     
-    // Add subtle overlay with title first letter
+    // Add subtle overlay with title first letter - slightly reduce opacity
     const firstLetter = title.charAt(0).toUpperCase()
     ctx.font = 'bold 300px sans-serif'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.06)'
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
     ctx.fillText(firstLetter, width / 2, height / 2)
     
   }, [width, height, title, category])
@@ -94,198 +100,254 @@ export function PlaceholderImage({
   )
 }
 
-// Pattern drawing functions
-function drawCirclesPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
-  const circleCount = 15
-  ctx.globalCompositeOperation = 'screen'
+// Simple seeded random function
+function seededRandom(seed: number) {
+  // Simple deterministic random function
+  const x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+// Updated pattern drawing functions with seed parameter
+// 1. Organic Circles - overlapping translucent circles with organic feel
+function drawOrganicCircles(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'overlay'
   
-  // Choose accent color based on category
-  let accentColor = 'rgba(255, 255, 255, 0.15)'
-  if (category === 'workshops') accentColor = 'rgba(220, 165, 255, 0.12)'
-  if (category === 'listening') accentColor = 'rgba(120, 195, 255, 0.12)'
-  if (category === 'events') accentColor = 'rgba(170, 150, 255, 0.12)'
+  let rndSeed = seed;
+  const circleCount = 15 + Math.floor(seededRandom(rndSeed++) * 10)
   
   for (let i = 0; i < circleCount; i++) {
-    const x = Math.random() * width
-    const y = Math.random() * height
-    const radius = Math.random() * 100 + 50
+    // Random position and size
+    const x = seededRandom(rndSeed++) * width
+    const y = seededRandom(rndSeed++) * height
+    const radius = seededRandom(rndSeed++) * Math.min(width, height) * 0.3
     
+    // Create gradient
     const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius)
-    gradient.addColorStop(0, accentColor)
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.01)')
+    gradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.04)')
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
     
+    // Draw circle
     ctx.beginPath()
     ctx.arc(x, y, radius, 0, Math.PI * 2)
     ctx.fillStyle = gradient
     ctx.fill()
+    
+    // Add very subtle stroke to some circles
+    if (seededRandom(rndSeed++) > 0.7) {
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'
+      ctx.lineWidth = 0.5
+      ctx.stroke()
+    }
   }
   
   ctx.globalCompositeOperation = 'source-over'
 }
 
-function drawWavePattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
-  const waveCount = 5
-  const amplitude = height / 15
+// 2. Textured Grid - subtle grid with varied opacity
+function drawTexturedGrid(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'soft-light'
   
-  ctx.globalCompositeOperation = 'screen'
+  const cellSize = 25 + seededRandom(seed) * 20
+  const noiseAmplitude = 5
   
-  // Choose accent color based on category
-  let strokeColor = 'rgba(255, 255, 255, 0.08)'
-  if (category === 'workshops') strokeColor = 'rgba(220, 165, 255, 0.08)'
-  if (category === 'listening') strokeColor = 'rgba(120, 195, 255, 0.08)'
-  if (category === 'events') strokeColor = 'rgba(170, 150, 255, 0.08)'
-  
-  ctx.strokeStyle = strokeColor
-  ctx.lineWidth = 2
-  
-  for (let i = 0; i < waveCount; i++) {
-    const yOffset = (height / (waveCount + 1)) * (i + 1)
-    const frequency = (i + 1) * 0.01
+  // Draw vertical lines with slight noise
+  for (let x = 0; x <= width; x += cellSize) {
+    const opacity = 0.05 + seededRandom(seed) * 0.05
+    ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
+    ctx.lineWidth = 0.5
     
     ctx.beginPath()
+    ctx.moveTo(x, 0)
     
-    for (let x = 0; x < width; x += 1) {
-      const y = Math.sin(x * frequency) * amplitude + yOffset
-      if (x === 0) {
+    // Add slight noise to line
+    for (let y = 0; y < height; y += 10) {
+      const noise = (seededRandom(seed) - 0.5) * noiseAmplitude
+      ctx.lineTo(x + noise, y)
+    }
+    
+    ctx.stroke()
+  }
+  
+  // Draw horizontal lines with slight noise
+  for (let y = 0; y <= height; y += cellSize) {
+    const opacity = 0.05 + seededRandom(seed) * 0.05
+    ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
+    
+    ctx.beginPath()
+    ctx.moveTo(0, y)
+    
+    // Add slight noise to line
+    for (let x = 0; x < width; x += 10) {
+      const noise = (seededRandom(seed) - 0.5) * noiseAmplitude
+      ctx.lineTo(x, y + noise)
+    }
+    
+    ctx.stroke()
+  }
+  
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+// 3. Subtle Fractals - recursive pattern with diminishing opacity
+function drawSubtleFractals(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'overlay'
+  
+  const drawBranch = (x: number, y: number, length: number, angle: number, depth: number, seed: number) => {
+    if (depth <= 0) return
+    
+    const endX = x + Math.cos(angle) * length
+    const endY = y + Math.sin(angle) * length
+    
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    ctx.lineTo(endX, endY)
+    ctx.strokeStyle = `rgba(255, 255, 255, ${0.05 - depth * 0.005})`
+    ctx.lineWidth = 0.5
+    ctx.stroke()
+    
+    const branchAngle = Math.PI / 4 + seededRandom(seed) * (Math.PI / 8)
+    drawBranch(endX, endY, length * 0.7, angle + branchAngle, depth - 1, seed)
+    drawBranch(endX, endY, length * 0.7, angle - branchAngle, depth - 1, seed)
+  }
+  
+  // Start drawing fractal pattern from different points
+  const startPoints = 3 + Math.floor(seededRandom(seed) * 3)
+  
+  for (let i = 0; i < startPoints; i++) {
+    const x = width * (0.2 + seededRandom(seed) * 0.6)
+    const y = height * (0.2 + seededRandom(seed) * 0.6)
+    const length = Math.min(width, height) * 0.15
+    const angle = seededRandom(seed) * Math.PI * 2
+    
+    drawBranch(x, y, length, angle, 4, seed)
+  }
+  
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+// 4. Abstract Flow Fields - particle-based flow field
+function drawAbstractFlowFields(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'soft-light'
+  
+  const particleCount = 100
+  const stepSize = 10
+  const steps = 50
+  
+  // Create a noise field (simplified version)
+  const noiseField = (x: number, y: number) => {
+    return (Math.sin(x * 0.01) + Math.cos(y * 0.01)) * Math.PI
+  }
+  
+  // Draw particles following the flow field
+  for (let i = 0; i < particleCount; i++) {
+    let x = seededRandom(seed) * width
+    let y = seededRandom(seed) * height
+    
+    ctx.beginPath()
+    ctx.moveTo(x, y)
+    
+    for (let j = 0; j < steps; j++) {
+      const angle = noiseField(x, y)
+      x += Math.cos(angle) * stepSize
+      y += Math.sin(angle) * stepSize
+      
+      if (x < 0 || x > width || y < 0 || y > height) break
+      
+      ctx.lineTo(x, y)
+    }
+    
+    ctx.strokeStyle = `rgba(255, 255, 255, 0.03)`
+    ctx.lineWidth = 0.5
+    ctx.stroke()
+  }
+  
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+// 5. Fluid Ripples - concentric circles with interference
+function drawFluidRipples(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'soft-light'
+  
+  const centerPoints = []
+  const rippleCount = 3 + Math.floor(seededRandom(seed) * 3)
+  
+  // Create random center points
+  for (let i = 0; i < rippleCount; i++) {
+    centerPoints.push({
+      x: width * (0.2 + seededRandom(seed) * 0.6),
+      y: height * (0.2 + seededRandom(seed) * 0.6),
+      frequency: 0.05 + seededRandom(seed) * 0.05
+    })
+  }
+  
+  // Draw ripples
+  for (let radius = 5; radius < Math.max(width, height); radius += 15) {
+    ctx.beginPath()
+    
+    for (let angle = 0; angle < Math.PI * 2; angle += 0.05) {
+      let totalOffset = 0
+      
+      // Calculate interference from each center point
+      for (const center of centerPoints) {
+        const dist = Math.sqrt(
+          Math.pow(center.x - (width / 2), 2) + 
+          Math.pow(center.y - (height / 2), 2)
+        )
+        totalOffset += Math.sin(radius * center.frequency + dist * 0.01) * 5
+      }
+      
+      const x = width / 2 + Math.cos(angle) * (radius + totalOffset)
+      const y = height / 2 + Math.sin(angle) * (radius + totalOffset)
+      
+      if (angle === 0) {
         ctx.moveTo(x, y)
       } else {
         ctx.lineTo(x, y)
       }
     }
     
+    ctx.closePath()
+    ctx.strokeStyle = `rgba(255, 255, 255, ${0.02 + (radius / Math.max(width, height)) * 0.03})`
+    ctx.lineWidth = 0.5
     ctx.stroke()
   }
   
   ctx.globalCompositeOperation = 'source-over'
 }
 
-function drawGridPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
-  const cellSize = 40
+// 6. Ethereal Waves - subtle wave patterns
+function drawEtherealWaves(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'soft-light'
   
-  // Choose accent color based on category
-  let strokeColor = 'rgba(255, 255, 255, 0.07)'
-  if (category === 'workshops') strokeColor = 'rgba(220, 165, 255, 0.07)'
-  if (category === 'listening') strokeColor = 'rgba(120, 195, 255, 0.07)'
-  if (category === 'events') strokeColor = 'rgba(170, 150, 255, 0.07)'
+  const waveCount = 10
+  const layerCount = 3
   
-  ctx.strokeStyle = strokeColor
-  ctx.lineWidth = 1
-  
-  // Vertical lines
-  for (let x = 0; x < width; x += cellSize) {
-    ctx.beginPath()
-    ctx.moveTo(x, 0)
-    ctx.lineTo(x, height)
-    ctx.stroke()
-  }
-  
-  // Horizontal lines
-  for (let y = 0; y < height; y += cellSize) {
-    ctx.beginPath()
-    ctx.moveTo(0, y)
-    ctx.lineTo(width, y)
-    ctx.stroke()
-  }
-}
-
-function drawDotsPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
-  const spacing = 30
-  
-  // Choose accent color based on category
-  let fillColor = 'rgba(255, 255, 255, 0.15)'
-  if (category === 'workshops') fillColor = 'rgba(220, 165, 255, 0.15)'
-  if (category === 'listening') fillColor = 'rgba(120, 195, 255, 0.15)'
-  if (category === 'events') fillColor = 'rgba(170, 150, 255, 0.15)'
-  
-  ctx.fillStyle = fillColor
-  
-  for (let x = spacing; x < width; x += spacing) {
-    for (let y = spacing; y < height; y += spacing) {
-      const jitter = Math.random() * 10 - 5
-      const size = Math.random() * 3 + 1
+  for (let layer = 0; layer < layerCount; layer++) {
+    const amplitude = 10 + seededRandom(seed) * 15
+    const frequency = 0.005 + seededRandom(seed) * 0.01
+    const phaseOffset = seededRandom(seed) * Math.PI * 2
+    
+    for (let i = 0; i < waveCount; i++) {
+      const yOffset = height * (0.2 + (i / waveCount) * 0.6)
       
       ctx.beginPath()
-      ctx.arc(x + jitter, y + jitter, size, 0, Math.PI * 2)
-      ctx.fill()
-    }
-  }
-}
-
-function drawLinesPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
-  const lineCount = 20
-  
-  // Choose accent color based on category
-  let strokeColor = 'rgba(255, 255, 255, 0.08)'
-  if (category === 'workshops') strokeColor = 'rgba(220, 165, 255, 0.08)'
-  if (category === 'listening') strokeColor = 'rgba(120, 195, 255, 0.08)'
-  if (category === 'events') strokeColor = 'rgba(170, 150, 255, 0.08)'
-  
-  ctx.strokeStyle = strokeColor
-  ctx.lineWidth = 1
-  
-  for (let i = 0; i < lineCount; i++) {
-    const y = (height / lineCount) * i
-    
-    ctx.beginPath()
-    ctx.moveTo(0, y)
-    ctx.lineTo(width, y + Math.random() * 50 - 25)
-    ctx.stroke()
-  }
-}
-
-function drawNeuralPattern(ctx: CanvasRenderingContext2D, width: number, height: number, category?: string) {
-  const nodeCount = 15
-  const nodes = []
-  
-  // Choose accent colors based on category
-  let strokeColor = 'rgba(255, 255, 255, 0.05)'
-  let fillColor = 'rgba(255, 255, 255, 0.15)'
-  
-  if (category === 'workshops') {
-    strokeColor = 'rgba(220, 165, 255, 0.05)'
-    fillColor = 'rgba(220, 165, 255, 0.15)'
-  } else if (category === 'listening') {
-    strokeColor = 'rgba(120, 195, 255, 0.05)'
-    fillColor = 'rgba(120, 195, 255, 0.15)'
-  } else if (category === 'events') {
-    strokeColor = 'rgba(170, 150, 255, 0.05)'
-    fillColor = 'rgba(170, 150, 255, 0.15)'
-  }
-  
-  // Create nodes
-  for (let i = 0; i < nodeCount; i++) {
-    nodes.push({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      radius: Math.random() * 4 + 2
-    })
-  }
-  
-  // Draw connections between nearby nodes
-  ctx.strokeStyle = strokeColor
-  ctx.lineWidth = 1
-  
-  for (let i = 0; i < nodeCount; i++) {
-    for (let j = i + 1; j < nodeCount; j++) {
-      const dx = nodes[i].x - nodes[j].x
-      const dy = nodes[i].y - nodes[j].y
-      const distance = Math.sqrt(dx * dx + dy * dy)
       
-      if (distance < 150) {
-        ctx.beginPath()
-        ctx.moveTo(nodes[i].x, nodes[i].y)
-        ctx.lineTo(nodes[j].x, nodes[j].y)
-        ctx.stroke()
+      for (let x = 0; x < width; x += 2) {
+        const y = yOffset + Math.sin(x * frequency + phaseOffset) * amplitude
+        
+        if (x === 0) {
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
       }
+      
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.01 + layer * 0.01})`
+      ctx.lineWidth = 0.5
+      ctx.stroke()
     }
   }
   
-  // Draw nodes
-  ctx.fillStyle = fillColor
-  
-  for (const node of nodes) {
-    ctx.beginPath()
-    ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2)
-    ctx.fill()
-  }
+  ctx.globalCompositeOperation = 'source-over'
 } 

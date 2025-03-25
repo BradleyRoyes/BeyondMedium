@@ -2,38 +2,32 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
+import { useIsMobile } from "../../hooks/use-mobile"
 
 export default function Hero() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isHovering, setIsHovering] = useState(false)
-  const [isTitleHovered, setIsTitleHovered] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [titleFaded, setTitleFaded] = useState(false)
+  const [isDiumFading, setIsDiumFading] = useState(false)
+  const diumFadeTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const isMobile = useIsMobile()
 
-  // Check if device is mobile on component mount
+  // Timer for mobile auto-fade effect
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    
-    // For mobile devices, create a subtle pulsing effect on the "dium" part
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       const interval = setInterval(() => {
-        setTitleFaded(prev => !prev)
-      }, 8000) // Slower pulse every 8 seconds for subtlety
+        setIsDiumFading(true);
+        
+        const timer = setTimeout(() => {
+          setIsDiumFading(false);
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+      }, 8000);
       
-      return () => {
-        clearInterval(interval)
-        window.removeEventListener('resize', checkMobile)
-      }
+      return () => clearInterval(interval);
     }
-    
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [isMobile]);
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -186,6 +180,24 @@ export default function Hero() {
     }
   }, [mousePosition, isHovering])
 
+  const handleDiumMouseEnter = () => {
+    if (diumFadeTimerRef.current) {
+      clearTimeout(diumFadeTimerRef.current);
+    }
+    setIsDiumFading(true);
+  }
+
+  const handleDiumMouseLeave = () => {
+    if (diumFadeTimerRef.current) {
+      clearTimeout(diumFadeTimerRef.current);
+    }
+    
+    // Set a delay before fading back in for a ghostly effect
+    diumFadeTimerRef.current = setTimeout(() => {
+      setIsDiumFading(false);
+    }, 3000);
+  }
+
   return (
     <div className="relative h-screen w-full overflow-hidden">
       <canvas ref={canvasRef} className="absolute inset-0 h-full w-full enigma-gradient cursor-none" />
@@ -209,24 +221,21 @@ export default function Hero() {
         </motion.div>
         
         <motion.h1
-          className="mb-4 font-light gradient-text relative"
+          className="mb-4 font-light"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          onMouseEnter={() => !isMobile && setIsTitleHovered(true)}
-          onMouseLeave={() => !isMobile && setIsTitleHovered(false)}
         >
-          <span>Beyond</span>
-          <span>Me</span>
+          <span className="gradient-text">Beyond</span>
+          <span className="gradient-text">Me</span>
           <span 
-            className="inline-block"
+            className="inline-block relative gradient-text"
             style={{
-              opacity: (isTitleHovered || (isMobile && titleFaded)) ? 0 : 1,
-              transform: (isTitleHovered || (isMobile && titleFaded)) ? 'scale(0.98) translateY(1px)' : 'scale(1) translateY(0)',
-              textShadow: (isTitleHovered || (isMobile && titleFaded)) ? '0 0 15px rgba(255,255,255,0.2)' : 'none',
-              transformOrigin: 'left center',
-              transition: 'opacity 2.8s cubic-bezier(0.4, 0.0, 0.2, 1), transform 3s cubic-bezier(0.4, 0.0, 0.2, 1), text-shadow 2.5s ease'
+              opacity: isDiumFading ? 0.2 : 1,
+              transition: 'opacity 1.5s ease-in-out'
             }}
+            onMouseEnter={!isMobile ? handleDiumMouseEnter : undefined}
+            onMouseLeave={!isMobile ? handleDiumMouseLeave : undefined}
           >
             dium
           </span>
