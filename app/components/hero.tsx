@@ -192,8 +192,8 @@ export default function Hero() {
       const centerY = canvasHeight / 2;
       
       // Size the repulsion zone based on screen size
-      // Make it larger on desktop, appropriate size on mobile
-      const repulsionRadius = Math.min(canvasWidth, canvasHeight) * (isMobile ? 0.25 : 0.3);
+      // Make it proportionally larger on mobile to ensure full text coverage
+      const repulsionRadius = Math.min(canvasWidth, canvasHeight) * (isMobile ? 0.35 : 0.3);
       
       centerAreaRef.current = {
         x: centerX,
@@ -311,26 +311,35 @@ export default function Hero() {
         const dyFromCenter = this.y - centerArea.y;
         const distanceFromCenter = Math.sqrt(dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter);
         
-        // Apply repulsion from center area
+        // Apply repulsion from center area - with stronger effect on mobile
         if (distanceFromCenter < centerArea.radius) {
-          // Calculate repulsion force - stronger near the center
+          // Calculate repulsion force - stronger near the center and on mobile
           const repulsionForce = (centerArea.radius - distanceFromCenter) / centerArea.radius;
+          const adjustedForce = isMobile ? repulsionForce * 1.3 : repulsionForce;
           
-          if (repulsionForce > 0.05) { // Only apply if force is significant
+          if (adjustedForce > 0.05) { // Only apply if force is significant
             // Calculate angle from center to particle
             const angle = Math.atan2(dyFromCenter, dxFromCenter);
             
-            // Apply repulsion force
-            const repulsionX = Math.cos(angle) * repulsionForce * 1.5;
-            const repulsionY = Math.sin(angle) * repulsionForce * 1.5;
+            // Apply repulsion force - stronger on mobile for better avoidance
+            const repulsionStrength = isMobile ? 2.0 : 1.5;
+            const repulsionX = Math.cos(angle) * adjustedForce * repulsionStrength;
+            const repulsionY = Math.sin(angle) * adjustedForce * repulsionStrength;
             
             // Move particle away from center
             this.x += repulsionX;
             this.y += repulsionY;
             
-            // Adjust velocity slightly to maintain flow
-            this.speedX = this.speedX * 0.9 + repulsionX * 0.1;
-            this.speedY = this.speedY * 0.9 + repulsionY * 0.1;
+            // Adjust velocity more significantly on mobile
+            const velocityInfluence = isMobile ? 0.15 : 0.1;
+            this.speedX = this.speedX * (1 - velocityInfluence) + repulsionX * velocityInfluence;
+            this.speedY = this.speedY * (1 - velocityInfluence) + repulsionY * velocityInfluence;
+            
+            // Additional position adjustment for immediate effect on mobile
+            if (isMobile && distanceFromCenter < centerArea.radius * 0.7) {
+              this.x += repulsionX * 0.5;
+              this.y += repulsionY * 0.5;
+            }
           }
         }
         
@@ -463,18 +472,46 @@ export default function Hero() {
 
     // Initialize regular particles
     for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
+      const particle = new Particle();
+      
+      // For mobile, ensure particles start outside the center area
+      if (isMobile) {
+        const centerArea = centerAreaRef.current;
+        const distanceToCenter = Math.sqrt(
+          Math.pow(particle.x - centerArea.x, 2) + 
+          Math.pow(particle.y - centerArea.y, 2)
+        );
+        
+        // If particle is inside the repulsion zone, reposition it
+        if (distanceToCenter < centerArea.radius) {
+          // Generate a random angle
+          const angle = Math.random() * Math.PI * 2;
+          // Position just outside the repulsion zone
+          const distance = centerArea.radius + Math.random() * 50;
+          
+          particle.x = centerArea.x + Math.cos(angle) * distance;
+          particle.y = centerArea.y + Math.sin(angle) * distance;
+        }
+      }
+      
+      particles.push(particle);
     }
     
     // Initialize special particles for dium reformation
     for (let i = 0; i < diumParticleCount; i++) {
       const particle = new Particle(true);
       
-      // On mobile, just initialize like normal particles
+      // On mobile, initialize particles away from the center
       if (isMobile) {
-        // No special positioning for mobile
-        particle.x = Math.random() * canvas.width;
-        particle.y = Math.random() * canvas.height;
+        const centerArea = centerAreaRef.current;
+        
+        // Generate a random angle
+        const angle = Math.random() * Math.PI * 2;
+        // Position outside the repulsion zone
+        const distance = centerArea.radius + 20 + Math.random() * 100;
+        
+        particle.x = centerArea.x + Math.cos(angle) * distance;
+        particle.y = centerArea.y + Math.sin(angle) * distance;
       }
       // On desktop: position particles around the dium text for the gravity effect
       else if (diumPositionRef.current.x && diumPositionRef.current.y) {
