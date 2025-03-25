@@ -22,8 +22,8 @@ export default function Gallery() {
     },
     {
       alt: "Unique tools and toys",
-      title: "Unique Tools & Toys",
-      category: "toys"
+      title: "Unique Sensory Aids",
+      category: "aids"
     },
     {
       alt: "Berlin location",

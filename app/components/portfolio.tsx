@@ -9,7 +9,7 @@ import { PlaceholderImage } from "./PlaceholderImage"
 export default function Portfolio() {
   const [selectedCategory, setSelectedCategory] = useState("all")
 
-  const categories = ["all", "workshops", "experiences", "toys"]
+  const categories = ["all", "workshops", "experiences", "aids"]
 
   const works = [
     {
@@ -33,7 +33,7 @@ export default function Portfolio() {
     {
       id: 4,
       title: "Sensory Integration Tools",
-      category: "toys",
+      category: "aids",
       year: "Coming Soon",
     },
     {
@@ -45,7 +45,7 @@ export default function Portfolio() {
     {
       id: 6,
       title: "Neurodiversity Solutions",
-      category: "toys",
+      category: "aids",
       year: "Monthly",
     },
   ]
@@ -61,7 +61,7 @@ export default function Portfolio() {
           return 'bg-gradient-to-r from-[#a18daa] to-[#c9b6de] text-zinc-800 border-none';
         case 'experiences':
           return 'bg-gradient-to-r from-[#7e9a9a] to-[#a4c2c2] text-zinc-800 border-none';
-        case 'toys':
+        case 'aids':
           return 'bg-gradient-to-r from-[#aa9b84] to-[#d4c9bb] text-zinc-800 border-none';
         default: // 'all'
           return 'bg-[#94a897] text-zinc-800 border-none font-medium';

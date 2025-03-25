@@ -27,7 +27,7 @@ const formSchema = z.object({
 const errorStyles = {
   workshops: 'text-[#c9b6de]',
   experiences: 'text-[#a4c2c2]',
-  toys: 'text-[#d4c9bb]',
+  aids: 'text-[#d4c9bb]',
   default: 'text-[#b5c5b8]'
 }
 
