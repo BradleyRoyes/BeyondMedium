@@ -212,7 +212,7 @@ export const getCustomEmailsFromSupabase = async (): Promise<CustomEmail[]> => {
       id: item.id ? String(item.id) : `email_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       to: item.email || '',
       subject: item.subject || '',
-      message: item.message || '',
+      message: item.message || '', // Handle case where message field might be missing
       timestamp: item.created_at || new Date().toISOString()
     })) || [];
     
@@ -238,6 +238,7 @@ export const addCustomEmailToSupabase = async (email: CustomEmail): Promise<bool
     const supabaseEmail = {
       email: email.to,
       subject: email.subject,
+      message: email.message, // Include message field, but Supabase might ignore it if column doesn't exist
       created_at: email.timestamp || new Date().toISOString()
     };
     
@@ -246,6 +247,21 @@ export const addCustomEmailToSupabase = async (email: CustomEmail): Promise<bool
       .insert(supabaseEmail);
 
     if (error) {
+      // Message field might be missing, try without it
+      if (error.message && error.message.includes('message')) {
+        console.warn('Message field not found in Supabase table, trying without it');
+        const { email: to, subject, created_at } = supabaseEmail;
+        const { error: fallbackError } = await supabase
+          .from(CUSTOM_EMAILS_TABLE)
+          .insert({ email: to, subject, created_at });
+        
+        if (fallbackError) {
+          console.error('Error adding custom email to Supabase (fallback):', fallbackError);
+          return false;
+        }
+        return true;
+      }
+      
       // Handle Row-Level Security (RLS) errors
       if (error.code === '42501') {
         console.warn('Row-Level Security (RLS) prevented insert. Using local storage only.');

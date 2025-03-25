@@ -134,9 +134,10 @@ async function testSupabaseConnection() {
     // First try inserting with minimal data
     console.log('\nTrying minimal insert to custom_emails table...');
     const minimalEmail = {
-      created_at: new Date().toISOString(),
-      email: 'test@example.com', // Include required email field
-      subject: 'Test Subject'    // Include subject field
+      email: 'test@example.com', 
+      subject: 'Test Subject',
+      message: 'Test message content',
+      created_at: new Date().toISOString()
     };
     
     const { data: minEmailInsertData, error: minEmailInsertError } = await supabase
