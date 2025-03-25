@@ -75,3 +75,44 @@
   }
 }
 
+/* Custom styles for dark mode compatibility */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-gray-400;
+}
+
+.mystery-glow {
+  @apply bg-gradient-to-r from-[#94a897]/30 to-[#7e9a9a]/30 dark:from-[#94a897]/40 dark:to-[#7e9a9a]/40;
+  filter: blur(120px);
+}
+
+/* Ensure backgrounds have proper dark mode equivalents */
+.bg-black {
+  @apply dark:bg-zinc-950;
+}
+
+.bg-zinc-900 {
+  @apply dark:bg-zinc-900;
+}
+
+.bg-zinc-800 {
+  @apply dark:bg-zinc-800;
+}
+
+/* Ensure text colors have proper dark mode equivalents */
+.text-gray-400 {
+  @apply dark:text-gray-400;
+}
+
+.text-zinc-400 {
+  @apply dark:text-zinc-400;
+}
+
+.text-zinc-300 {
+  @apply dark:text-zinc-300;
+}
+
+/* Border adjustments for dark mode */
+.border-zinc-700 {
+  @apply dark:border-zinc-600;
+}
+

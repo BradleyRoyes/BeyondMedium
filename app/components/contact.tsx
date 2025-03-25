@@ -27,7 +27,7 @@ const formSchema = z.object({
 const errorStyles = {
   workshops: 'text-[#c9b6de]',
   experiences: 'text-[#a4c2c2]',
-  aids: 'text-[#d4c9bb]',
+  toys: 'text-[#d4c9bb]',
   default: 'text-[#b5c5b8]'
 }
 
@@ -45,6 +45,17 @@ export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  // Animation state for the background pattern
+  const [linePatterns, setLinePatterns] = useState<Array<{ 
+    x1: number; 
+    y1: number; 
+    x2: number; 
+    y2: number;
+    delay: number;
+    duration: number;
+    opacity: number;
+  }>>([])
+
   // Track if we're mounted to avoid hydration issues
   const [isMounted, setIsMounted] = useState(false)
 
@@ -52,6 +63,41 @@ export default function Contact() {
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Generate the line patterns on component mount - client-side only
+  useEffect(() => {
+    if (!isMounted) return;
+    
+    const patterns = []
+    // Vertical lines with slight variations
+    for (let i = 0; i < 40; i++) {
+      patterns.push({
+        x1: i * 2.5,
+        y1: 0,
+        x2: i * 2.5,
+        y2: 100,
+        delay: Math.random() * 5,
+        duration: 15 + Math.random() * 20,
+        opacity: 0.05 + Math.random() * 0.1
+      })
+    }
+    
+    // Add some diagonal lines for more interest
+    for (let i = 0; i < 15; i++) {
+      const startX = Math.random() * 100
+      patterns.push({
+        x1: startX,
+        y1: 0,
+        x2: startX + (Math.random() * 40 - 20),
+        y2: 100,
+        delay: Math.random() * 5,
+        duration: 25 + Math.random() * 15,
+        opacity: 0.03 + Math.random() * 0.05
+      })
+    }
+    
+    setLinePatterns(patterns)
+  }, [isMounted])
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
@@ -190,7 +236,71 @@ export default function Contact() {
           )}
         </motion.div>
       </div>
-      <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[70vh] h-[70vh] rounded-full mystery-glow opacity-10"></div>
+      <div className="absolute inset-0 z-0 opacity-15">
+        <div className="absolute top-1/2 right-0 translate-x-1/3 -translate-y-1/2 w-[70vh] h-[70vh] rounded-full mystery-glow opacity-20"></div>
+        {isMounted && (
+          <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {linePatterns.map((line, i) => (
+              <motion.line 
+                key={i} 
+                x1={line.x1} 
+                y1={line.y1} 
+                x2={line.x2} 
+                y2={line.y2} 
+                stroke="white" 
+                strokeWidth="0.1"
+                opacity={line.opacity}
+                animate={{
+                  x1: [line.x1, line.x1 + (Math.random() * 3 - 1.5)],
+                  x2: [line.x2, line.x2 + (Math.random() * 5 - 2.5)],
+                  opacity: [line.opacity, line.opacity * 1.5, line.opacity]
+                }}
+                transition={{
+                  duration: line.duration,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                  delay: line.delay,
+                }}
+              />
+            ))}
+            {Array.from({ length: 15 }).map((_, i) => {
+              // Pre-calculate random values to avoid generating new ones during render
+              const radius = 0.3 + (0.5 * (i / 15))
+              const cx = 10 + ((100 - 20) * (i / 15))
+              const cy = 10 + ((100 - 20) * ((15 - i) / 15))
+              const opacity = 0.1 + (0.2 * (i / 15))
+              const duration = 20 + (30 * (i / 15))
+              const delay = 5 * (i / 15)
+              
+              return (
+                <motion.circle
+                  key={`particle-${i}`}
+                  r={radius}
+                  fill="white"
+                  initial={{ 
+                    cx: cx, 
+                    cy: cy,
+                    opacity: opacity
+                  }}
+                  animate={{ 
+                    cx: [cx, cx + 20, cx - 10, cx],
+                    cy: [cy, cy -.15, cy + 25, cy],
+                    opacity: [opacity, opacity * 2, opacity]
+                  }}
+                  transition={{
+                    duration: duration,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut",
+                    delay: delay
+                  }}
+                />
+              )
+            })}
+          </svg>
+        )}
+      </div>
     </section>
   )
 }
