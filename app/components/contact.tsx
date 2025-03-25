@@ -37,6 +37,7 @@ export default function Contact() {
   // Add form submission state
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   // Animation state for the background pattern
   const [linePatterns, setLinePatterns] = useState<Array<{ 
@@ -94,11 +95,19 @@ export default function Contact() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
+    setSubmitError(null)
     
     // Call the API to subscribe to the waitlist
     subscribeToWaitlist(values.email)
       .then((response) => {
         console.log('Subscription response:', response);
+        
+        if (!response.success) {
+          // Handle API error with successful response but failure flag
+          setSubmitError(response.message || 'Failed to join waitlist. Please try again.');
+          setIsSubmitting(false);
+          return;
+        }
         
         // Reset form and show success message
         form.reset();
@@ -113,7 +122,7 @@ export default function Contact() {
       .catch((error) => {
         console.error('Error subscribing to waitlist:', error);
         setIsSubmitting(false);
-        // Could add error state handling here if needed
+        setSubmitError(error instanceof Error ? error.message : 'An unknown error occurred. Please try again.');
       });
   }
 
@@ -189,6 +198,13 @@ export default function Contact() {
                     ) : "Join"}
                   </Button>
                 </div>
+                
+                {submitError && (
+                  <div className="text-[#e88e8e] text-sm font-light text-center mt-2 p-2 bg-[#2a2020] rounded border border-[#e88e8e]/20">
+                    {submitError}
+                  </div>
+                )}
+                
                 <p className="mt-4 text-center text-sm font-light text-gray-400">
                   Want to get in touch directly? Email us at{" "}
                   <a href="mailto:connect@beyondmedium.com" className="text-white hover:underline">
