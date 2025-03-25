@@ -93,32 +93,28 @@
   @apply from-[#94a897]/40 to-[#7e9a9a]/40;
 }
 
-/* Dark mode styles - we need to nest these in .dark selectors instead of using dark: variants */
+/* CSS variables for dark mode */
+:root {
+  --dark-bg-zinc-950: rgb(9, 9, 11);
+  --dark-bg-zinc-900: rgb(24, 24, 27);
+  --dark-bg-zinc-800: rgb(39, 39, 42);
+  --dark-border-zinc-600: rgb(82, 82, 91);
+}
+
+/* Dark mode overrides without using @apply with the same class */
 .dark .bg-black {
-  @apply bg-zinc-950;
+  background-color: var(--dark-bg-zinc-950);
 }
 
 .dark .bg-zinc-900 {
-  @apply bg-zinc-900;
+  background-color: var(--dark-bg-zinc-900);
 }
 
 .dark .bg-zinc-800 {
-  @apply bg-zinc-800;
-}
-
-.dark .text-gray-400 {
-  @apply text-gray-400;
-}
-
-.dark .text-zinc-400 {
-  @apply text-zinc-400;
-}
-
-.dark .text-zinc-300 {
-  @apply text-zinc-300;
+  background-color: var(--dark-bg-zinc-800);
 }
 
 .dark .border-zinc-700 {
-  @apply border-zinc-600;
+  border-color: var(--dark-border-zinc-600);
 }
 
