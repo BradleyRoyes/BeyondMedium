@@ -40,7 +40,7 @@ export default function Gallery() {
             20 Years of Collective Experience Design
           </h3>
           <p className="text-zinc-400 max-w-2xl text-lg md:text-xl">
-            Bringing innovative accessibility tools and sensory integration solutions to Berlin for people of all ages and neurotypes.
+            Bringing innovative accessibility tools and our sensory room & integration lab to Berlin for people of all ages and neurotypes.
           </p>
         </div>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
