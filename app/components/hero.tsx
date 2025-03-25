@@ -68,12 +68,18 @@ export default function Hero() {
       };
     };
     
-    // Initial update and then on resize
+    // Initial update and then on resize or scroll
     updateDiumPosition();
     window.addEventListener('resize', updateDiumPosition);
+    window.addEventListener('scroll', updateDiumPosition);
+    
+    // Update position on regular intervals to handle any edge cases
+    const positionInterval = setInterval(updateDiumPosition, 100);
     
     return () => {
       window.removeEventListener('resize', updateDiumPosition);
+      window.removeEventListener('scroll', updateDiumPosition);
+      clearInterval(positionInterval);
     };
   }, [isDiumFading]);
 
@@ -272,6 +278,22 @@ export default function Hero() {
       setIsHovering(true)
     }
     
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        // Get touch position relative to canvas
+        const rect = canvas.getBoundingClientRect()
+        setMousePosition({
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        })
+        setIsHovering(true)
+      }
+    }
+    
+    const handleTouchEnd = () => {
+      setIsHovering(false)
+    }
+    
     const handleMouseLeave = () => {
       setIsHovering(false)
     }
@@ -355,18 +377,48 @@ export default function Hero() {
 
     const handleResize = () => {
       if (!canvasRef.current) return
+      
+      // Update canvas dimensions when window resizes
       canvasRef.current.width = window.innerWidth
       canvasRef.current.height = window.innerHeight
+      
+      // Also update dium position when resizing
+      if (diumTextRef.current) {
+        const rect = diumTextRef.current.getBoundingClientRect();
+        diumPositionRef.current = {
+          ...diumPositionRef.current,
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+          width: rect.width,
+          height: rect.height
+        };
+      }
     }
 
     window.addEventListener("resize", handleResize)
     canvas.addEventListener("mousemove", handleMouseMove)
     canvas.addEventListener("mouseleave", handleMouseLeave)
+    canvas.addEventListener("touchmove", handleTouchMove)
+    canvas.addEventListener("touchend", handleTouchEnd)
+    canvas.addEventListener("touchcancel", handleTouchEnd)
+    
+    // Add scroll event listener to update particle positions relative to viewport
+    window.addEventListener("scroll", () => {
+      // Force a redraw on scroll to ensure particles match current viewport
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext("2d")
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
+      }
+    })
     
     return () => {
       window.removeEventListener("resize", handleResize)
       canvas.removeEventListener("mousemove", handleMouseMove)
       canvas.removeEventListener("mouseleave", handleMouseLeave)
+      canvas.removeEventListener("touchmove", handleTouchMove)
+      canvas.removeEventListener("touchend", handleTouchEnd)
+      canvas.removeEventListener("touchcancel", handleTouchEnd)
+      window.removeEventListener("scroll", () => {})
     }
   }, [mousePosition, isHovering, isMobile])
 
