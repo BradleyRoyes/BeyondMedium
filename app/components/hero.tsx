@@ -128,10 +128,15 @@ export default function Hero() {
     const updateDiumPosition = () => {
       if (!diumTextRef.current) return;
       
+      // Get more precise measurements including scroll position
       const rect = diumTextRef.current.getBoundingClientRect();
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      
+      // Store absolute position (including scroll) for more reliable tracking
       diumPositionRef.current = {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
+        x: rect.left + rect.width / 2 + scrollLeft,
+        y: rect.top + rect.height / 2 + scrollTop,
         width: rect.width,
         height: rect.height,
         active: isDiumFading
@@ -143,8 +148,8 @@ export default function Hero() {
     window.addEventListener('resize', updateDiumPosition);
     window.addEventListener('scroll', updateDiumPosition);
     
-    // Update position on regular intervals to handle any edge cases
-    const positionInterval = setInterval(updateDiumPosition, 100);
+    // Update position more frequently - important for tracking during animations
+    const positionInterval = setInterval(updateDiumPosition, 50);
     
     return () => {
       window.removeEventListener('resize', updateDiumPosition);
@@ -227,28 +232,44 @@ export default function Hero() {
         if (this.isDiumParticle && diumPosition.active) {
           // Calculate a target position within the "dium" text area
           if (!this.isReturning) {
-            // Assign a random position within the dium text area when becoming active
-            const spreadX = diumPosition.width / 2
-            const spreadY = diumPosition.height / 2
+            // Get current scroll position for accurate positioning
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             
-            this.targetX = diumPosition.x + (Math.cos(this.angleOffset) * spreadX * Math.random())
-            this.targetY = diumPosition.y + (Math.sin(this.angleOffset) * spreadY * Math.random())
-            this.isReturning = true
+            // Calculate positions relative to current viewport (subtract scroll)
+            const viewportX = diumPosition.x - scrollLeft;
+            const viewportY = diumPosition.y - scrollTop;
+            
+            // Use a more predictable distribution pattern for neurodivergent-friendly visuals
+            // Golden ratio spiral distribution gives more natural, less chaotic appearance
+            const idx = Math.random();
+            const goldenAngle = idx * Math.PI * (3 - Math.sqrt(5)); // golden angle
+            const radius = Math.sqrt(idx) * (diumPosition.width * 0.5);
+            
+            this.targetX = viewportX + Math.cos(goldenAngle) * radius;
+            this.targetY = viewportY + Math.sin(goldenAngle) * radius;
+            this.isReturning = true;
+            
+            // Vary return speed to create a smoother, less jarring effect
+            // Slower particles are less visually overwhelming
+            this.returnSpeed = 0.02 + Math.random() * 0.03;
           }
           
-          // Move toward the target position
+          // Move toward the target position with gentle easing
           const dx = this.targetX - this.x
           const dy = this.targetY - this.y
           const distance = Math.sqrt(dx * dx + dy * dy)
           
-          if (distance > 1) {
+          if (distance > 0.5) {
+            // Ease the movement for a more predictable, calming motion
+            // Slower, more predictable movement patterns are easier to process
             this.x += dx * this.returnSpeed
             this.y += dy * this.returnSpeed
           }
           
-          // Increase size and opacity for dium particles when active
-          this.size = Math.max(0.1, this.baseSize * 1.5 + Math.sin(this.phase) * 0.3)
-          this.opacity = Math.min(0.9, this.baseOpacity * 2)
+          // Gentle pulsing - less jarring, more rhythmic for better sensory processing
+          this.size = Math.max(0.1, this.baseSize * 1.2 + Math.sin(this.phase * 0.5) * 0.2)
+          this.opacity = Math.min(0.8, this.baseOpacity * 1.5)
           
           return // Skip normal movement when reforming dium
         } else if (this.isDiumParticle && this.isReturning) {
@@ -256,26 +277,27 @@ export default function Hero() {
           this.isReturning = false
         }
         
-        // Normal particle movement with subtle oscillation
-        this.x += this.speedX + Math.sin(this.phase) * 0.2
-        this.y += this.speedY + Math.cos(this.phase) * 0.2
+        // More gentle, predictable movement patterns for all particles
+        // Reduced speed variability and more structured, rhythmic movement
+        this.x += this.speedX * 0.7 + Math.sin(this.phase * 0.4) * 0.15
+        this.y += this.speedY * 0.7 + Math.cos(this.phase * 0.4) * 0.15
 
-        // Screen wrapping
+        // Screen wrapping with gentle transition
         if (this.x > canvas.width) this.x = 0
         if (this.x < 0) this.x = canvas.width
         if (this.y > canvas.height) this.y = 0
         if (this.y < 0) this.y = canvas.height
         
         // Update original position for tracking
-        this.originalX += this.speedX
-        this.originalY += this.speedY
+        this.originalX += this.speedX * 0.7
+        this.originalY += this.speedY * 0.7
         
         if (this.originalX > canvas.width) this.originalX = 0
         if (this.originalX < 0) this.originalX = canvas.width
         if (this.originalY > canvas.height) this.originalY = 0
         if (this.originalY < 0) this.originalY = canvas.height
 
-        // Mouse interaction if hovering
+        // Mouse interaction if hovering - gentler, more predictable response
         if (isHovering) {
           const dx = this.x - mouseX
           const dy = this.y - mouseY
@@ -283,32 +305,32 @@ export default function Hero() {
           
           // If particle is within mouse radius, create interactive effects
           if (distance < mouseRadius) {
-            // Calculate force based on distance (closer = stronger)
-            const force = (mouseRadius - distance) / mouseRadius
+            // Calculate force based on distance (closer = stronger) but cap the maximum
+            // This prevents overwhelming, jarring movements
+            const force = Math.min(0.7, (mouseRadius - distance) / mouseRadius)
             
-            // Create more complex movement patterns
-            const angle = Math.atan2(dy, dx) + (Math.sin(this.phase) * 0.5)
-            const pushX = Math.cos(angle) * force * 2
-            const pushY = Math.sin(angle) * force * 2
+            // Create more predictable, structured movement patterns
+            const angle = Math.atan2(dy, dx)
+            const pushX = Math.cos(angle) * force * 1.5
+            const pushY = Math.sin(angle) * force * 1.5
             
-            this.x += pushX + Math.sin(this.phase + distance * 0.01) * force * 0.5
-            this.y += pushY + Math.cos(this.phase + distance * 0.01) * force * 0.5
+            this.x += pushX
+            this.y += pushY
             
-            // Ensure size is always positive by using Math.max with a minimum value
-            const oscillation = Math.sin(this.phase) * force * 0.6
-            this.size = Math.max(0.1, this.baseSize + (force * 3) + oscillation)
-            this.opacity = Math.min(1, this.baseOpacity + force * 0.5)
+            // Gentle, predictable size changes
+            this.size = Math.max(0.1, this.baseSize + (force * 2))
+            this.opacity = Math.min(0.8, this.baseOpacity + force * 0.4)
           } else {
-            // Ensure size is always positive by using Math.max with a minimum value
-            const oscillation = Math.sin(this.phase) * 0.2
+            // Gentle pulsing when not directly interacting
+            const oscillation = Math.sin(this.phase * 0.5) * 0.15
             this.size = Math.max(0.1, this.baseSize + oscillation)
-            this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
+            this.opacity = this.baseOpacity + Math.sin(this.phase * 0.5) * 0.04
           }
         } else {
-          // Ensure size is always positive by using Math.max with a minimum value
-          const oscillation = Math.sin(this.phase) * 0.2
+          // Gentle pulsing when not hovering
+          const oscillation = Math.sin(this.phase * 0.5) * 0.15
           this.size = Math.max(0.1, this.baseSize + oscillation)
-          this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
+          this.opacity = this.baseOpacity + Math.sin(this.phase * 0.5) * 0.04
         }
       }
 
@@ -426,7 +448,18 @@ export default function Hero() {
       
       // Update and draw dium particles
       for (const particle of diumParticles) {
-        particle.update(mousePosition.x, mousePosition.y, isHovering, diumPositionRef.current)
+        // Get current scroll position to adjust position calculations
+        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Update particle and adjust for scroll position
+        const adjustedDiumPosition = {
+          ...diumPositionRef.current,
+          x: diumPositionRef.current.x - scrollLeft,
+          y: diumPositionRef.current.y - scrollTop
+        };
+        
+        particle.update(mousePosition.x, mousePosition.y, isHovering, adjustedDiumPosition)
         particle.draw()
       }
       
@@ -474,6 +507,19 @@ export default function Hero() {
     
     // Add scroll event listener to update particle positions relative to viewport
     window.addEventListener("scroll", () => {
+      // Update the dium position on scroll
+      if (diumTextRef.current) {
+        const rect = diumTextRef.current.getBoundingClientRect();
+        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        diumPositionRef.current = {
+          ...diumPositionRef.current,
+          x: rect.left + rect.width / 2 + scrollLeft,
+          y: rect.top + rect.height / 2 + scrollTop,
+        };
+      }
+      
       // Force a redraw on scroll to ensure particles match current viewport
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d")
