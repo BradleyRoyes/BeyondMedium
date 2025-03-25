@@ -22,8 +22,8 @@ export default function Gallery() {
     },
     {
       alt: "Unique tools and toys",
-      title: "Unique Sensory Aids",
-      category: "aids"
+      title: "Unique Tools & Toys",
+      category: "toys"
     },
     {
       alt: "Berlin location",
@@ -66,8 +66,8 @@ export default function Gallery() {
           <h3 className="text-3xl md:text-4xl text-white mb-2 md:mb-4 font-medium">
             Bringing 20+ Years of Collective Experience
           </h3>
-          <p className="mx-auto mt-4 max-w-lg text-center text-gray-400">
-            We're a small, passionate team building Berlin's first dedicated space for sensory-inclusive design. Drawing from our backgrounds in cognitive science, design, healthcare and movement practices, we're creating tools and experiences that make a real difference.
+          <p className="mt-4 max-w-lg text-gray-400">
+            We're building Berlin's first dedicated space for sensory-inclusive design. Our team combines expertise in cognitive science, design, healthcare and movement practices to create meaningful tools and experiences.
           </p>
         </div>
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
