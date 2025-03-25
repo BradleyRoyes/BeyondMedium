@@ -45,7 +45,7 @@ export default function Hero() {
         }, 3000);
         
         return () => clearTimeout(timer);
-      }, 8000);
+      }, 20000);
       
       return () => clearInterval(interval);
     }
