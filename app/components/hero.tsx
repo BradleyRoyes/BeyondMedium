@@ -35,47 +35,58 @@ export default function Hero() {
   const diumPositionRef = useRef({ x: 0, y: 0, width: 0, height: 0, active: false })
   
   // Background color animation variables
-  const [backgroundColors, setBackgroundColors] = useState({
-    from: "rgba(20, 5, 40, 0.95)",
-    to: "rgba(20, 5, 40, 0.95)",
-    angle: 180
+  const [backgroundStyles, setBackgroundStyles] = useState({
+    background: "linear-gradient(180deg, rgba(20, 5, 40, 0.95), rgba(20, 5, 40, 0.95))",
+    opacity: 1
   })
   
   // Effect to handle background color animation
   useEffect(() => {
-    // Brand colors to transition between
-    const colors = [
-      { from: "rgba(20, 5, 40, 0.95)", to: "rgba(10, 10, 20, 0.95)" }, // Dark purple to dark blue
-      { from: "rgba(10, 10, 20, 0.95)", to: "rgba(5, 25, 20, 0.95)" },  // Dark blue to dark teal
-      { from: "rgba(5, 25, 20, 0.95)", to: "rgba(10, 30, 30, 0.95)" },  // Dark teal to mint dark
-      { from: "rgba(10, 30, 30, 0.95)", to: "rgba(20, 5, 40, 0.95)" }   // Mint dark to dark purple
+    // Brand colors to transition between - with intermediate steps for smoother transitions
+    const gradients = [
+      "linear-gradient(180deg, rgba(20, 5, 40, 0.95), rgba(15, 7, 30, 0.95))",     // Dark purple
+      "linear-gradient(180deg, rgba(15, 7, 30, 0.95), rgba(10, 10, 20, 0.95))",    // Dark purple to dark blue
+      "linear-gradient(180deg, rgba(10, 10, 20, 0.95), rgba(8, 17, 20, 0.95))",    // Dark blue 
+      "linear-gradient(180deg, rgba(8, 17, 20, 0.95), rgba(5, 25, 20, 0.95))",     // Dark blue to dark teal
+      "linear-gradient(180deg, rgba(5, 25, 20, 0.95), rgba(7, 27, 25, 0.95))",     // Dark teal
+      "linear-gradient(180deg, rgba(7, 27, 25, 0.95), rgba(10, 30, 30, 0.95))",    // Dark teal to mint dark
+      "linear-gradient(180deg, rgba(10, 30, 30, 0.95), rgba(15, 20, 35, 0.95))",   // Mint dark
+      "linear-gradient(180deg, rgba(15, 20, 35, 0.95), rgba(20, 5, 40, 0.95))"     // Mint dark to dark purple
     ];
     
-    let colorIndex = 0;
-    let angleDirection = 1; // 1 for increasing, -1 for decreasing
+    let gradientIndex = 0;
+    let isTransitioning = false;
     
-    const colorInterval = setInterval(() => {
-      // Update to the next color combination
-      setBackgroundColors(prev => {
-        // Update angle to create more dynamic movement
-        let newAngle = prev.angle + (5 * angleDirection);
-        if (newAngle > 210 || newAngle < 150) {
-          angleDirection *= -1;
-          newAngle = prev.angle + (5 * angleDirection);
-        }
-        
-        return {
-          from: colors[colorIndex].from,
-          to: colors[colorIndex].to,
-          angle: newAngle
-        };
+    // Function to start the next transition
+    const startNextTransition = () => {
+      if (isTransitioning) return;
+      
+      isTransitioning = true;
+      
+      // Set the new gradient
+      setBackgroundStyles({
+        background: gradients[gradientIndex],
+        opacity: 1
       });
       
-      // Move to next color in sequence
-      colorIndex = (colorIndex + 1) % colors.length;
-    }, 10000); // Transition every 10 seconds
+      // Move to the next gradient
+      gradientIndex = (gradientIndex + 1) % gradients.length;
+      
+      // After the transition is complete, prepare for the next one
+      setTimeout(() => {
+        isTransitioning = false;
+      }, 5000); // Match this with the CSS transition duration
+    };
     
-    return () => clearInterval(colorInterval);
+    // Initial transition
+    startNextTransition();
+    
+    // Set up the interval for transitions
+    const transitionInterval = setInterval(() => {
+      startNextTransition();
+    }, 5500); // Slightly longer than the transition duration to avoid overlap
+    
+    return () => clearInterval(transitionInterval);
   }, []);
 
   // Timer for mobile auto-fade effect
@@ -486,12 +497,12 @@ export default function Hero() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Animated background gradient */}
+      {/* Animated background gradient - with improved transitions */}
       <div 
-        className="absolute inset-0 bg-gradient-to-b transition-all duration-10000 ease-in-out"
+        className="absolute inset-0"
         style={{
-          background: `linear-gradient(${backgroundColors.angle}deg, ${backgroundColors.from}, ${backgroundColors.to})`,
-          transition: 'background 10s ease-in-out'
+          ...backgroundStyles,
+          transition: 'background 5s ease-in-out, opacity 5s ease-in-out'
         }}
       />
       
