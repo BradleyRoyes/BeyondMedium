@@ -75,7 +75,10 @@ export default function Portfolio() {
   return (
     <section className="bg-black py-20">
       <div className="container mx-auto px-4">
-        <h2 className="mb-8 text-center font-light">Our Offerings</h2>
+        <h2 className="mb-4 text-center font-light">Our Offerings</h2>
+        <p className="mb-8 text-center text-gray-400 max-w-2xl mx-auto">
+          We will be offering workshops and interactive galleries during the day, intentional experience spaces in the evenings, as well as science-backed aids available for at-home use.
+        </p>
         <div className="mb-12 flex flex-wrap justify-center gap-4">
           {categories.map((category) => (
             <Button
