@@ -180,6 +180,12 @@ export default function Hero() {
     // Special particles to form "dium" when needed
     const diumParticles: Particle[] = []
     const diumParticleCount = isMobile ? 60 : 120
+    
+    // Track previous frame time for smoother animations
+    let lastFrameTime = 0
+    
+    // Connection cache to reduce flicker
+    const connectionCache: {from: number, to: number, opacity: number}[] = []
 
     class Particle {
       x: number
@@ -204,6 +210,8 @@ export default function Hero() {
       isReturning: boolean
       returnSpeed: number
       angleOffset: number
+      // Add unique ID for connection stability
+      id: number
 
       constructor(isDiumParticle = false) {
         this.x = Math.random() * canvas.width
@@ -229,6 +237,8 @@ export default function Hero() {
         // Slower return speed for more gradual movement
         this.returnSpeed = 0.02 + Math.random() * 0.03
         this.angleOffset = Math.random() * Math.PI * 2
+        // Add unique ID for stable connection references
+        this.id = Math.random() * 100000 | 0
       }
 
       update(mouseX: number, mouseY: number, isHovering: boolean, diumPosition: { x: number, y: number, width: number, height: number, active: boolean }) {
@@ -425,15 +435,26 @@ export default function Hero() {
       // Limit connections on mobile for performance
       const connectionLimit = isMobile ? 3 : 6
       
-      for (let i = 0; i < particles.length; i++) {
-        const particleA = particles[i]
+      // Clear the connection cache periodically but not every frame
+      // This helps maintain some consistency while still allowing for updates
+      if (Date.now() % 30 === 0) {
+        connectionCache.length = 0
+      }
+      
+      // For better stability, use a fixed sampling of particles for connections
+      // This reduces the flickering effect caused by constantly changing connection patterns
+      const sampleSize = Math.min(particles.length, isMobile ? 40 : 80)
+      const sampledParticles = particles.slice(0, sampleSize)
+      
+      for (let i = 0; i < sampledParticles.length; i++) {
+        const particleA = sampledParticles[i]
         let connectionsCount = 0
         
-        for (let j = i + 1; j < particles.length; j++) {
+        for (let j = i + 1; j < sampledParticles.length; j++) {
           // Stop after reaching connection limit for this particle
           if (connectionsCount >= connectionLimit) break
           
-          const particleB = particles[j]
+          const particleB = sampledParticles[j]
           
           const dx = particleA.x - particleB.x
           const dy = particleA.y - particleB.y
@@ -441,18 +462,33 @@ export default function Hero() {
           
           // Only draw connections if particles are close enough
           if (distance < particleA.connectionRadius) {
-            // Calculate connection opacity based on distance
-            const opacity = (1 - distance / particleA.connectionRadius) * 0.15
+            // Calculate connection opacity based on distance with a more stable formula
+            // Using a power function to make changes more gradual
+            const opacity = Math.pow((1 - distance / particleA.connectionRadius), 1.5) * 0.15
+            
+            // Check if this connection is in the cache
+            const connectionKey = `${particleA.id}-${particleB.id}`
+            const cacheIndex = connectionCache.findIndex(c => c.from === particleA.id && c.to === particleB.id)
+            
+            // If already in cache, use a blend of the cached and new opacity for stability
+            let finalOpacity = opacity
+            if (cacheIndex >= 0) {
+              finalOpacity = connectionCache[cacheIndex].opacity * 0.7 + opacity * 0.3
+              connectionCache[cacheIndex].opacity = finalOpacity
+            } else {
+              // Add to cache
+              connectionCache.push({ from: particleA.id, to: particleB.id, opacity: finalOpacity })
+            }
             
             // Draw connection line with gradient
             ctx.beginPath()
             ctx.moveTo(particleA.x, particleA.y)
             ctx.lineTo(particleB.x, particleB.y)
             
-            // Create dynamic gradient for connection
+            // Create dynamic gradient for connection with smoother transitions
             const gradient = ctx.createLinearGradient(particleA.x, particleA.y, particleB.x, particleB.y)
-            gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * particleA.opacity})`)
-            gradient.addColorStop(1, `rgba(255, 255, 255, ${opacity * particleB.opacity})`)
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${finalOpacity * particleA.opacity})`)
+            gradient.addColorStop(1, `rgba(255, 255, 255, ${finalOpacity * particleB.opacity})`)
             
             ctx.strokeStyle = gradient
             ctx.lineWidth = Math.max(0.1, Math.min(particleA.size, particleB.size) * 0.3)
@@ -464,10 +500,24 @@ export default function Hero() {
       }
     }
 
-    function animate() {
+    function animate(currentTime = 0) {
       if (!ctx) return
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
+      
+      // Calculate delta time for smoother animation
+      const deltaTime = currentTime - lastFrameTime
+      lastFrameTime = currentTime
+      
+      // Only clear with a semi-transparent overlay for smoother transitions on connections
+      // This creates a trail effect that reduces flickering
+      if (isMobile) {
+        // Clear fully on mobile for performance
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      } else {
+        // Use partial transparency clearing for desktop to reduce flicker
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+      }
+      
       // Update and draw regular particles
       for (const particle of particles) {
         particle.update(mousePosition.x, mousePosition.y, isHovering, diumPositionRef.current)
@@ -480,13 +530,28 @@ export default function Hero() {
         particle.draw()
       }
       
-      // Draw connections between particles - skip on mobile for better performance
-      if (!isMobile || (isMobile && Math.random() > 0.7)) {
-        drawConnections([...particles, ...diumParticles.filter(p => !p.isReturning)]);
+      // Fix flickering by using stable subsets of particles for connections
+      // and by reducing the frequency of connection updates on mobile
+      
+      // Create stable subsets for connection drawing to reduce flickering
+      const regularParticlesForConnections = particles.slice(0, isMobile ? 30 : 60);
+      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 15 : 30);
+      
+      // On mobile, skip some frames for connections to improve performance
+      const shouldDrawConnections = !isMobile || (Date.now() % 3 === 0);
+      
+      if (shouldDrawConnections) {
+        // Draw connections between regular particles
+        drawConnections([...regularParticlesForConnections, ...diumParticlesForConnections]);
         
         // Draw additional connections between dium particles when reforming
         if (diumPositionRef.current.active) {
-          drawConnections(diumParticles.filter(p => p.isReturning));
+          // Use a stable subset of returning dium particles
+          const returningDiumParticles = diumParticles
+            .filter(p => p.isReturning)
+            .slice(0, isMobile ? 30 : 60);
+            
+          drawConnections(returningDiumParticles);
         }
       }
 
