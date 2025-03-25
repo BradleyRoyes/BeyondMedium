@@ -3,38 +3,25 @@
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 
-// Simple hook to detect screen size for responsive optimization
-const useScreenSize = () => {
-  const [screenSize, setScreenSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 1200,
-    isMobile: false,
-    isTablet: false,
-    isLaptop: false,
-    isDesktop: false
-  });
+// Simple hook to detect mobile devices
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
   
   useEffect(() => {
-    const checkScreenSize = () => {
-      const width = window.innerWidth;
-      setScreenSize({
-        width,
-        isMobile: width < 480,
-        isTablet: width >= 480 && width < 768,
-        isLaptop: width >= 768 && width < 1200,
-        isDesktop: width >= 1200
-      });
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
     };
     
     // Check on mount and when window resizes
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
     
     return () => {
-      window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('resize', checkMobile);
     };
   }, []);
   
-  return screenSize;
+  return isMobile;
 };
 
 export default function Hero() {
@@ -43,7 +30,7 @@ export default function Hero() {
   const [isHovering, setIsHovering] = useState(false)
   const [isDiumFading, setIsDiumFading] = useState(false)
   const diumFadeTimerRef = useRef<NodeJS.Timeout | null>(null)
-  const screenSize = useScreenSize()
+  const isMobile = useIsMobile()
   const diumTextRef = useRef<HTMLSpanElement>(null)
   const diumPositionRef = useRef({ x: 0, y: 0, width: 0, height: 0, active: false })
   
@@ -119,13 +106,13 @@ export default function Hero() {
 
   // Timer for mobile auto-fade effect
   useEffect(() => {
-    if (screenSize.isMobile) {
+    if (isMobile) {
       // On mobile, don't use the fading effect at all
       setIsDiumFading(false);
       
       return () => {};
     }
-  }, [screenSize.isMobile]);
+  }, [isMobile]);
 
   // Effect to track the position of the "dium" text element
   useEffect(() => {
@@ -141,7 +128,7 @@ export default function Hero() {
         width: rect.width,
         height: rect.height,
         // Only activate the gravity effect on desktop
-        active: !screenSize.isMobile && isDiumFading
+        active: !isMobile && isDiumFading
       };
     };
     
@@ -152,7 +139,7 @@ export default function Hero() {
     
     // Schedule multiple position updates at staggered intervals for desktop only
     const initialTimeouts: NodeJS.Timeout[] = [];
-    if (!screenSize.isMobile) {
+    if (!isMobile) {
       // Position updates only needed for desktop gravity effect
       [50, 100, 300, 500, 1000, 2000].forEach(delay => {
         const timeoutId = setTimeout(updateDiumPosition, delay);
@@ -165,7 +152,7 @@ export default function Hero() {
     
     // Also update position when isDiumFading changes (desktop only)
     const diumFadingObserver = () => {
-      if (screenSize.isMobile) return; // Skip on mobile
+      if (isMobile) return; // Skip on mobile
       
       // Update position immediately when fading state changes
       updateDiumPosition();
@@ -184,7 +171,7 @@ export default function Hero() {
       clearInterval(positionInterval);
       initialTimeouts.forEach(clearTimeout);
     };
-  }, [isDiumFading, screenSize]);
+  }, [isDiumFading, isMobile]);
 
   // Add a reference for the center area to create a repulsion zone
   const centerAreaRef = useRef({
@@ -205,17 +192,8 @@ export default function Hero() {
       const centerY = canvasHeight / 2;
       
       // Size the repulsion zone based on screen size
-      // Make it proportionally larger on smaller screens to ensure full text coverage
-      let repulsionFactor;
-      if (screenSize.isMobile) {
-        repulsionFactor = 0.4; // Larger zone on mobile
-      } else if (screenSize.isTablet) {
-        repulsionFactor = 0.35; // Slightly smaller on tablets
-      } else {
-        repulsionFactor = 0.3; // Normal size on desktop
-      }
-      
-      const repulsionRadius = Math.min(canvasWidth, canvasHeight) * repulsionFactor;
+      // Make it proportionally larger on mobile to ensure full text coverage
+      const repulsionRadius = Math.min(canvasWidth, canvasHeight) * (isMobile ? 0.35 : 0.3);
       
       centerAreaRef.current = {
         x: centerX,
@@ -241,7 +219,7 @@ export default function Hero() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [screenSize.isMobile]);
+  }, [isMobile]);
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -256,31 +234,12 @@ export default function Hero() {
     // Initialize the center area repulsion zone
     updateCenterArea()
 
-    // Scale particle count based on screen size for better performance
-    let particleCount, diumParticleCount;
-    
-    if (screenSize.isMobile) {
-      // Very small screens (phones)
-      particleCount = 40;
-      diumParticleCount = 30;
-    } else if (screenSize.isTablet) {
-      // Tablet sized screens
-      particleCount = 60;
-      diumParticleCount = 45;
-    } else if (screenSize.isLaptop) {
-      // Laptop sized screens
-      particleCount = 100;
-      diumParticleCount = 80;
-    } else {
-      // Large desktop screens
-      particleCount = 150;
-      diumParticleCount = 120;
-    }
-    
+    const particles: Particle[] = []
+    const particleCount = isMobile ? 80 : 150 // Reduce particle count on mobile for better performance
     const mouseRadius = 100 // Area of influence around the mouse
     // Special particles to form "dium" when needed
     const diumParticles: Particle[] = []
-    const particles: Particle[] = []
+    const diumParticleCount = isMobile ? 60 : 120
     
     // Track previous frame time for smoother animations
     let lastFrameTime = 0
@@ -313,14 +272,9 @@ export default function Hero() {
       angleOffset: number
       // Add unique ID for connection stability
       id: number
-      // Special property for rare particles that can ignore repulsion
-      canIgnoreRepulsion: boolean
-      // Timer for occasional special behavior
-      specialBehaviorTimer: number
-      // Current special behavior state
-      isInSpecialState: boolean
-      // Type of special behavior (0: none, 1: through center, 2: spiral, 3: zigzag)
-      specialBehaviorType: number
+      
+      // Add property to determine if this particle ignores repulsion (rare chance)
+      ignoresRepulsion: boolean
 
       constructor(isDiumParticle = false) {
         this.x = Math.random() * canvas.width
@@ -349,42 +303,13 @@ export default function Hero() {
         // Add unique ID for stable connection references
         this.id = Math.random() * 100000 | 0
         
-        // Only non-dium particles can occasionally ignore repulsion (1% chance)
-        this.canIgnoreRepulsion = !isDiumParticle && Math.random() < 0.01
-        
-        // Initialize special behavior timer with random values
-        // This ensures special behaviors occur at different times
-        this.specialBehaviorTimer = Math.random() * 1000
-        this.isInSpecialState = false
-        this.specialBehaviorType = 0
+        // Add property to determine if this particle ignores repulsion (rare chance)
+        this.ignoresRepulsion = Math.random() < 0.03 // 3% chance
       }
 
       update(mouseX: number, mouseY: number, isHovering: boolean, diumPosition: { x: number, y: number, width: number, height: number, active: boolean }) {
         // Update phase for oscillation effects
         this.phase += this.phaseSpeed
-        
-        // Update special behavior timer
-        if (this.canIgnoreRepulsion) {
-          this.specialBehaviorTimer -= 1
-          
-          // Reset timer and possibly trigger special behavior
-          if (this.specialBehaviorTimer <= 0) {
-            // Reset timer (occur approximately every 1000-3000 frames)
-            this.specialBehaviorTimer = 1000 + Math.random() * 2000
-            
-            // 20% chance to trigger special behavior when timer expires
-            if (Math.random() < 0.2) {
-              this.isInSpecialState = true
-              // Choose a random special behavior type
-              this.specialBehaviorType = Math.floor(Math.random() * 3) + 1
-              // Special state lasts between 100-300 frames
-              setTimeout(() => {
-                this.isInSpecialState = false
-                this.specialBehaviorType = 0
-              }, 2000 + Math.random() * 3000)
-            }
-          }
-        }
         
         // Check distance from center area for repulsion
         const centerArea = centerAreaRef.current;
@@ -392,65 +317,19 @@ export default function Hero() {
         const dyFromCenter = this.y - centerArea.y;
         const distanceFromCenter = Math.sqrt(dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter);
         
-        // Handle special behavior for particles that can ignore repulsion
-        if (this.isInSpecialState && this.canIgnoreRepulsion) {
-          // Temporarily increase size and opacity for these special particles
-          this.size = this.baseSize * (1.5 + Math.sin(this.phase) * 0.5)
-          this.opacity = Math.min(0.9, this.baseOpacity * 2)
-          
-          // Different special behaviors
-          switch (this.specialBehaviorType) {
-            case 1: // Travel through center
-              // Calculate angle to center
-              const angleToCenter = Math.atan2(centerArea.y - this.y, centerArea.x - this.x)
-              // Move directly through center
-              this.speedX = Math.cos(angleToCenter) * 1.0
-              this.speedY = Math.sin(angleToCenter) * 1.0
-              break
-              
-            case 2: // Spiral around center
-              // Create spiral motion
-              const spiralAngle = this.phase * 2
-              const spiralRadius = Math.max(5, distanceFromCenter * 0.8)
-              this.x = centerArea.x + Math.cos(spiralAngle) * spiralRadius
-              this.y = centerArea.y + Math.sin(spiralAngle) * spiralRadius
-              return // Skip normal movement
-              
-            case 3: // Zigzag through
-              // Create zigzag motion through center
-              const zigzagFactor = Math.sin(this.phase * 5) * 20
-              const zigzagAngle = Math.atan2(centerArea.y - this.y, centerArea.x - this.x)
-              const perpAngle = zigzagAngle + Math.PI/2
-              this.speedX = Math.cos(zigzagAngle) * 1.0 + Math.cos(perpAngle) * zigzagFactor * 0.05
-              this.speedY = Math.sin(zigzagAngle) * 1.0 + Math.sin(perpAngle) * zigzagFactor * 0.05
-              break
-          }
-          
-          // Normal movement with updated speeds
-        this.x += this.speedX
-        this.y += this.speedY
-
-          // Screen wrapping
-          if (this.x > canvas.width) this.x = 0
-          if (this.x < 0) this.x = canvas.width
-          if (this.y > canvas.height) this.y = 0
-          if (this.y < 0) this.y = canvas.height
-          
-          return // Skip the rest of update logic during special state
-        }
-        
         // Apply repulsion from center area - with stronger effect on mobile
-        if (distanceFromCenter < centerArea.radius && !this.isInSpecialState) {
+        // Skip repulsion for special particles that ignore the restriction
+        if (distanceFromCenter < centerArea.radius && !this.ignoresRepulsion) {
           // Calculate repulsion force - stronger near the center and on mobile
           const repulsionForce = (centerArea.radius - distanceFromCenter) / centerArea.radius;
-          const adjustedForce = screenSize.isMobile ? repulsionForce * 1.3 : repulsionForce;
+          const adjustedForce = isMobile ? repulsionForce * 1.3 : repulsionForce;
           
           if (adjustedForce > 0.05) { // Only apply if force is significant
             // Calculate angle from center to particle
             const angle = Math.atan2(dyFromCenter, dxFromCenter);
             
             // Apply repulsion force - stronger on mobile for better avoidance
-            const repulsionStrength = screenSize.isMobile ? 2.0 : 1.5;
+            const repulsionStrength = isMobile ? 2.0 : 1.5;
             const repulsionX = Math.cos(angle) * adjustedForce * repulsionStrength;
             const repulsionY = Math.sin(angle) * adjustedForce * repulsionStrength;
             
@@ -459,20 +338,43 @@ export default function Hero() {
             this.y += repulsionY;
             
             // Adjust velocity more significantly on mobile
-            const velocityInfluence = screenSize.isMobile ? 0.15 : 0.1;
+            const velocityInfluence = isMobile ? 0.15 : 0.1;
             this.speedX = this.speedX * (1 - velocityInfluence) + repulsionX * velocityInfluence;
             this.speedY = this.speedY * (1 - velocityInfluence) + repulsionY * velocityInfluence;
             
             // Additional position adjustment for immediate effect on mobile
-            if (screenSize.isMobile && distanceFromCenter < centerArea.radius * 0.7) {
+            if (isMobile && distanceFromCenter < centerArea.radius * 0.7) {
               this.x += repulsionX * 0.5;
               this.y += repulsionY * 0.5;
             }
           }
+        } 
+        // For particles that ignore repulsion, do something interesting when in the center
+        else if (distanceFromCenter < centerArea.radius && this.ignoresRepulsion) {
+          // Create orbital or spiral motion near the center
+          // Calculate angle and adjust slightly
+          const currentAngle = Math.atan2(dyFromCenter, dxFromCenter);
+          const orbitSpeed = 0.01 + (0.02 * (1 - distanceFromCenter / centerArea.radius));
+          const orbitAngle = currentAngle + orbitSpeed;
+          
+          // Maintain similar distance but change angle for orbital effect
+          const orbitDistance = distanceFromCenter * 0.998; // Very slight inward spiral
+          
+          // Set new position based on orbital movement
+          this.x = centerArea.x + Math.cos(orbitAngle) * orbitDistance;
+          this.y = centerArea.y + Math.sin(orbitAngle) * orbitDistance;
+          
+          // Increase size and opacity slightly for visual interest
+          this.size = this.baseSize * (1.5 + Math.sin(this.phase) * 0.5);
+          this.opacity = Math.min(0.8, this.baseOpacity * 2);
+          
+          // Adjust speed for when it exits the center
+          this.speedX = Math.cos(orbitAngle) * 0.5;
+          this.speedY = Math.sin(orbitAngle) * 0.5;
         }
         
         // Skip dium particle special behavior on mobile completely
-        if (screenSize.isMobile && this.isDiumParticle) {
+        if (isMobile && this.isDiumParticle) {
           // Just use normal particle behavior on mobile
           this.x += this.speedX + Math.sin(this.phase) * 0.2
           this.y += this.speedY + Math.cos(this.phase) * 0.2
@@ -591,21 +493,30 @@ export default function Hero() {
         // Create slight color variations for a sophisticated look
         const colorShift = Math.sin(this.phase) * 10
         
-        // Special color for particles in special state
-        if (this.isInSpecialState && this.canIgnoreRepulsion) {
-          // Use a more noticeable but still elegant color
-          let specialHue = 180 + this.specialBehaviorType * 30 // Each behavior type gets slightly different hue
-          let specialSaturation = 20 + Math.sin(this.phase * 2) * 10 // Pulsing saturation
-          ctx.fillStyle = `hsla(${specialHue + colorShift}, ${specialSaturation}%, 100%, ${this.opacity})`
+        // Special styling for particles that ignore repulsion
+        if (this.ignoresRepulsion) {
+          // Create a more vibrant but still subtle appearance
+          const specialColorBase = 200 // Slight blue-ish tint
+          ctx.fillStyle = `hsla(${specialColorBase + colorShift}, ${20 + Math.sin(this.phase) * 10}%, 100%, ${this.opacity})`
+          
+          // Draw a slightly larger particle with a subtle glow
+          ctx.shadowBlur = 3
+          ctx.shadowColor = `hsla(${specialColorBase + colorShift}, 50%, 90%, 0.3)`
+          
+          ctx.beginPath()
+          ctx.arc(this.x, this.y, this.size * 1.2, 0, Math.PI * 2)
+          ctx.fill()
+          
+          // Reset shadow for other particles
+          ctx.shadowBlur = 0
         } else {
-          // Normal color logic
+          // Regular particle styling
           const colorBase = this.isDiumParticle && this.isReturning ? 190 : 210 // Slightly different color for dium particles
           ctx.fillStyle = `hsla(${colorBase + this.hue + colorShift}, ${this.saturation}%, 100%, ${this.opacity})`
+          ctx.beginPath()
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+          ctx.fill()
         }
-        
-        ctx.beginPath()
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
-        ctx.fill()
       }
     }
 
@@ -614,7 +525,7 @@ export default function Hero() {
       const particle = new Particle();
       
       // For mobile, ensure particles start outside the center area
-      if (screenSize.isMobile) {
+      if (isMobile) {
         const centerArea = centerAreaRef.current;
         const distanceToCenter = Math.sqrt(
           Math.pow(particle.x - centerArea.x, 2) + 
@@ -641,7 +552,7 @@ export default function Hero() {
       const particle = new Particle(true);
       
       // On mobile, initialize particles away from the center
-      if (screenSize.isMobile) {
+      if (isMobile) {
         const centerArea = centerAreaRef.current;
         
         // Generate a random angle
@@ -699,7 +610,7 @@ export default function Hero() {
       if (!ctx) return
       
       // Limit connections on mobile for performance
-      const connectionLimit = screenSize.isMobile ? 3 : 6
+      const connectionLimit = isMobile ? 3 : 6
       
       // Clear the connection cache periodically but not every frame
       // This helps maintain some consistency while still allowing for updates
@@ -709,7 +620,7 @@ export default function Hero() {
       
       // For better stability, use a fixed sampling of particles for connections
       // This reduces the flickering effect caused by constantly changing connection patterns
-      const sampleSize = Math.min(particles.length, screenSize.isMobile ? 40 : 80)
+      const sampleSize = Math.min(particles.length, isMobile ? 40 : 80)
       const sampledParticles = particles.slice(0, sampleSize)
       
       for (let i = 0; i < sampledParticles.length; i++) {
@@ -778,12 +689,12 @@ export default function Hero() {
       
       // Only clear with a semi-transparent overlay for smoother transitions on connections
       // This creates a trail effect that reduces flickering
-      if (screenSize.isMobile) {
+      if (isMobile) {
         // Clear fully on mobile for performance
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
       } else {
-        // Use semi-transparent overlay for smooth trails on desktop
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)"
+        // Use partial transparency clearing for desktop to reduce flicker
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
       }
 
@@ -803,11 +714,11 @@ export default function Hero() {
       // and by reducing the frequency of connection updates on mobile
       
       // Create stable subsets for connection drawing to reduce flickering
-      const regularParticlesForConnections = particles.slice(0, screenSize.isMobile ? 30 : 60);
-      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, screenSize.isMobile ? 15 : 30);
+      const regularParticlesForConnections = particles.slice(0, isMobile ? 30 : 60);
+      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 15 : 30);
       
       // On mobile, skip some frames for connections to improve performance
-      const shouldDrawConnections = !screenSize.isMobile || (Date.now() % 3 === 0);
+      const shouldDrawConnections = !isMobile || (Date.now() % 3 === 0);
       
       if (shouldDrawConnections) {
         // Draw connections between regular particles
@@ -818,7 +729,7 @@ export default function Hero() {
           // Use a stable subset of returning dium particles
           const returningDiumParticles = diumParticles
             .filter(p => p.isReturning)
-            .slice(0, screenSize.isMobile ? 30 : 60);
+            .slice(0, isMobile ? 30 : 60);
             
           drawConnections(returningDiumParticles);
         }
@@ -863,7 +774,7 @@ export default function Hero() {
     // Modify to avoid refreshing on mobile
     window.addEventListener("scroll", () => {
       // Only force redraw on scroll for desktop - skip this for mobile to avoid refresh flicker
-      if (!screenSize.isMobile && canvasRef.current) {
+      if (!isMobile && canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d")
         if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
       }
@@ -891,7 +802,7 @@ export default function Hero() {
       canvas.removeEventListener("touchcancel", handleTouchEnd)
       window.removeEventListener("scroll", () => {})
     }
-  }, [mousePosition, isHovering, screenSize.isMobile])
+  }, [mousePosition, isHovering, isMobile])
 
   const handleDiumMouseEnter = () => {
     if (diumFadeTimerRef.current) {
@@ -956,11 +867,11 @@ export default function Hero() {
             className="inline-block relative gradient-text"
             style={{
               // Keep opacity at 1 on mobile devices, only use the fading effect on desktop
-              opacity: (!screenSize.isMobile && isDiumFading) ? 0.1 : 1,
+              opacity: (!isMobile && isDiumFading) ? 0.1 : 1,
               transition: 'opacity 1.5s ease-in-out'
             }}
-            onMouseEnter={!screenSize.isMobile ? handleDiumMouseEnter : undefined}
-            onMouseLeave={!screenSize.isMobile ? handleDiumMouseLeave : undefined}
+            onMouseEnter={!isMobile ? handleDiumMouseEnter : undefined}
+            onMouseLeave={!isMobile ? handleDiumMouseLeave : undefined}
           >
             dium
           </span>

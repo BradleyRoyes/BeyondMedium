@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { PlaceholderImage } from "./PlaceholderImage"
 
 export default function Portfolio() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>("workshops")
 
   const categories = ["workshops", "experiences", "aids"]
 
