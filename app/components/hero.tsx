@@ -235,11 +235,11 @@ export default function Hero() {
     updateCenterArea()
 
     const particles: Particle[] = []
-    const particleCount = isMobile ? 80 : 150 // Reduce particle count on mobile for better performance
+    const particleCount = isMobile ? 40 : 75 // Reduced from 80/150 to 40/75
     const mouseRadius = 100 // Area of influence around the mouse
     // Special particles to form "dium" when needed
     const diumParticles: Particle[] = []
-    const diumParticleCount = isMobile ? 60 : 120
+    const diumParticleCount = isMobile ? 30 : 60 // Reduced from 60/120 to 30/60
     
     // Track previous frame time for smoother animations
     let lastFrameTime = 0
@@ -279,32 +279,32 @@ export default function Hero() {
       constructor(isDiumParticle = false) {
         this.x = Math.random() * canvas.width
         this.y = Math.random() * canvas.height
-        this.baseSize = Math.random() * 2.5 + 0.1
+        this.baseSize = Math.random() * 2 + 0.1 // Slightly smaller base size
         this.size = this.baseSize
-        this.speedX = Math.random() * 1.5 - 0.75
-        this.speedY = Math.random() * 1.5 - 0.75
-        this.baseOpacity = Math.random() * 0.5 + 0.1
+        this.speedX = Math.random() * 0.8 - 0.4 // Reduced from 1.5 to 0.8
+        this.speedY = Math.random() * 0.8 - 0.4 // Reduced from 1.5 to 0.8
+        this.baseOpacity = Math.random() * 0.4 + 0.1 // Slightly reduced max opacity
         this.opacity = this.baseOpacity
         this.originalX = this.x
         this.originalY = this.y
-        this.connectionRadius = Math.random() * 120 + 60
+        this.connectionRadius = Math.random() * 100 + 50 // Reduced from 120 to 100
         this.hue = Math.random() * 60 - 30 // Subtle hue variation
         this.saturation = Math.random() * 10 // Very slight saturation
         this.phase = Math.random() * Math.PI * 2
-        this.phaseSpeed = 0.01 + Math.random() * 0.02
+        this.phaseSpeed = 0.005 + Math.random() * 0.01 // Reduced from 0.01-0.03 to 0.005-0.015
         // For "dium" reformation effect
         this.isDiumParticle = isDiumParticle
         this.targetX = 0
         this.targetY = 0
         this.isReturning = false
         // Slower return speed for more gradual movement
-        this.returnSpeed = 0.02 + Math.random() * 0.03
+        this.returnSpeed = 0.01 + Math.random() * 0.02 // Reduced from 0.02-0.05 to 0.01-0.03
         this.angleOffset = Math.random() * Math.PI * 2
         // Add unique ID for stable connection references
         this.id = Math.random() * 100000 | 0
         
         // Add property to determine if this particle ignores repulsion (rare chance)
-        this.ignoresRepulsion = Math.random() < 0.03 // 3% chance
+        this.ignoresRepulsion = Math.random() < 0.02 // Reduced from 3% to 2%
       }
 
       update(mouseX: number, mouseY: number, isHovering: boolean, diumPosition: { x: number, y: number, width: number, height: number, active: boolean }) {
@@ -354,7 +354,7 @@ export default function Hero() {
           // Create orbital or spiral motion near the center
           // Calculate angle and adjust slightly
           const currentAngle = Math.atan2(dyFromCenter, dxFromCenter);
-          const orbitSpeed = 0.01 + (0.02 * (1 - distanceFromCenter / centerArea.radius));
+          const orbitSpeed = 0.005 + (0.01 * (1 - distanceFromCenter / centerArea.radius)); // Reduced from 0.01/0.02 to 0.005/0.01
           const orbitAngle = currentAngle + orbitSpeed;
           
           // Maintain similar distance but change angle for orbital effect
@@ -369,8 +369,8 @@ export default function Hero() {
           this.opacity = Math.min(0.8, this.baseOpacity * 2);
           
           // Adjust speed for when it exits the center
-          this.speedX = Math.cos(orbitAngle) * 0.5;
-          this.speedY = Math.sin(orbitAngle) * 0.5;
+          this.speedX = Math.cos(orbitAngle) * 0.3; // Reduced from 0.5 to 0.3
+          this.speedY = Math.sin(orbitAngle) * 0.3; // Reduced from 0.5 to 0.3
         }
         
         // Skip dium particle special behavior on mobile completely
@@ -429,8 +429,8 @@ export default function Hero() {
         }
         
         // Normal particle movement with subtle oscillation
-        this.x += this.speedX + Math.sin(this.phase) * 0.2
-        this.y += this.speedY + Math.cos(this.phase) * 0.2
+        this.x += this.speedX + Math.sin(this.phase) * 0.1 // Reduced oscillation from 0.2 to 0.1
+        this.y += this.speedY + Math.cos(this.phase) * 0.1 // Reduced oscillation from 0.2 to 0.1
 
         // Screen wrapping
         if (this.x > canvas.width) this.x = 0
@@ -610,7 +610,7 @@ export default function Hero() {
       if (!ctx) return
       
       // Limit connections on mobile for performance
-      const connectionLimit = isMobile ? 3 : 6
+      const connectionLimit = isMobile ? 2 : 4 // Reduced from 3/6 to 2/4
       
       // Clear the connection cache periodically but not every frame
       // This helps maintain some consistency while still allowing for updates
@@ -620,7 +620,7 @@ export default function Hero() {
       
       // For better stability, use a fixed sampling of particles for connections
       // This reduces the flickering effect caused by constantly changing connection patterns
-      const sampleSize = Math.min(particles.length, isMobile ? 40 : 80)
+      const sampleSize = Math.min(particles.length, isMobile ? 25 : 50) // Reduced from 40/80 to 25/50
       const sampledParticles = particles.slice(0, sampleSize)
       
       for (let i = 0; i < sampledParticles.length; i++) {
@@ -664,11 +664,11 @@ export default function Hero() {
             
             // Create dynamic gradient for connection with smoother transitions
             const gradient = ctx.createLinearGradient(particleA.x, particleA.y, particleB.x, particleB.y)
-            gradient.addColorStop(0, `rgba(255, 255, 255, ${finalOpacity * particleA.opacity})`)
-            gradient.addColorStop(1, `rgba(255, 255, 255, ${finalOpacity * particleB.opacity})`)
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${finalOpacity * particleA.opacity * 0.8})`) // Reduced opacity by 20%
+            gradient.addColorStop(1, `rgba(255, 255, 255, ${finalOpacity * particleB.opacity * 0.8})`) // Reduced opacity by 20%
             
             ctx.strokeStyle = gradient
-            ctx.lineWidth = Math.max(0.1, Math.min(particleA.size, particleB.size) * 0.3)
+            ctx.lineWidth = Math.max(0.1, Math.min(particleA.size, particleB.size) * 0.25) // Reduced from 0.3 to 0.25
             ctx.stroke()
             
             connectionsCount++
@@ -714,11 +714,11 @@ export default function Hero() {
       // and by reducing the frequency of connection updates on mobile
       
       // Create stable subsets for connection drawing to reduce flickering
-      const regularParticlesForConnections = particles.slice(0, isMobile ? 30 : 60);
-      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 15 : 30);
+      const regularParticlesForConnections = particles.slice(0, isMobile ? 20 : 40); // Reduced from 30/60 to 20/40
+      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 10 : 20); // Reduced from 15/30 to 10/20
       
       // On mobile, skip some frames for connections to improve performance
-      const shouldDrawConnections = !isMobile || (Date.now() % 3 === 0);
+      const shouldDrawConnections = !isMobile || (Date.now() % 4 === 0); // Increased skip rate from 3 to 4
       
       if (shouldDrawConnections) {
         // Draw connections between regular particles
@@ -729,7 +729,7 @@ export default function Hero() {
           // Use a stable subset of returning dium particles
           const returningDiumParticles = diumParticles
             .filter(p => p.isReturning)
-            .slice(0, isMobile ? 30 : 60);
+            .slice(0, isMobile ? 20 : 40); // Reduced from 30/60 to 20/40
             
           drawConnections(returningDiumParticles);
         }
