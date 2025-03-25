@@ -65,23 +65,23 @@ export function PlaceholderImage({
     
     // Choose and draw pattern based on uniquePattern value and seed
     switch(uniquePattern.current) {
-      case 0: // Rorschach Inkblot Classic
-        drawRorschachInkblot(ctx, width, height, seedValue.current)
+      case 0: // Classic Rorschach Inkblot
+        drawClassicRorschach(ctx, width, height, seedValue.current)
         break
-      case 1: // Symmetrical Butterfly
-        drawSymmetricalButterfly(ctx, width, height, seedValue.current)
+      case 1: // Bat-like Form
+        drawBatlikeForm(ctx, width, height, seedValue.current)
         break
-      case 2: // Mirrored Abstract
-        drawMirroredAbstract(ctx, width, height, seedValue.current)
+      case 2: // Face/Mask Pattern
+        drawFaceMaskPattern(ctx, width, height, seedValue.current)
         break
-      case 3: // Bilateral Flow Field
-        drawBilateralFlowField(ctx, width, height, seedValue.current)
+      case 3: // Anatomical Form
+        drawAnatomicalForm(ctx, width, height, seedValue.current)
         break
-      case 4: // Organic Symmetry
-        drawOrganicSymmetry(ctx, width, height, seedValue.current)
+      case 4: // Animal Silhouette
+        drawAnimalSilhouette(ctx, width, height, seedValue.current)
         break
-      case 5: // Fractal Mirror
-        drawFractalMirror(ctx, width, height, seedValue.current)
+      case 5: // Abstract Rorschach
+        drawAbstractRorschach(ctx, width, height, seedValue.current)
         break
     }
     
@@ -107,357 +107,448 @@ function seededRandom(seed: number) {
   return x - Math.floor(x);
 }
 
-// 1. Rorschach Inkblot Classic - symmetrical inkblot pattern
-function drawRorschachInkblot(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+// 1. Classic Rorschach Inkblot - resembling the first card in the official test
+function drawClassicRorschach(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
   ctx.globalCompositeOperation = 'soft-light'
   
   // Draw only on one half, then mirror
   const halfWidth = width / 2
-  const splatCount = 5 + Math.floor(seededRandom(seed) * 5)
   
   let rndSeed = seed;
   
-  // Draw the blots
-  for (let i = 0; i < splatCount; i++) {
-    // Generate random blot properties
-    const centerX = halfWidth * (0.3 + seededRandom(rndSeed++) * 0.7)
-    const centerY = height * (0.2 + seededRandom(rndSeed++) * 0.6)
+  // Create a central form with satellite elements
+  ctx.beginPath()
+  
+  // Main central blob (classic Rorschach card I style)
+  const centerY = height * 0.5
+  const formHeight = height * 0.6
+  
+  // Base points
+  const points = [
+    { x: halfWidth, y: centerY - formHeight * 0.4 },
+    { x: halfWidth - halfWidth * 0.3, y: centerY - formHeight * 0.2 },
+    { x: halfWidth - halfWidth * 0.4, y: centerY },
+    { x: halfWidth - halfWidth * 0.25, y: centerY + formHeight * 0.2 },
+    { x: halfWidth, y: centerY + formHeight * 0.4 },
+  ]
+  
+  // Add randomness to points
+  const randomizedPoints = points.map(point => ({
+    x: point.x + (seededRandom(rndSeed++) - 0.5) * 20,
+    y: point.y + (seededRandom(rndSeed++) - 0.5) * 20
+  }))
+  
+  // Draw the main shape
+  ctx.moveTo(randomizedPoints[0].x, randomizedPoints[0].y)
+  
+  // Use bezier curves for smooth, organic shape
+  for (let i = 0; i < randomizedPoints.length - 1; i++) {
+    const current = randomizedPoints[i]
+    const next = randomizedPoints[i+1]
     
-    // Create a few connected nodes for each blot
-    const nodeCount = 4 + Math.floor(seededRandom(rndSeed++) * 3)
-    const nodes = []
+    const cp1x = current.x + (next.x - current.x) * 0.5 - (seededRandom(rndSeed++) - 0.5) * 40
+    const cp1y = current.y + (seededRandom(rndSeed++) - 0.5) * 30
+    const cp2x = next.x - (next.x - current.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 40
+    const cp2y = next.y + (seededRandom(rndSeed++) - 0.5) * 30
     
-    for (let j = 0; j < nodeCount; j++) {
-      nodes.push({
-        x: centerX + (seededRandom(rndSeed++) - 0.5) * (halfWidth * 0.5),
-        y: centerY + (seededRandom(rndSeed++) - 0.5) * (height * 0.3)
-      })
-    }
-    
-    // Draw blot shape with bezier curves
-    ctx.beginPath()
-    ctx.moveTo(nodes[0].x, nodes[0].y)
-    
-    for (let j = 1; j < nodes.length; j++) {
-      const prevNode = nodes[j-1]
-      const currNode = nodes[j]
-      
-      // Control points for bezier curve
-      const cp1x = prevNode.x + (currNode.x - prevNode.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 30
-      const cp1y = prevNode.y + (seededRandom(rndSeed++) - 0.5) * 40
-      const cp2x = currNode.x - (currNode.x - prevNode.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 30
-      const cp2y = currNode.y + (seededRandom(rndSeed++) - 0.5) * 40
-      
-      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, currNode.x, currNode.y)
-    }
-    
-    // Connect back to first node
-    const firstNode = nodes[0]
-    const lastNode = nodes[nodes.length - 1]
-    
-    const cp1x = lastNode.x + (firstNode.x - lastNode.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 30
-    const cp1y = lastNode.y + (seededRandom(rndSeed++) - 0.5) * 40
-    const cp2x = firstNode.x - (firstNode.x - lastNode.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 30
-    const cp2y = firstNode.y + (seededRandom(rndSeed++) - 0.5) * 40
-    
-    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, firstNode.x, firstNode.y)
-    
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.07 + seededRandom(rndSeed++) * 0.05})`
-    ctx.fill()
-    
-    // Draw mirror image on right side
-    ctx.save()
-    ctx.translate(width, 0)
-    ctx.scale(-1, 1)
-    ctx.fill()
-    ctx.restore()
+    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, next.x, next.y)
   }
+  
+  // Add some "satellite" blobs for more complex shape
+  for (let i = 0; i < 3; i++) {
+    const basePoint = randomizedPoints[Math.floor(seededRandom(rndSeed++) * randomizedPoints.length)]
+    const blobSize = 20 + seededRandom(rndSeed++) * 40
+    
+    const offsetX = (seededRandom(rndSeed++) - 0.3) * blobSize
+    const offsetY = (seededRandom(rndSeed++) - 0.5) * blobSize
+    
+    ctx.moveTo(basePoint.x + offsetX, basePoint.y + offsetY)
+    ctx.arc(basePoint.x + offsetX, basePoint.y + offsetY, blobSize, 0, Math.PI * 2)
+  }
+  
+  // Fill with higher contrast than before
+  ctx.fillStyle = `rgba(255, 255, 255, 0.15)`
+  ctx.fill()
+  
+  // Draw mirror image on right side
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fill()
+  ctx.restore()
   
   ctx.globalCompositeOperation = 'source-over'
 }
 
-// 2. Symmetrical Butterfly - butterfly-like pattern with symmetry
-function drawSymmetricalButterfly(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+// 2. Bat-like Form - resembling card V in the official test
+function drawBatlikeForm(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
   ctx.globalCompositeOperation = 'overlay'
   
   const halfWidth = width / 2
   const centerY = height / 2
   
   let rndSeed = seed;
-  const wingCount = 3 + Math.floor(seededRandom(rndSeed++) * 3)
   
-  // Generate "wings" that are symmetrical
-  for (let i = 0; i < wingCount; i++) {
-    // Wing properties
-    const baseY = centerY + (seededRandom(rndSeed++) - 0.5) * (height * 0.6)
-    const wingLength = halfWidth * (0.5 + seededRandom(rndSeed++) * 0.4)
-    const wingHeight = height * (0.1 + seededRandom(rndSeed++) * 0.3)
-    const wingCurve = 0.3 + seededRandom(rndSeed++) * 0.4
+  // Create main bat-like form
+  ctx.beginPath()
+  
+  // Central body
+  const bodyWidth = halfWidth * 0.25
+  const bodyHeight = height * 0.4
+  
+  // Start at top of body
+  ctx.moveTo(halfWidth, centerY - bodyHeight/2)
+  
+  // Left wing (complex)
+  const wingSpan = halfWidth * 0.8
+  const wingHeight = bodyHeight * 1.2
+  
+  // Wing top curve
+  ctx.bezierCurveTo(
+    halfWidth - bodyWidth * 0.5, centerY - bodyHeight * 0.6,
+    halfWidth - wingSpan * 0.5, centerY - wingHeight * 0.5,
+    halfWidth - wingSpan, centerY - wingHeight * 0.3
+  )
+  
+  // Wing middle indentation (bat wing finger effect)
+  const fingerCount = 2 + Math.floor(seededRandom(rndSeed++) * 2)
+  
+  let lastX = halfWidth - wingSpan
+  let lastY = centerY - wingHeight * 0.3
+  
+  for (let i = 0; i < fingerCount; i++) {
+    const fingerDepth = (seededRandom(rndSeed++) * 0.15 + 0.05) * wingSpan
+    const fingerPos = (i + 1) / (fingerCount + 1)
     
-    // Draw left wing
-    ctx.beginPath()
-    ctx.moveTo(halfWidth, baseY)
+    const indentX = lastX + wingSpan * fingerPos * 0.8
+    const indentY = centerY - wingHeight * 0.1 + (seededRandom(rndSeed++) - 0.5) * 20
     
-    // Control points for bezier
-    const cp1x = halfWidth - wingLength * 0.3
-    const cp1y = baseY - wingHeight * wingCurve
-    const cp2x = halfWidth - wingLength * 0.7
-    const cp2y = baseY + wingHeight * (1 - wingCurve)
-    const endX = halfWidth - wingLength
-    const endY = baseY + (seededRandom(rndSeed++) - 0.5) * 20
+    // Curve out
+    ctx.bezierCurveTo(
+      lastX + (indentX - lastX) * 0.3, lastY,
+      indentX - fingerDepth, indentY - fingerDepth,
+      indentX, indentY
+    )
     
-    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY)
-    
-    // Return curve for wing shape
-    const backCp1x = cp2x + (seededRandom(rndSeed++) - 0.5) * 20
-    const backCp1y = cp2y + wingHeight * (seededRandom(rndSeed++) * 0.2 + 0.1)
-    const backCp2x = cp1x + (seededRandom(rndSeed++) - 0.5) * 20
-    const backCp2y = cp1y + wingHeight * (seededRandom(rndSeed++) * 0.2 + 0.1)
-    
-    ctx.bezierCurveTo(backCp1x, backCp1y, backCp2x, backCp2y, halfWidth, baseY)
-    
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.06 + seededRandom(rndSeed++) * 0.05})`
-    ctx.fill()
-    
-    // Draw mirrored right wing
-    ctx.save()
-    ctx.translate(width, 0)
-    ctx.scale(-1, 1)
-    ctx.fill()
-    ctx.restore()
+    lastX = indentX
+    lastY = indentY
   }
+  
+  // Complete wing bottom curve to body
+  ctx.bezierCurveTo(
+    halfWidth - wingSpan * 0.5, centerY + wingHeight * 0.3,
+    halfWidth - bodyWidth * 0.3, centerY + bodyHeight * 0.3,
+    halfWidth, centerY + bodyHeight/2
+  )
+  
+  // Fill with higher contrast
+  ctx.fillStyle = `rgba(255, 255, 255, 0.18)`
+  ctx.fill()
+  
+  // Draw mirror image on right side
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fill()
+  ctx.restore()
   
   ctx.globalCompositeOperation = 'source-over'
 }
 
-// 3. Mirrored Abstract - symmetrical abstract patterns
-function drawMirroredAbstract(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+// 3. Face/Mask Pattern - resembling interpretation of faces in Rorschach tests
+function drawFaceMaskPattern(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
   ctx.globalCompositeOperation = 'soft-light'
   
   const halfWidth = width / 2
+  const centerY = height / 2
+  
   let rndSeed = seed;
   
-  // Create multiple blob-like shapes
-  const shapeCount = 4 + Math.floor(seededRandom(rndSeed++) * 4)
+  // Draw face/mask outline
+  ctx.beginPath()
   
-  for (let s = 0; s < shapeCount; s++) {
-    // For each shape, draw multiple layers that evolve
-    const layers = 3 + Math.floor(seededRandom(rndSeed++) * 3)
-    const centerX = halfWidth * (0.2 + seededRandom(rndSeed++) * 0.8)
-    const centerY = height * (0.2 + seededRandom(rndSeed++) * 0.6)
-    const maxRadius = halfWidth * (0.2 + seededRandom(rndSeed++) * 0.3)
-    
-    for (let l = 0; l < layers; l++) {
-      ctx.beginPath()
-      
-      const pointCount = 10 + Math.floor(seededRandom(rndSeed++) * 6)
-      const layerRadiusMod = 0.7 + (l / layers) * 0.3
-      
-      // Create deformed circle with random fluctuations
-      for (let i = 0; i <= pointCount; i++) {
-        const angle = (i / pointCount) * Math.PI * 2
-        const radiusNoise = (0.8 + seededRandom(rndSeed++) * 0.4) * layerRadiusMod
-        const radius = maxRadius * radiusNoise
-        
-        const x = centerX + Math.cos(angle) * radius
-        const y = centerY + Math.sin(angle) * radius
-        
-        if (i === 0) {
-          ctx.moveTo(x, y)
-        } else {
-          const prevAngle = ((i - 1) / pointCount) * Math.PI * 2
-          const prevX = centerX + Math.cos(prevAngle) * (maxRadius * (0.8 + seededRandom(rndSeed++ - 1) * 0.4) * layerRadiusMod)
-          const prevY = centerY + Math.sin(prevAngle) * (maxRadius * (0.8 + seededRandom(rndSeed++ - 1) * 0.4) * layerRadiusMod)
-          
-          const cpDist = Math.sqrt(Math.pow(x - prevX, 2) + Math.pow(y - prevY, 2)) * 0.3
-          const cpAngle1 = prevAngle + Math.PI / 2
-          const cpAngle2 = angle - Math.PI / 2
-          
-          const cp1x = prevX + Math.cos(cpAngle1) * cpDist
-          const cp1y = prevY + Math.sin(cpAngle1) * cpDist
-          const cp2x = x + Math.cos(cpAngle2) * cpDist
-          const cp2y = y + Math.sin(cpAngle2) * cpDist
-          
-          ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
-        }
-      }
-      
-      const opacity = 0.02 + (l / layers) * 0.03
-      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`
-      ctx.fill()
-      
-      // Mirror to right side
-      ctx.save()
-      ctx.translate(width, 0)
-      ctx.scale(-1, 1)
-      ctx.fill()
-      ctx.restore()
-    }
-  }
+  // Head outline
+  const headHeight = height * 0.5
+  const headWidth = halfWidth * 0.7
+  
+  // Oval for face
+  ctx.ellipse(
+    halfWidth - headWidth * 0.2, 
+    centerY, 
+    headWidth, 
+    headHeight / 2, 
+    0, 0, Math.PI * 2
+  )
+  
+  // Add eye-like circular void (negative space)
+  const eyeSize = headWidth * 0.3
+  const eyeX = halfWidth - headWidth * 0.4
+  const eyeY = centerY - headHeight * 0.1
+  
+  ctx.moveTo(eyeX + eyeSize, eyeY)
+  ctx.arc(eyeX, eyeY, eyeSize, 0, Math.PI * 2, true) // counterclockwise creates hole
+  
+  // Add second eye-like element
+  const eye2Size = eyeSize * 0.7
+  const eye2X = halfWidth - headWidth * 0.1
+  const eye2Y = centerY - headHeight * 0.15
+  
+  ctx.moveTo(eye2X + eye2Size, eye2Y)
+  ctx.arc(eye2X, eye2Y, eye2Size, 0, Math.PI * 2, true)
+  
+  // Add "mouth" or bottom element
+  const mouthWidth = headWidth * 0.5
+  const mouthHeight = headHeight * 0.2
+  const mouthY = centerY + headHeight * 0.2
+  
+  ctx.ellipse(
+    halfWidth - headWidth * 0.3, 
+    mouthY, 
+    mouthWidth, 
+    mouthHeight, 
+    0, 0, Math.PI * 2
+  )
+  
+  // Fill with higher contrast
+  ctx.fillStyle = `rgba(255, 255, 255, 0.2)`
+  ctx.fill()
+  
+  // Draw mirror image on right side
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fill()
+  ctx.restore()
   
   ctx.globalCompositeOperation = 'source-over'
 }
 
-// 4. Bilateral Flow Field - symmetrical particle trails
-function drawBilateralFlowField(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+// 4. Anatomical Form - resembling interpretations of human anatomy in Rorschach tests
+function drawAnatomicalForm(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'overlay'
+  
+  const halfWidth = width / 2
+  const centerY = height / 2
+  
+  let rndSeed = seed;
+  
+  // Draw base shape resembling internal anatomy/pelvic structure
+  ctx.beginPath()
+  
+  // Central column (vertebral-like)
+  const colWidth = halfWidth * 0.1
+  const colHeight = height * 0.6
+  
+  // Start at top
+  ctx.moveTo(halfWidth, centerY - colHeight/2)
+  ctx.lineTo(halfWidth, centerY + colHeight/2)
+  
+  // Add horizontal elements (rib/wing-like)
+  const wingCount = 3 + Math.floor(seededRandom(rndSeed++) * 2)
+  
+  for (let i = 0; i < wingCount; i++) {
+    const y = centerY - colHeight/2 + colHeight * (i / (wingCount - 1))
+    const wingWidth = halfWidth * (0.3 + seededRandom(rndSeed++) * 0.4)
+    const wingHeight = colHeight * 0.15
+    
+    // Left side wing/rib
+    ctx.moveTo(halfWidth, y)
+    ctx.bezierCurveTo(
+      halfWidth - wingWidth * 0.3, y - wingHeight * 0.2,
+      halfWidth - wingWidth * 0.7, y - wingHeight * 0.1,
+      halfWidth - wingWidth, y + wingHeight * 0.2
+    )
+    
+    // Back to center
+    ctx.bezierCurveTo(
+      halfWidth - wingWidth * 0.6, y + wingHeight * 0.5,
+      halfWidth - wingWidth * 0.3, y + wingHeight * 0.3,
+      halfWidth, y + wingHeight * 0.1
+    )
+  }
+  
+  // Add rounded elements at the bottom (basin-like)
+  ctx.moveTo(halfWidth, centerY + colHeight/2)
+  ctx.bezierCurveTo(
+    halfWidth - colWidth * 2, centerY + colHeight/2,
+    halfWidth - halfWidth * 0.6, centerY + colHeight/2 + colHeight * 0.2,
+    halfWidth - halfWidth * 0.2, centerY + colHeight/2 + colHeight * 0.1
+  )
+  
+  // Fill with higher contrast
+  ctx.fillStyle = `rgba(255, 255, 255, 0.17)`
+  ctx.fill()
+  
+  // Draw mirror image on right side
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fill()
+  ctx.restore()
+  
+  ctx.globalCompositeOperation = 'source-over'
+}
+
+// 5. Animal Silhouette - resembling animal interpretations in Rorschach tests
+function drawAnimalSilhouette(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
   ctx.globalCompositeOperation = 'soft-light'
   
   const halfWidth = width / 2
-  const particleCount = 40
-  const stepSize = 5
-  const steps = 30
-  let rndSeed = seed
+  const centerY = height / 2
   
-  // Create a noise field that respects symmetry
-  const noiseField = (x: number, y: number, seed: number) => {
-    return (Math.sin(x * 0.05 + seed * 0.1) + Math.cos(y * 0.05)) * Math.PI
+  let rndSeed = seed;
+  
+  // Draw animal-like form (butterfly, moth, or beetle-like)
+  ctx.beginPath()
+  
+  // Body
+  const bodyWidth = halfWidth * 0.1
+  const bodyHeight = height * 0.4
+  
+  // Draw central body
+  ctx.ellipse(
+    halfWidth - bodyWidth/2, 
+    centerY, 
+    bodyWidth, 
+    bodyHeight/2, 
+    0, 0, Math.PI * 2
+  )
+  
+  // Add wing-like projections
+  const wingPairs = 2 + Math.floor(seededRandom(rndSeed++) * 2)
+  
+  for (let i = 0; i < wingPairs; i++) {
+    const segmentPos = i / (wingPairs - 1)
+    const y = centerY - bodyHeight/2 + bodyHeight * segmentPos
+    
+    const wingWidth = halfWidth * (0.6 - segmentPos * 0.3)
+    const wingHeight = bodyHeight * (0.3 - segmentPos * 0.1)
+    
+    // Left wing
+    ctx.moveTo(halfWidth - bodyWidth/2, y)
+    ctx.bezierCurveTo(
+      halfWidth - wingWidth * 0.3, y - wingHeight,
+      halfWidth - wingWidth * 0.7, y - wingHeight * 0.5,
+      halfWidth - wingWidth, y
+    )
+    
+    ctx.bezierCurveTo(
+      halfWidth - wingWidth * 0.7, y + wingHeight * 0.5,
+      halfWidth - wingWidth * 0.3, y + wingHeight,
+      halfWidth - bodyWidth/2, y
+    )
   }
   
-  // Draw particles following the flow field - only on left half
-  for (let i = 0; i < particleCount; i++) {
-    let x = seededRandom(rndSeed++) * halfWidth * 0.9
-    let y = seededRandom(rndSeed++) * height
-    
-    ctx.beginPath()
-    ctx.moveTo(x, y)
-    
-    for (let j = 0; j < steps; j++) {
-      const angle = noiseField(x, y, rndSeed++)
-      x += Math.cos(angle) * stepSize
-      y += Math.sin(angle) * stepSize
-      
-      // Keep within left half
-      if (x < 0 || x > halfWidth || y < 0 || y > height) break
-      
-      ctx.lineTo(x, y)
-    }
-    
-    ctx.strokeStyle = `rgba(255, 255, 255, 0.05)`
-    ctx.lineWidth = 0.5
-    ctx.stroke()
-    
-    // Draw mirrored version on right half
-    ctx.save()
-    ctx.translate(width, 0)
-    ctx.scale(-1, 1)
-    ctx.stroke()
-    ctx.restore()
-  }
+  // Add antenna or horn-like projections at top
+  const antennaLength = bodyHeight * 0.3
+  
+  ctx.moveTo(halfWidth - bodyWidth/2, centerY - bodyHeight/2)
+  ctx.bezierCurveTo(
+    halfWidth - bodyWidth, centerY - bodyHeight/2 - antennaLength * 0.5,
+    halfWidth - bodyWidth * 2, centerY - bodyHeight/2 - antennaLength * 0.7,
+    halfWidth - bodyWidth * 3, centerY - bodyHeight/2 - antennaLength
+  )
+  
+  // Fill with higher contrast
+  ctx.fillStyle = `rgba(255, 255, 255, 0.19)`
+  ctx.fill()
+  
+  // Draw mirror image on right side
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fill()
+  ctx.restore()
   
   ctx.globalCompositeOperation = 'source-over'
 }
 
-// 5. Organic Symmetry - symmetrical organic forms
-function drawOrganicSymmetry(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+// 6. Abstract Rorschach - inspired by later cards in the official test
+function drawAbstractRorschach(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
   ctx.globalCompositeOperation = 'overlay'
   
   const halfWidth = width / 2
-  let rndSeed = seed
+  const centerY = height / 2
   
-  // Draw multiple layers of organic forms
-  const formCount = 5 + Math.floor(seededRandom(rndSeed++) * 3)
+  let rndSeed = seed;
   
-  for (let i = 0; i < formCount; i++) {
-    const startY = height * (0.2 + seededRandom(rndSeed++) * 0.6)
-    const controlCount = 3 + Math.floor(seededRandom(rndSeed++) * 3)
-    const maxWidth = halfWidth * (0.5 + seededRandom(rndSeed++) * 0.5)
+  // Create multiple abstract forms with smaller details
+  ctx.beginPath()
+  
+  // Main central shape
+  const mainHeight = height * 0.7
+  const mainWidth = halfWidth * 0.8
+  
+  // Create a complex, multi-node shape
+  const nodeCount = 6 + Math.floor(seededRandom(rndSeed++) * 4)
+  const nodes = []
+  
+  // Generate nodes in a rough oval pattern
+  for (let i = 0; i < nodeCount; i++) {
+    const angle = (i / nodeCount) * Math.PI * 2
     
-    ctx.beginPath()
-    ctx.moveTo(halfWidth, startY)
+    // Base position on oval
+    const x = halfWidth - (Math.cos(angle) * mainWidth * 0.5)
+    const y = centerY + (Math.sin(angle) * mainHeight * 0.4)
     
-    const controlPoints = []
+    // Add randomness
+    const randomX = x + (seededRandom(rndSeed++) - 0.5) * mainWidth * 0.4
+    const randomY = y + (seededRandom(rndSeed++) - 0.5) * mainHeight * 0.2
     
-    // Create control points for one half
-    for (let j = 0; j < controlCount; j++) {
-      const t = j / (controlCount - 1)
-      controlPoints.push({
-        x: halfWidth - maxWidth * t,
-        y: startY + (seededRandom(rndSeed++) - 0.5) * height * 0.5
-      })
-    }
-    
-    // Draw path using control points
-    for (let j = 0; j < controlPoints.length; j++) {
-      const point = controlPoints[j]
-      
-      if (j === 0) {
-        ctx.lineTo(point.x, point.y)
-      } else {
-        const prev = controlPoints[j - 1]
-        const mid = {
-          x: (prev.x + point.x) / 2,
-          y: (prev.y + point.y) / 2
-        }
-        ctx.quadraticCurveTo(prev.x, prev.y, mid.x, mid.y)
-      }
-    }
-    
-    // Return to center
-    ctx.lineTo(halfWidth, controlPoints[controlPoints.length - 1].y + (seededRandom(rndSeed++) - 0.5) * 30)
-    
-    ctx.fillStyle = `rgba(255, 255, 255, ${0.05 + seededRandom(rndSeed++) * 0.03})`
-    ctx.fill()
-    
-    // Mirror to right side
-    ctx.save()
-    ctx.translate(width, 0)
-    ctx.scale(-1, 1)
-    ctx.fill()
-    ctx.restore()
+    nodes.push({ x: randomX, y: randomY })
   }
   
-  ctx.globalCompositeOperation = 'source-over'
-}
-
-// 6. Fractal Mirror - symmetrical fractal-like patterns
-function drawFractalMirror(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
-  ctx.globalCompositeOperation = 'overlay'
+  // Connect the nodes with bezier curves for smooth shape
+  ctx.moveTo(nodes[0].x, nodes[0].y)
   
-  const halfWidth = width / 2
-  let rndSeed = seed
-  
-  // Draw recursive branching pattern that's mirrored
-  const drawBranch = (x: number, y: number, length: number, angle: number, depth: number, seed: number) => {
-    if (depth <= 0 || length < 5) return
+  for (let i = 0; i < nodes.length; i++) {
+    const current = nodes[i]
+    const next = nodes[(i + 1) % nodes.length]
     
-    const endX = x + Math.cos(angle) * length
-    const endY = y + Math.sin(angle) * length
+    const cp1x = current.x + (next.x - current.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 50
+    const cp1y = current.y + (seededRandom(rndSeed++) - 0.5) * 70
+    const cp2x = next.x - (next.x - current.x) * 0.5 + (seededRandom(rndSeed++) - 0.5) * 50
+    const cp2y = next.y + (seededRandom(rndSeed++) - 0.5) * 70
     
-    // Only draw branches on the left half
-    if (endX <= halfWidth) {
-      ctx.beginPath()
-      ctx.moveTo(x, y)
-      ctx.lineTo(endX, endY)
-      ctx.strokeStyle = `rgba(255, 255, 255, ${0.07 - depth * 0.01})`
-      ctx.lineWidth = 0.7
-      ctx.stroke()
-      
-      // Draw mirrored version on right half
-      const mirrorX = width - x
-      const mirrorEndX = width - endX
-      
-      ctx.beginPath()
-      ctx.moveTo(mirrorX, y)
-      ctx.lineTo(mirrorEndX, endY)
-      ctx.stroke()
-    }
-    
-    // Recursive branches
-    const branchAngle = 0.4 + seededRandom(seed) * 0.6
-    drawBranch(endX, endY, length * 0.75, angle + branchAngle, depth - 1, seed + 1)
-    drawBranch(endX, endY, length * 0.75, angle - branchAngle, depth - 1, seed + 2)
+    ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, next.x, next.y)
   }
   
-  // Start branches from different points along center line
-  const startPoints = 2 + Math.floor(seededRandom(rndSeed++) * 3)
-  
-  for (let i = 0; i < startPoints; i++) {
-    const y = height * (0.3 + (i / startPoints) * 0.4)
-    const length = halfWidth * (0.3 + seededRandom(rndSeed++) * 0.2)
-    const angle = Math.PI + (seededRandom(rndSeed++) - 0.5) * 0.5
+  // Add some smaller details/offshoots
+  for (let i = 0; i < 4; i++) {
+    const baseNode = nodes[Math.floor(seededRandom(rndSeed++) * nodes.length)]
+    const detailSize = 10 + seededRandom(rndSeed++) * 30
     
-    drawBranch(halfWidth, y, length, angle, 4, rndSeed++)
+    // Add a smaller shape connected to main form
+    ctx.moveTo(baseNode.x, baseNode.y)
+    
+    const angle = seededRandom(rndSeed++) * Math.PI * 2
+    const detailX = baseNode.x + Math.cos(angle) * detailSize * 2
+    const detailY = baseNode.y + Math.sin(angle) * detailSize * 2
+    
+    ctx.bezierCurveTo(
+      baseNode.x + Math.cos(angle) * detailSize * 0.5, baseNode.y + Math.sin(angle) * detailSize * 0.5,
+      detailX - Math.cos(angle) * detailSize * 0.3, detailY - Math.sin(angle) * detailSize * 0.3,
+      detailX, detailY
+    )
+    
+    // Complete the small shape
+    ctx.bezierCurveTo(
+      detailX + Math.cos(angle + Math.PI/2) * detailSize * 0.5, detailY + Math.sin(angle + Math.PI/2) * detailSize * 0.5,
+      detailX - Math.cos(angle - Math.PI/2) * detailSize * 0.5, detailY - Math.sin(angle - Math.PI/2) * detailSize * 0.5,
+      baseNode.x, baseNode.y
+    )
   }
+  
+  // Fill with higher contrast
+  ctx.fillStyle = `rgba(255, 255, 255, 0.18)`
+  ctx.fill()
+  
+  // Draw mirror image on right side
+  ctx.save()
+  ctx.translate(width, 0)
+  ctx.scale(-1, 1)
+  ctx.fill()
+  ctx.restore()
   
   ctx.globalCompositeOperation = 'source-over'
 } 
