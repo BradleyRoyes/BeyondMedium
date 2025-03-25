@@ -1,8 +1,16 @@
-// Simple database implementation with Vercel KV for production and fallback to file/localStorage for dev
-// In a more robust production app, you might use a full database like MongoDB, PostgreSQL, etc.
+// Simple database with file-based persistence
+// In a production app, you would use a real database like MongoDB, PostgreSQL, etc.
 import fs from 'fs';
 import path from 'path';
-import { kv } from '@vercel/kv';
+import { WaitlistEntry, CustomEmail, Conversation } from './types';
+import { 
+  addWaitlistEntryToSupabase, 
+  addCustomEmailToSupabase, 
+  getWaitlistEntriesFromSupabase, 
+  getCustomEmailsFromSupabase,
+  updateWaitlistEntryInSupabase,
+  isSupabaseConfigured 
+} from './supabase';
 
 export interface WaitlistEntry {
   id: string;
@@ -26,11 +34,7 @@ export interface CustomEmail {
   timestamp: string;
 }
 
-// Keys for KV storage
-const KV_WAITLIST_KEY = 'waitlist_entries';
-const KV_CUSTOM_EMAILS_KEY = 'custom_emails';
-
-// File paths for local development fallback
+// File paths for data storage
 const DB_FILE_PATH = path.join(process.cwd(), 'data', 'waitlist.json');
 const CUSTOM_EMAILS_FILE_PATH = path.join(process.cwd(), 'data', 'custom-emails.json');
 
@@ -38,69 +42,48 @@ const CUSTOM_EMAILS_FILE_PATH = path.join(process.cwd(), 'data', 'custom-emails.
 let waitlistEntries: WaitlistEntry[] = [];
 let customEmails: CustomEmail[] = [];
 
-// Check if running in Vercel production environment
-const isVercelProduction = process.env.VERCEL === '1';
-
-// Ensure data directory exists (for local development)
+// Ensure data directory exists
 const ensureDataDir = () => {
-  if (isVercelProduction) return; // Skip in Vercel production
-  
   const dataDir = path.join(process.cwd(), 'data');
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
 };
 
-// Load entries from various storage options
-const loadWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
+// Load entries from file system for server-side persistence
+const loadEntriesFromFile = () => {
   try {
-    // Try to load from Vercel KV first
-    if (isVercelProduction) {
-      const kvData = await kv.get<WaitlistEntry[]>(KV_WAITLIST_KEY);
-      if (kvData) return kvData;
-      return [];
-    }
-    
-    // Fallback to file storage for development
     ensureDataDir();
     if (fs.existsSync(DB_FILE_PATH)) {
       const data = fs.readFileSync(DB_FILE_PATH, 'utf-8');
       return JSON.parse(data);
     }
   } catch (error) {
-    console.error('Failed to load waitlist entries:', error);
+    console.error('Failed to load waitlist entries from file:', error);
   }
   return [];
 };
 
-// Load custom emails from storage
-const loadCustomEmails = async (): Promise<CustomEmail[]> => {
+// Load custom emails from file system
+const loadCustomEmailsFromFile = () => {
   try {
-    // Try to load from Vercel KV first
-    if (isVercelProduction) {
-      const kvData = await kv.get<CustomEmail[]>(KV_CUSTOM_EMAILS_KEY);
-      if (kvData) return kvData;
-      return [];
-    }
-    
-    // Fallback to file storage for development
     ensureDataDir();
     if (fs.existsSync(CUSTOM_EMAILS_FILE_PATH)) {
       const data = fs.readFileSync(CUSTOM_EMAILS_FILE_PATH, 'utf-8');
       return JSON.parse(data);
     }
   } catch (error) {
-    console.error('Failed to load custom emails:', error);
+    console.error('Failed to load custom emails from file:', error);
   }
   return [];
 };
 
-// Initialize database (called lazily when needed instead of at module load)
-const initializeDatabase = async () => {
-  // Server-side: Load from storage
+// Initialize data from file system (server-side) or localStorage (client-side)
+const initializeDatabase = () => {
+  // Server-side: Load from file system
   if (typeof window === 'undefined') {
-    waitlistEntries = await loadWaitlistEntries();
-    customEmails = await loadCustomEmails();
+    waitlistEntries = loadEntriesFromFile();
+    customEmails = loadCustomEmailsFromFile();
     return;
   }
   
@@ -120,28 +103,13 @@ const initializeDatabase = async () => {
   }
 };
 
-// Initialize database if not already initialized
-const ensureDatabaseInitialized = async () => {
-  // Only initialize if arrays are empty
-  if (waitlistEntries.length === 0 && customEmails.length === 0) {
-    await initializeDatabase();
-  }
-};
+// Initialize on module load
+initializeDatabase();
 
-// Save waitlist entries to persistent storage
-const saveWaitlistEntries = async () => {
-  // Save to Vercel KV (production)
-  if (typeof window === 'undefined' && isVercelProduction) {
-    try {
-      await kv.set(KV_WAITLIST_KEY, waitlistEntries);
-      return;
-    } catch (error) {
-      console.error('Failed to save waitlist entries to KV storage:', error);
-    }
-  }
-  
-  // Save to file system (server-side development)
-  if (typeof window === 'undefined' && !isVercelProduction) {
+// Save entries to persistent storage
+const saveEntries = () => {
+  // Save to file system (server-side)
+  if (typeof window === 'undefined') {
     try {
       ensureDataDir();
       fs.writeFileSync(DB_FILE_PATH, JSON.stringify(waitlistEntries, null, 2), 'utf-8');
@@ -160,19 +128,9 @@ const saveWaitlistEntries = async () => {
 };
 
 // Save custom emails to persistent storage
-const saveCustomEmails = async () => {
-  // Save to Vercel KV (production)
-  if (typeof window === 'undefined' && isVercelProduction) {
-    try {
-      await kv.set(KV_CUSTOM_EMAILS_KEY, customEmails);
-      return;
-    } catch (error) {
-      console.error('Failed to save custom emails to KV storage:', error);
-    }
-  }
-  
-  // Save to file system (server-side development)
-  if (typeof window === 'undefined' && !isVercelProduction) {
+const saveCustomEmails = () => {
+  // Save to file system (server-side)
+  if (typeof window === 'undefined') {
     try {
       ensureDataDir();
       fs.writeFileSync(CUSTOM_EMAILS_FILE_PATH, JSON.stringify(customEmails, null, 2), 'utf-8');
@@ -191,9 +149,7 @@ const saveCustomEmails = async () => {
 };
 
 // Add a new waitlist entry
-export const addWaitlistEntry = async (email: string): Promise<WaitlistEntry> => {
-  await ensureDatabaseInitialized();
-  
+export const addWaitlistEntry = (email: string): WaitlistEntry => {
   const id = `wl_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const timestamp = new Date().toISOString();
   
@@ -211,16 +167,28 @@ export const addWaitlistEntry = async (email: string): Promise<WaitlistEntry> =>
     }]
   };
   
+  // Add to local storage
   waitlistEntries.push(entry);
-  await saveWaitlistEntries();
+  saveEntries();
+  
+  // Try to add to Supabase if configured
+  if (isSupabaseConfigured()) {
+    addWaitlistEntryToSupabase(entry)
+      .then(success => {
+        if (!success) {
+          console.warn('Failed to add waitlist entry to Supabase, but saved locally');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding waitlist entry to Supabase:', error);
+      });
+  }
   
   return entry;
 };
 
 // Record a custom email sent
-export const recordCustomEmail = async (to: string, subject: string, message: string): Promise<CustomEmail> => {
-  await ensureDatabaseInitialized();
-  
+export const recordCustomEmail = (to: string, subject: string, message: string): CustomEmail => {
   const id = `email_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const timestamp = new Date().toISOString();
   
@@ -232,46 +200,79 @@ export const recordCustomEmail = async (to: string, subject: string, message: st
     timestamp
   };
   
+  // Add to local storage
   customEmails.push(email);
-  await saveCustomEmails();
+  saveCustomEmails();
+  
+  // Try to add to Supabase if configured
+  if (isSupabaseConfigured()) {
+    addCustomEmailToSupabase(email)
+      .then(success => {
+        if (!success) {
+          console.warn('Failed to add custom email to Supabase, but saved locally');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding custom email to Supabase:', error);
+      });
+  }
   
   return email;
 };
 
 // Get all waitlist entries
 export const getWaitlistEntries = async (): Promise<WaitlistEntry[]> => {
-  await ensureDatabaseInitialized();
-  
-  // Refresh data from storage
-  if (typeof window === 'undefined') {
-    waitlistEntries = await loadWaitlistEntries();
+  // Try to get from Supabase first if configured
+  if (isSupabaseConfigured()) {
+    try {
+      const supabaseEntries = await getWaitlistEntriesFromSupabase();
+      if (supabaseEntries.length > 0) {
+        // Update local cache
+        waitlistEntries = supabaseEntries;
+        saveEntries();
+        return supabaseEntries;
+      }
+    } catch (error) {
+      console.error('Error fetching waitlist entries from Supabase:', error);
+    }
   }
   
+  // Fall back to local storage
+  if (typeof window === 'undefined') {
+    waitlistEntries = loadEntriesFromFile();
+  }
   return [...waitlistEntries];
 };
 
 // Get all custom emails
 export const getCustomEmails = async (): Promise<CustomEmail[]> => {
-  await ensureDatabaseInitialized();
-  
-  // Refresh data from storage
-  if (typeof window === 'undefined') {
-    customEmails = await loadCustomEmails();
+  // Try to get from Supabase first if configured
+  if (isSupabaseConfigured()) {
+    try {
+      const supabaseEmails = await getCustomEmailsFromSupabase();
+      if (supabaseEmails.length > 0) {
+        // Update local cache
+        customEmails = supabaseEmails;
+        saveCustomEmails();
+        return supabaseEmails;
+      }
+    } catch (error) {
+      console.error('Error fetching custom emails from Supabase:', error);
+    }
   }
   
+  // Fall back to local storage
+  if (typeof window === 'undefined') {
+    customEmails = loadCustomEmailsFromFile();
+  }
   return [...customEmails];
 };
 
 // Get a specific waitlist entry
 export const getWaitlistEntry = async (id: string): Promise<WaitlistEntry | undefined> => {
-  await ensureDatabaseInitialized();
-  
-  // Refresh data from storage
-  if (typeof window === 'undefined') {
-    waitlistEntries = await loadWaitlistEntries();
-  }
-  
-  return waitlistEntries.find(entry => entry.id === id);
+  // Refresh entries to ensure latest data
+  const entries = await getWaitlistEntries();
+  return entries.find(entry => entry.id === id);
 };
 
 // Add a response to a waitlist entry
@@ -280,27 +281,41 @@ export const addResponseToEntry = async (
   subject: string, 
   message: string
 ): Promise<WaitlistEntry | null> => {
-  await ensureDatabaseInitialized();
+  // Refresh entries to ensure latest data
+  const entries = await getWaitlistEntries();
+  const entryIndex = entries.findIndex(entry => entry.id === id);
   
-  // Refresh data from storage
-  if (typeof window === 'undefined') {
-    waitlistEntries = await loadWaitlistEntries();
-  }
+  if (entryIndex === -1) return null;
   
-  const entry = waitlistEntries.find(entry => entry.id === id);
+  const entry = entries[entryIndex];
   
-  if (!entry) return null;
-  
-  entry.conversations.push({
+  const newConversation: Conversation = {
     from: 'connect@beyondmedium.com',
     to: entry.email,
     subject,
     message,
     timestamp: new Date().toISOString()
-  });
+  };
   
+  entry.conversations.push(newConversation);
   entry.responded = true;
-  await saveWaitlistEntries();
+  
+  // Update in local storage
+  waitlistEntries[entryIndex] = entry;
+  saveEntries();
+  
+  // Try to update in Supabase if configured
+  if (isSupabaseConfigured()) {
+    updateWaitlistEntryInSupabase(entry)
+      .then(success => {
+        if (!success) {
+          console.warn('Failed to update waitlist entry in Supabase, but saved locally');
+        }
+      })
+      .catch(error => {
+        console.error('Error updating waitlist entry in Supabase:', error);
+      });
+  }
   
   return entry;
 }; 

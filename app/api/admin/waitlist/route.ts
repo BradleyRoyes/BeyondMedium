@@ -28,21 +28,21 @@ export async function GET(request: NextRequest): Promise<Response> {
       );
     }
     
-    // Get all waitlist entries - now using async/await
+    // Get waitlist entries
     const entries = await getWaitlistEntries();
     
     // Return entries
-    return Response.json({
-      success: true,
-      data: entries
-    });
+    return Response.json(
+      { success: true, data: entries },
+      { status: 200 }
+    );
   } catch (error) {
     console.error('Error fetching waitlist entries:', error);
     
     return Response.json(
       { 
         success: false, 
-        message: 'Failed to fetch waitlist entries'
+        message: error instanceof Error ? error.message : 'Failed to fetch entries'
       },
       { status: 500 }
     );

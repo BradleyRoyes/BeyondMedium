@@ -28,21 +28,21 @@ export async function GET(request: NextRequest): Promise<Response> {
       );
     }
     
-    // Get all custom emails - now using async/await
+    // Get custom emails
     const emails = await getCustomEmails();
     
     // Return emails
-    return Response.json({
-      success: true,
-      data: emails
-    });
+    return Response.json(
+      { success: true, data: emails },
+      { status: 200 }
+    );
   } catch (error) {
     console.error('Error fetching custom emails:', error);
     
     return Response.json(
       { 
         success: false, 
-        message: 'Failed to fetch custom emails'
+        message: error instanceof Error ? error.message : 'Failed to fetch emails'
       },
       { status: 500 }
     );
