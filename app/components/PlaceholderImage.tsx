@@ -23,7 +23,7 @@ export function PlaceholderImage({
   
   useEffect(() => {
     if (uniquePattern.current === null) {
-      uniquePattern.current = Math.floor(Math.random() * 8) // Increased to 8 pattern types
+      uniquePattern.current = Math.floor(Math.random() * 12) // Increased to 12 pattern types
       seedValue.current = Math.random() * 10000 | 0 // Integer seed for deterministic randomness
     }
     
@@ -89,15 +89,22 @@ export function PlaceholderImage({
       case 7: // Sacred Geometry
         drawSacredGeometry(ctx, width, height, seedValue.current)
         break
+      case 8: // Impossible Geometry (new)
+        drawImpossibleGeometry(ctx, width, height, seedValue.current)
+        break
+      case 9: // Visual Drift (new)
+        drawVisualDrift(ctx, width, height, seedValue.current)
+        break
+      case 10: // Moiré Pattern (new)
+        drawMoirePattern(ctx, width, height, seedValue.current)
+        break
+      case 11: // Chromatic Flow (new)
+        drawChromaticFlow(ctx, width, height, seedValue.current)
+        break
     }
     
-    // Add subtle overlay with title first letter - slightly reduce opacity
-    const firstLetter = title.charAt(0).toUpperCase()
-    ctx.font = 'bold 300px sans-serif'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)'
-    ctx.fillText(firstLetter, width / 2, height / 2)
+    // Draw the letter in an abstract way
+    drawAbstractLetter(ctx, width, height, title.charAt(0).toUpperCase(), seedValue.current)
     
   }, [width, height, title, category])
   
@@ -735,4 +742,940 @@ function drawSacredGeometry(ctx: CanvasRenderingContext2D, width: number, height
   ctx.restore()
   
   ctx.globalCompositeOperation = 'source-over'
+}
+
+// 8. Impossible Geometry - inspired by M.C. Escher and impossible objects
+function drawImpossibleGeometry(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'multiply';
+  
+  const centerX = width / 2;
+  const centerY = height / 2;
+  let rndSeed = seed;
+  
+  // Size of the impossible shape
+  const size = Math.min(width, height) * 0.4;
+  
+  // Draw the impossible triangle (Penrose triangle)
+  ctx.beginPath();
+  
+  // Calculate points for the impossible triangle
+  const points = [];
+  
+  // Generate the three corner points of the triangle
+  for (let i = 0; i < 3; i++) {
+    const angle = (Math.PI * 2 / 3) * i + Math.PI / 6;
+    points.push({
+      x: centerX + Math.cos(angle) * size,
+      y: centerY + Math.sin(angle) * size
+    });
+  }
+  
+  // Create the three sides of the impossible triangle
+  for (let i = 0; i < 3; i++) {
+    const currentPoint = points[i];
+    const nextPoint = points[(i + 1) % 3];
+    
+    // Width of the beam
+    const beamWidth = size * 0.15;
+    
+    // Calculate angle for this side
+    const angle = Math.atan2(nextPoint.y - currentPoint.y, nextPoint.x - currentPoint.x);
+    
+    // Calculate perpendicular offset
+    const perpX = Math.sin(angle) * beamWidth;
+    const perpY = -Math.cos(angle) * beamWidth;
+    
+    // Draw the paradoxical connection at corners
+    ctx.save();
+    ctx.translate(currentPoint.x, currentPoint.y);
+    ctx.rotate(angle);
+    
+    const sideLength = Math.sqrt(
+      Math.pow(nextPoint.x - currentPoint.x, 2) + 
+      Math.pow(nextPoint.y - currentPoint.y, 2)
+    );
+    
+    // Draw a beam with "impossible" connection
+    const gradient = ctx.createLinearGradient(0, -beamWidth, 0, beamWidth);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.15)');
+    
+    ctx.fillStyle = gradient;
+    
+    // Draw the beam with a notch to create the impossible effect
+    ctx.beginPath();
+    
+    // First part - a simple rectangle
+    ctx.rect(0, -beamWidth/2, sideLength * 0.7, beamWidth);
+    
+    // Create the "impossible" connection effect
+    if (i === 0) {
+      ctx.rect(sideLength * 0.7, -beamWidth * 0.8, sideLength * 0.3, beamWidth * 1.6);
+    } else if (i === 1) {
+      ctx.rect(sideLength * 0.7, -beamWidth * 0.5, sideLength * 0.3, beamWidth * 1.3);
+    } else {
+      ctx.rect(sideLength * 0.7, -beamWidth * 0.3, sideLength * 0.3, beamWidth);
+    }
+    
+    ctx.fill();
+    ctx.restore();
+  }
+  
+  // Add some geometric details to enhance the impossible appearance
+  const detailCount = 5 + Math.floor(seededRandom(rndSeed++) * 5);
+  
+  ctx.beginPath();
+  for (let i = 0; i < detailCount; i++) {
+    const angle = seededRandom(rndSeed++) * Math.PI * 2;
+    const distance = size * (0.4 + seededRandom(rndSeed++) * 0.6);
+    
+    const x = centerX + Math.cos(angle) * distance;
+    const y = centerY + Math.sin(angle) * distance;
+    
+    const detailSize = size * (0.05 + seededRandom(rndSeed++) * 0.15);
+    
+    // Random impossible detail
+    if (seededRandom(rndSeed++) > 0.5) {
+      // Small cube
+      drawImpossibleCube(ctx, x, y, detailSize, rndSeed);
+      rndSeed += 3;
+    } else {
+      // Circle with impossible shadow
+      ctx.moveTo(x + detailSize, y);
+      ctx.arc(x, y, detailSize, 0, Math.PI * 2);
+      
+      // Add shadow that defies light logic
+      const shadowAngle = angle + Math.PI / 2 + seededRandom(rndSeed++) * Math.PI;
+      const shadowX = x + Math.cos(shadowAngle) * detailSize * 2;
+      const shadowY = y + Math.sin(shadowAngle) * detailSize * 2;
+      
+      ctx.moveTo(shadowX + detailSize * 0.7, shadowY);
+      ctx.arc(shadowX, shadowY, detailSize * 0.7, 0, Math.PI * 2);
+    }
+  }
+  
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+  ctx.fill();
+  
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// Helper function to draw a small impossible cube
+function drawImpossibleCube(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, seed: number) {
+  let rndSeed = seed;
+  
+  // Draw cube that violates perspective rules
+  ctx.save();
+  ctx.translate(x, y);
+  
+  // Rotation to make it look impossible
+  const rotate = seededRandom(rndSeed++) * Math.PI;
+  ctx.rotate(rotate);
+  
+  // Front face
+  ctx.beginPath();
+  ctx.rect(-size/2, -size/2, size, size);
+  
+  // Top face (perspective should make this a parallelogram, but we'll make it rectangular)
+  ctx.moveTo(-size/2, -size/2);
+  ctx.lineTo(-size/2 - size/3, -size/2 - size/3);
+  ctx.lineTo(size/2 - size/3, -size/2 - size/3);
+  ctx.lineTo(size/2, -size/2);
+  
+  // Right face (another impossible connection)
+  ctx.moveTo(size/2, -size/2);
+  ctx.lineTo(size/2, size/2);
+  ctx.lineTo(size/2 - size/3, size/2 + size/3);
+  ctx.lineTo(size/2 - size/3, -size/2 - size/3);
+  
+  ctx.restore();
+}
+
+// 9. Visual Drift - creating the illusion of movement
+function drawVisualDrift(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'soft-light';
+  
+  const centerX = width / 2;
+  const centerY = height / 2;
+  let rndSeed = seed;
+  
+  // Choose pattern type
+  const patternType = Math.floor(seededRandom(rndSeed++) * 3);
+  
+  if (patternType === 0) {
+    // Concentric circles with phase shift
+    const ringCount = 10 + Math.floor(seededRandom(rndSeed++) * 20);
+    const maxRadius = Math.min(width, height) * 0.4;
+    
+    ctx.beginPath();
+    
+    for (let i = 0; i < ringCount; i++) {
+      const radius = maxRadius * (i / ringCount);
+      const lineWidth = 3 + seededRandom(rndSeed++) * 2;
+      
+      // Phase shift creates illusion of movement
+      const phase = seededRandom(rndSeed++) * Math.PI * 2;
+      
+      // Draw a slightly broken circle
+      for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+        const gapChance = seededRandom(rndSeed++);
+        if (gapChance > 0.9) continue; // create random gaps
+        
+        const modulation = Math.sin(angle * 6 + phase) * lineWidth;
+        const actualRadius = radius + modulation;
+        
+        const x = centerX + Math.cos(angle) * actualRadius;
+        const y = centerY + Math.sin(angle) * actualRadius;
+        
+        if (angle === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  else if (patternType === 1) {
+    // Radial drift lines
+    const lineCount = 30 + Math.floor(seededRandom(rndSeed++) * 50);
+    const maxLength = Math.min(width, height) * 0.4;
+    
+    ctx.beginPath();
+    
+    for (let i = 0; i < lineCount; i++) {
+      const angle = (Math.PI * 2 / lineCount) * i;
+      const length = maxLength * (0.3 + seededRandom(rndSeed++) * 0.7);
+      
+      // Starting point slight offset from center
+      const startDistance = maxLength * seededRandom(rndSeed++) * 0.3;
+      const startX = centerX + Math.cos(angle) * startDistance;
+      const startY = centerY + Math.sin(angle) * startDistance;
+      
+      // End point
+      const endX = centerX + Math.cos(angle) * (startDistance + length);
+      const endY = centerY + Math.sin(angle) * (startDistance + length);
+      
+      // Draw line with varying thickness
+      ctx.moveTo(startX, startY);
+      
+      // Add some curve for visual interest
+      const controlOffsetX = Math.sin(angle) * length * 0.1;
+      const controlOffsetY = -Math.cos(angle) * length * 0.1;
+      
+      ctx.quadraticCurveTo(
+        startX + (endX - startX) * 0.5 + controlOffsetX,
+        startY + (endY - startY) * 0.5 + controlOffsetY,
+        endX, endY
+      );
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  else {
+    // Spiral drift
+    const spiralCount = 2 + Math.floor(seededRandom(rndSeed++) * 3);
+    const spiralTurns = 3 + Math.floor(seededRandom(rndSeed++) * 5);
+    const maxRadius = Math.min(width, height) * 0.4;
+    
+    for (let j = 0; j < spiralCount; j++) {
+      ctx.beginPath();
+      
+      // Each spiral has an offset start angle
+      const startAngle = (Math.PI * 2 / spiralCount) * j;
+      
+      // Draw each spiral
+      for (let i = 0; i <= 100; i++) {
+        const t = i / 100;
+        
+        // Spiral equations
+        const angle = startAngle + spiralTurns * Math.PI * 2 * t;
+        const radius = maxRadius * t;
+        
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          // Add some oscillation for visual drift effect
+          const oscillationAngle = angle * 7;
+          const oscillationAmount = 2 + Math.sin(oscillationAngle) * 5 * t;
+          
+          const oscillateX = Math.sin(angle + Math.PI/2) * oscillationAmount;
+          const oscillateY = -Math.cos(angle + Math.PI/2) * oscillationAmount;
+          
+          ctx.lineTo(x + oscillateX, y + oscillateY);
+        }
+      }
+      
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + j * 0.05})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+  
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// Abstract letter drawing function
+function drawAbstractLetter(ctx: CanvasRenderingContext2D, width: number, height: number, letter: string, seed: number) {
+  let rndSeed = seed;
+  const letterStyle = Math.floor(seededRandom(rndSeed++) * 5); // 5 different letter styles
+  
+  // Save context state before drawing letter
+  ctx.save();
+  
+  switch(letterStyle) {
+    case 0: // Fragmented letter
+      drawFragmentedLetter(ctx, width, height, letter, rndSeed);
+      break;
+    case 1: // Glitch letter
+      drawGlitchLetter(ctx, width, height, letter, rndSeed);
+      break;
+    case 2: // Contour letter
+      drawContourLetter(ctx, width, height, letter, rndSeed);
+      break;
+    case 3: // Liquid letter
+      drawLiquidLetter(ctx, width, height, letter, rndSeed);
+      break;
+    case 4: // Geometric letter
+      drawGeometricLetter(ctx, width, height, letter, rndSeed);
+      break;
+  }
+  
+  // Restore context state after drawing letter
+  ctx.restore();
+}
+
+// Draw a letter broken into fragments
+function drawFragmentedLetter(ctx: CanvasRenderingContext2D, width: number, height: number, letter: string, seed: number) {
+  let rndSeed = seed;
+  const fragmentCount = 5 + Math.floor(seededRandom(rndSeed++) * 8);
+  
+  // Draw base letter into offscreen canvas to sample from
+  const offscreen = document.createElement('canvas');
+  offscreen.width = width;
+  offscreen.height = height;
+  const offCtx = offscreen.getContext('2d');
+  
+  if (!offCtx) return;
+  
+  // Draw the letter large on the offscreen canvas
+  offCtx.font = 'bold 300px sans-serif';
+  offCtx.textAlign = 'center';
+  offCtx.textBaseline = 'middle';
+  offCtx.fillStyle = 'white';
+  offCtx.fillText(letter, width / 2, height / 2);
+  
+  // Create fragments from random portions of the letter
+  ctx.globalCompositeOperation = 'overlay';
+  
+  for (let i = 0; i < fragmentCount; i++) {
+    // Random position within the text bounds
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) * 0.3;
+    
+    const x = centerX + (seededRandom(rndSeed++) - 0.5) * radius;
+    const y = centerY + (seededRandom(rndSeed++) - 0.5) * radius;
+    
+    // Random fragment size
+    const fragmentSize = 20 + seededRandom(rndSeed++) * 80;
+    
+    // Offset the fragment slightly
+    const offsetX = (seededRandom(rndSeed++) - 0.5) * 30;
+    const offsetY = (seededRandom(rndSeed++) - 0.5) * 30;
+    
+    // Get the data from the original letter canvas
+    try {
+      const imgData = offCtx.getImageData(
+        x - fragmentSize/2, 
+        y - fragmentSize/2, 
+        fragmentSize, 
+        fragmentSize
+      );
+      
+      // Draw the fragment with slight offset
+      ctx.putImageData(imgData, x - fragmentSize/2 + offsetX, y - fragmentSize/2 + offsetY);
+    } catch (e) {
+      // Skip if fragment is out of bounds
+      continue;
+    }
+  }
+  
+  // Restore the normal composite operation
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// Draw a letter with glitch effect
+function drawGlitchLetter(ctx: CanvasRenderingContext2D, width: number, height: number, letter: string, seed: number) {
+  let rndSeed = seed;
+  const glitchCount = 3 + Math.floor(seededRandom(rndSeed++) * 5);
+  
+  // Base letter style
+  ctx.globalAlpha = 0.2;
+  ctx.font = 'bold 300px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  // Draw glitch layers
+  for (let i = 0; i < glitchCount; i++) {
+    // RGB channels with slight offset
+    const rgb = [
+      seededRandom(rndSeed++) > 0.5 ? 255 : 200,
+      seededRandom(rndSeed++) > 0.5 ? 255 : 200,
+      seededRandom(rndSeed++) > 0.5 ? 255 : 200
+    ];
+    
+    const offsetX = (seededRandom(rndSeed++) - 0.5) * 15;
+    const offsetY = (seededRandom(rndSeed++) - 0.5) * 15;
+    
+    ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.15)`;
+    ctx.fillText(letter, width / 2 + offsetX, height / 2 + offsetY);
+  }
+  
+  // Reset alpha
+  ctx.globalAlpha = 1.0;
+}
+
+// Draw a letter with contour effect
+function drawContourLetter(ctx: CanvasRenderingContext2D, width: number, height: number, letter: string, seed: number) {
+  let rndSeed = seed;
+  
+  // Draw base letter into offscreen canvas to sample from
+  const offscreen = document.createElement('canvas');
+  offscreen.width = width;
+  offscreen.height = height;
+  const offCtx = offscreen.getContext('2d');
+  
+  if (!offCtx) return;
+  
+  // Draw the letter large on the offscreen canvas
+  offCtx.font = 'bold 300px sans-serif';
+  offCtx.textAlign = 'center';
+  offCtx.textBaseline = 'middle';
+  offCtx.fillStyle = 'white';
+  offCtx.fillText(letter, width / 2, height / 2);
+  
+  // Get image data to sample
+  let imageData;
+  try {
+    imageData = offCtx.getImageData(0, 0, width, height);
+  } catch (e) {
+    return;
+  }
+  
+  // Draw topographic contours
+  const contourCount = 5 + Math.floor(seededRandom(rndSeed++) * 5);
+  const contourSpacing = 255 / contourCount;
+  
+  ctx.globalCompositeOperation = 'overlay';
+  
+  // Draw contours at different alpha levels
+  for (let c = 1; c <= contourCount; c++) {
+    const threshold = c * contourSpacing;
+    
+    ctx.beginPath();
+    
+    // Sample grid
+    const gridStep = 5;
+    
+    for (let y = 0; y < height; y += gridStep) {
+      for (let x = 0; x < width; x += gridStep) {
+        const index = (y * width + x) * 4;
+        const alpha = imageData.data[index + 3];
+        
+        // Check if this point is near the contour threshold
+        if (alpha > threshold - 5 && alpha < threshold + 5) {
+          ctx.rect(x, y, 2, 2);
+        }
+      }
+    }
+    
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.05 + c * 0.02})`;
+    ctx.fill();
+  }
+  
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// Draw a letter with liquid/fluid effect
+function drawLiquidLetter(ctx: CanvasRenderingContext2D, width: number, height: number, letter: string, seed: number) {
+  let rndSeed = seed;
+  
+  // Base letter with drips
+  ctx.font = 'bold 300px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+  
+  // Draw the base letter
+  ctx.fillText(letter, width / 2, height / 2);
+  
+  // Draw liquid droplets and splashes
+  const dropletCount = 10 + Math.floor(seededRandom(rndSeed++) * 15);
+  
+  // Draw base letter into offscreen canvas to sample from
+  const offscreen = document.createElement('canvas');
+  offscreen.width = width;
+  offscreen.height = height;
+  const offCtx = offscreen.getContext('2d');
+  
+  if (!offCtx) return;
+  
+  // Draw the letter large on the offscreen canvas
+  offCtx.font = 'bold 300px sans-serif';
+  offCtx.textAlign = 'center';
+  offCtx.textBaseline = 'middle';
+  offCtx.fillStyle = 'white';
+  offCtx.fillText(letter, width / 2, height / 2);
+  
+  // Create drips from the letter
+  ctx.beginPath();
+  
+  for (let i = 0; i < dropletCount; i++) {
+    // Find a random position within the letter
+    const testX = Math.floor(width * 0.3 + seededRandom(rndSeed++) * width * 0.4);
+    const testY = Math.floor(height * 0.3 + seededRandom(rndSeed++) * height * 0.4);
+    
+    // Sample to check if we're in the letter
+    let pixelData;
+    try {
+      pixelData = offCtx.getImageData(testX, testY, 1, 1).data;
+    } catch (e) {
+      continue;
+    }
+    
+    if (pixelData[3] > 0) {
+      // We're in the letter - create a drip
+      const dripLength = 20 + seededRandom(rndSeed++) * 80;
+      const dripWidth = 3 + seededRandom(rndSeed++) * 10;
+      
+      // Random direction but biased downward
+      const angle = Math.PI / 2 + (seededRandom(rndSeed++) - 0.5) * Math.PI * 0.8;
+      
+      // Path for the drip
+      ctx.moveTo(testX, testY);
+      
+      const controlX1 = testX + Math.cos(angle) * dripLength * 0.3;
+      const controlY1 = testY + Math.sin(angle) * dripLength * 0.3;
+      
+      const controlX2 = testX + Math.cos(angle) * dripLength * 0.6;
+      const controlY2 = testY + Math.sin(angle) * dripLength * 0.6;
+      
+      const endX = testX + Math.cos(angle) * dripLength;
+      const endY = testY + Math.sin(angle) * dripLength;
+      
+      ctx.bezierCurveTo(controlX1, controlY1, controlX2, controlY2, endX, endY);
+      
+      // Add droplet at the end
+      ctx.moveTo(endX + dripWidth * 0.8, endY);
+      ctx.arc(endX, endY, dripWidth * 0.8, 0, Math.PI * 2);
+    }
+  }
+  
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.fill();
+}
+
+// Draw a letter composed of geometric shapes
+function drawGeometricLetter(ctx: CanvasRenderingContext2D, width: number, height: number, letter: string, seed: number) {
+  let rndSeed = seed;
+  
+  // Draw base letter into offscreen canvas to sample from
+  const offscreen = document.createElement('canvas');
+  offscreen.width = width;
+  offscreen.height = height;
+  const offCtx = offscreen.getContext('2d');
+  
+  if (!offCtx) return;
+  
+  // Draw the letter large on the offscreen canvas
+  offCtx.font = 'bold 300px sans-serif';
+  offCtx.textAlign = 'center';
+  offCtx.textBaseline = 'middle';
+  offCtx.fillStyle = 'white';
+  offCtx.fillText(letter, width / 2, height / 2);
+  
+  // Get image data to sample
+  let imageData;
+  try {
+    imageData = offCtx.getImageData(0, 0, width, height);
+  } catch (e) {
+    return;
+  }
+  
+  // Geometric shape type
+  const shapeType = Math.floor(seededRandom(rndSeed++) * 3);
+  
+  // Draw geometric shapes arranged to form the letter
+  const gridStep = shapeType === 0 ? 12 : (shapeType === 1 ? 15 : 18);
+  
+  ctx.beginPath();
+  
+  for (let y = 0; y < height; y += gridStep) {
+    for (let x = 0; x < width; x += gridStep) {
+      const index = (y * width + x) * 4;
+      const alpha = imageData.data[index + 3];
+      
+      // Only place shapes where the letter is
+      if (alpha > 30) {
+        const shapeSize = gridStep * (0.5 + seededRandom(rndSeed++) * 0.5);
+        
+        if (shapeType === 0) {
+          // Rectangles
+          ctx.rect(
+            x - shapeSize/2, 
+            y - shapeSize/2, 
+            shapeSize, 
+            shapeSize
+          );
+        } 
+        else if (shapeType === 1) {
+          // Circles
+          ctx.moveTo(x + shapeSize/2, y);
+          ctx.arc(x, y, shapeSize/2, 0, Math.PI * 2);
+        }
+        else {
+          // Triangles
+          const height = shapeSize * 0.866;
+          
+          ctx.moveTo(x, y - height/2);
+          ctx.lineTo(x - shapeSize/2, y + height/2);
+          ctx.lineTo(x + shapeSize/2, y + height/2);
+          ctx.closePath();
+        }
+      }
+    }
+  }
+  
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+  ctx.fill();
+}
+
+// 10. Moiré Pattern - interference patterns that create optical illusions
+function drawMoirePattern(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'screen';
+  
+  let rndSeed = seed;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  
+  // Choose pattern type
+  const patternType = Math.floor(seededRandom(rndSeed++) * 3);
+  
+  if (patternType === 0) {
+    // Concentric circles with offset centers
+    const circleCount = 20 + Math.floor(seededRandom(rndSeed++) * 30);
+    const spacing = Math.min(width, height) * 0.02;
+    
+    // Draw first set of concentric circles
+    ctx.beginPath();
+    const offset1X = centerX + (seededRandom(rndSeed++) - 0.5) * spacing * 4;
+    const offset1Y = centerY + (seededRandom(rndSeed++) - 0.5) * spacing * 4;
+    
+    for (let i = 0; i < circleCount; i++) {
+      const radius = i * spacing;
+      ctx.moveTo(offset1X + radius, offset1Y);
+      ctx.arc(offset1X, offset1Y, radius, 0, Math.PI * 2);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Draw second set of concentric circles with offset
+    ctx.beginPath();
+    const offset2X = centerX + (seededRandom(rndSeed++) - 0.5) * spacing * 4;
+    const offset2Y = centerY + (seededRandom(rndSeed++) - 0.5) * spacing * 4;
+    
+    for (let i = 0; i < circleCount; i++) {
+      const radius = i * spacing;
+      ctx.moveTo(offset2X + radius, offset2Y);
+      ctx.arc(offset2X, offset2Y, radius, 0, Math.PI * 2);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.stroke();
+  }
+  else if (patternType === 1) {
+    // Linear grid moiré
+    const lineCount = 40 + Math.floor(seededRandom(rndSeed++) * 30);
+    const spacing = width / lineCount;
+    
+    // First grid - vertical
+    ctx.beginPath();
+    for (let i = 0; i < lineCount; i++) {
+      const x = i * spacing;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Second grid - vertical with rotation
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(seededRandom(rndSeed++) * 0.05); // Small rotation angle
+    ctx.translate(-centerX, -centerY);
+    
+    ctx.beginPath();
+    for (let i = 0; i < lineCount; i++) {
+      const x = i * spacing;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.stroke();
+    ctx.restore();
+    
+    // Third grid - horizontal
+    ctx.beginPath();
+    for (let i = 0; i < lineCount; i++) {
+      const y = i * spacing;
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.stroke();
+    
+    // Fourth grid - horizontal with rotation
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(seededRandom(rndSeed++) * 0.05); // Small rotation angle
+    ctx.translate(-centerX, -centerY);
+    
+    ctx.beginPath();
+    for (let i = 0; i < lineCount; i++) {
+      const y = i * spacing;
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.stroke();
+    ctx.restore();
+  }
+  else {
+    // Radial moiré
+    const lineCount = 60 + Math.floor(seededRandom(rndSeed++) * 40);
+    const maxRadius = Math.min(width, height) * 0.5;
+    
+    // First radial set
+    ctx.beginPath();
+    for (let i = 0; i < lineCount; i++) {
+      const angle = (Math.PI * 2 / lineCount) * i;
+      const x = centerX + Math.cos(angle) * maxRadius;
+      const y = centerY + Math.sin(angle) * maxRadius;
+      
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(x, y);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Second radial set with offset center
+    const offset2X = centerX + (seededRandom(rndSeed++) - 0.5) * 20;
+    const offset2Y = centerY + (seededRandom(rndSeed++) - 0.5) * 20;
+    
+    ctx.beginPath();
+    for (let i = 0; i < lineCount; i++) {
+      const angle = (Math.PI * 2 / lineCount) * i;
+      const x = offset2X + Math.cos(angle) * maxRadius;
+      const y = offset2Y + Math.sin(angle) * maxRadius;
+      
+      ctx.moveTo(offset2X, offset2Y);
+      ctx.lineTo(x, y);
+    }
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.stroke();
+  }
+  
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// 11. Chromatic Flow - color and pattern flow resembling synesthesia or neural patterns
+function drawChromaticFlow(ctx: CanvasRenderingContext2D, width: number, height: number, seed: number) {
+  ctx.globalCompositeOperation = 'overlay';
+  
+  let rndSeed = seed;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  
+  // Flow pattern type
+  const flowType = Math.floor(seededRandom(rndSeed++) * 3);
+  
+  if (flowType === 0) {
+    // Neural network flow
+    const nodeCount = 15 + Math.floor(seededRandom(rndSeed++) * 20);
+    const connectionChance = 0.3;
+    
+    // Create nodes
+    const nodes = [];
+    for (let i = 0; i < nodeCount; i++) {
+      const angle = seededRandom(rndSeed++) * Math.PI * 2;
+      const distance = seededRandom(rndSeed++) * Math.min(width, height) * 0.4;
+      
+      nodes.push({
+        x: centerX + Math.cos(angle) * distance,
+        y: centerY + Math.sin(angle) * distance,
+        size: 3 + seededRandom(rndSeed++) * 8
+      });
+    }
+    
+    // Draw connections
+    ctx.beginPath();
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        if (seededRandom(rndSeed++) < connectionChance) {
+          const nodeA = nodes[i];
+          const nodeB = nodes[j];
+          
+          // Calculate distance
+          const dx = nodeB.x - nodeA.x;
+          const dy = nodeB.y - nodeA.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Only connect relatively close nodes
+          if (distance < Math.min(width, height) * 0.25) {
+            ctx.moveTo(nodeA.x, nodeA.y);
+            
+            // Flow curve with control points
+            const midX = (nodeA.x + nodeB.x) / 2;
+            const midY = (nodeA.y + nodeB.y) / 2;
+            
+            const controlOffsetX = (seededRandom(rndSeed++) - 0.5) * distance * 0.5;
+            const controlOffsetY = (seededRandom(rndSeed++) - 0.5) * distance * 0.5;
+            
+            ctx.quadraticCurveTo(
+              midX + controlOffsetX,
+              midY + controlOffsetY,
+              nodeB.x, nodeB.y
+            );
+          }
+        }
+      }
+    }
+    
+    // Style the connections
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Draw the nodes
+    ctx.beginPath();
+    for (const node of nodes) {
+      ctx.moveTo(node.x + node.size, node.y);
+      ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2);
+    }
+    
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fill();
+  }
+  else if (flowType === 1) {
+    // Flowing waves
+    const waveCount = 5 + Math.floor(seededRandom(rndSeed++) * 7);
+    const amplitude = Math.min(width, height) * 0.1;
+    const ySpacing = height / (waveCount + 1);
+    
+    for (let i = 0; i < waveCount; i++) {
+      const y = ySpacing * (i + 1);
+      const frequency = 0.01 + seededRandom(rndSeed++) * 0.03;
+      const phase = seededRandom(rndSeed++) * Math.PI * 2;
+      
+      ctx.beginPath();
+      
+      for (let x = 0; x <= width; x += 3) {
+        const waveY = y + Math.sin(x * frequency + phase) * amplitude;
+        
+        if (x === 0) {
+          ctx.moveTo(x, waveY);
+        } else {
+          ctx.lineTo(x, waveY);
+        }
+      }
+      
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + i * 0.02})`;
+      ctx.lineWidth = 2 + i * 0.5;
+      ctx.stroke();
+    }
+  }
+  else {
+    // Color field flow
+    const fieldSize = 20;
+    const cols = Math.ceil(width / fieldSize);
+    const rows = Math.ceil(height / fieldSize);
+    
+    // Generate a flow field
+    const flowField = [];
+    for (let y = 0; y < rows; y++) {
+      flowField[y] = [];
+      for (let x = 0; x < cols; x++) {
+        // Use perlin-like approach for smooth angles
+        const nx = x / cols;
+        const ny = y / rows;
+        
+        // Generate angle based on position
+        const angle = (
+          Math.sin(nx * 5 + seed * 0.1) + 
+          Math.cos(ny * 5 + seed * 0.2)
+        ) * Math.PI;
+        
+        flowField[y][x] = angle;
+      }
+    }
+    
+    // Draw flow particles
+    const particleCount = 100 + Math.floor(seededRandom(rndSeed++) * 150);
+    
+    for (let i = 0; i < particleCount; i++) {
+      // Random starting position
+      let x = seededRandom(rndSeed++) * width;
+      let y = seededRandom(rndSeed++) * height;
+      
+      const steps = 10 + Math.floor(seededRandom(rndSeed++) * 20);
+      const stepLength = 3 + seededRandom(rndSeed++) * 5;
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      
+      // Follow the flow field
+      for (let j = 0; j < steps; j++) {
+        // Get grid position
+        const col = Math.min(cols - 1, Math.max(0, Math.floor(x / fieldSize)));
+        const row = Math.min(rows - 1, Math.max(0, Math.floor(y / fieldSize)));
+        
+        // Get flow angle
+        const angle = flowField[row][col];
+        
+        // Move along the field
+        x += Math.cos(angle) * stepLength;
+        y += Math.sin(angle) * stepLength;
+        
+        // Stop if out of bounds
+        if (x < 0 || x >= width || y < 0 || y >= height) break;
+        
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1 + seededRandom(rndSeed++) * 2;
+      ctx.stroke();
+    }
+  }
+  
+  ctx.globalCompositeOperation = 'source-over';
 } 

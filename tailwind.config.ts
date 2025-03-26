@@ -96,12 +96,27 @@ const config: Config = {
                     opacity: '0', 
                     boxShadow: '0 0 0 0 rgba(164, 194, 194, 0)'
                 }
+            },
+            'mint-pulse-mobile': {
+                '0%': { 
+                    opacity: '0.3',
+                    boxShadow: '0 0 10px 2px rgba(164, 194, 194, 0.2)'
+                },
+                '50%': { 
+                    opacity: '0.5',
+                    boxShadow: '0 0 25px 8px rgba(164, 194, 194, 0.4)'
+                },
+                '100%': { 
+                    opacity: '0.3', 
+                    boxShadow: '0 0 10px 2px rgba(164, 194, 194, 0.2)'
+                }
             }
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
-            'mint-pulse': 'mint-pulse 3s ease-in-out infinite'
+            'mint-pulse': 'mint-pulse 3s ease-in-out infinite',
+            'mint-pulse-mobile': 'mint-pulse-mobile 4s ease-in-out infinite'
   		}
   	}
   },

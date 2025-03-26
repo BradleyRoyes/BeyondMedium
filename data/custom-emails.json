@@ -1,30 +1,16 @@
 [
   {
-    "id": "email_1742934475117_sp41y17",
-    "to": "Bradroyes@gmail.com",
-    "subject": "hi",
-    "message": "weeeee",
-    "timestamp": "2025-03-25T20:27:55.117Z"
+    "id": "9",
+    "to": "test@example.com",
+    "subject": "Test Email",
+    "message": "",
+    "timestamp": "2025-03-25T22:17:00.202+00:00"
   },
   {
-    "id": "email_1742935727622_vg92cji",
-    "to": "Bradroyes@gmail.com",
-    "subject": "World Mental Health Day Announcement",
-    "message": "tttt",
-    "timestamp": "2025-03-25T20:48:47.622Z"
-  },
-  {
-    "id": "email_1742936237386_oqxbahu",
-    "to": "Bradroyes@gmail.com",
-    "subject": "testt",
-    "message": "gsgsgs",
-    "timestamp": "2025-03-25T20:57:17.386Z"
-  },
-  {
-    "id": "email_1742936723924_g1rqqcl",
-    "to": "Bradroyes@gmail.com",
-    "subject": "The nEUsletter:  PsychedeliCare accepted by the European Commission, and more!",
-    "message": "ddd",
-    "timestamp": "2025-03-25T21:05:23.924Z"
+    "id": "8",
+    "to": "test@example.com",
+    "subject": "Test Email from Diagnostic API",
+    "message": "",
+    "timestamp": "2025-03-25T22:16:01.328+00:00"
   }
 ]
