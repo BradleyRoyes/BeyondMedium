@@ -139,7 +139,7 @@ export default function Contact() {
         >
           <h2 className="mb-4 font-light gradient-text">Join Our Waitlist</h2>
           <p className="mb-8 text-gray-400">
-            Be the first to experience our Sensory Exploration & Integration Center when we open in Berlin. Enter your email to receive exclusive updates on our progress.
+            Be the first to experience our Sensory Exploration & Integration Center when we open. Enter your email to receive exclusive updates on our progress.
           </p>
         </motion.div>
         <motion.div
