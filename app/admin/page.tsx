@@ -337,26 +337,26 @@ export default function AdminPanel() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       {/* Header */}
-      <header className="bg-black p-6 border-b border-zinc-800 flex justify-between items-center">
+      <header className="bg-black p-4 sm:p-6 border-b border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center">
-          <div>
+          <div className="text-center sm:text-left">
             <h1 className="text-2xl font-light">BEYOND MEDIUM</h1>
             <p className="text-sm text-zinc-400">Admin Panel</p>
           </div>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
           <Button 
             variant="outline" 
-            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center"
+            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center text-sm px-2 sm:px-4"
             onClick={() => setNewEmailDialogOpen(true)}
           >
-            <MailPlus className="h-4 w-4 mr-2" />
-            New Email
+            <MailPlus className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="whitespace-nowrap">New Email</span>
           </Button>
           <Link href="/admin/help">
             <Button 
               variant="outline" 
-              className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+              className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 text-sm px-2 sm:px-4"
             >
               Help
             </Button>
@@ -364,7 +364,7 @@ export default function AdminPanel() {
           <Button 
             variant="outline" 
             onClick={handleLogout}
-            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 text-sm px-2 sm:px-4"
           >
             Logout
           </Button>
@@ -372,7 +372,7 @@ export default function AdminPanel() {
       </header>
       
       {/* Main Content */}
-      <main className="container mx-auto p-6 max-w-6xl">
+      <main className="container mx-auto px-3 py-4 sm:p-6 max-w-6xl">
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -398,7 +398,7 @@ export default function AdminPanel() {
           ) : (
             <>
               {/* Stats overview */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-8">
                 <Card className="bg-zinc-900 border-zinc-800 text-white">
                   <CardHeader>
                     <CardTitle className="text-zinc-400 text-sm">Total Subscribers</CardTitle>
@@ -438,48 +438,48 @@ export default function AdminPanel() {
               
               {/* Tabs for different content sections */}
               <Tabs defaultValue="waitlist" className="mb-6">
-                <TabsList className="bg-zinc-800 border-zinc-700">
-                  <TabsTrigger value="waitlist">Waitlist Subscribers</TabsTrigger>
-                  <TabsTrigger value="custom-emails">Custom Emails</TabsTrigger>
+                <TabsList className="bg-zinc-800 border-zinc-700 w-full flex overflow-x-auto">
+                  <TabsTrigger value="waitlist" className="flex-1">Waitlist Subscribers</TabsTrigger>
+                  <TabsTrigger value="custom-emails" className="flex-1">Custom Emails</TabsTrigger>
                 </TabsList>
                 
                 {/* Waitlist Tab Content */}
                 <TabsContent value="waitlist">
                   <Card className="bg-zinc-900 border-zinc-800 text-white">
                     <CardHeader>
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div>
                           <CardTitle>Waitlist Subscribers</CardTitle>
                           <CardDescription className="text-zinc-400">
                             All subscribers to your waitlist
                           </CardDescription>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                           <Button
                             variant="outline"
-                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center"
+                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center text-sm"
                             onClick={handleDownloadEmailsOnly}
                           >
-                            <List className="h-4 w-4 mr-2" />
-                            Email Addresses
+                            <List className="h-4 w-4 mr-1 sm:mr-2" />
+                            <span className="whitespace-nowrap">Email Addresses</span>
                           </Button>
                           <Button
                             variant="outline"
-                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center"
+                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center text-sm"
                             onClick={handleDownloadEmails}
                           >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download CSV
+                            <Download className="h-4 w-4 mr-1 sm:mr-2" />
+                            <span className="whitespace-nowrap">Download CSV</span>
                           </Button>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent>
                       <Tabs defaultValue="all">
-                        <TabsList className="bg-zinc-800 border-zinc-700">
-                          <TabsTrigger value="all">All</TabsTrigger>
-                          <TabsTrigger value="pending">Awaiting Response</TabsTrigger>
-                          <TabsTrigger value="responded">Responded</TabsTrigger>
+                        <TabsList className="bg-zinc-800 border-zinc-700 w-full flex overflow-x-auto">
+                          <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
+                          <TabsTrigger value="pending" className="flex-1">Awaiting Response</TabsTrigger>
+                          <TabsTrigger value="responded" className="flex-1">Responded</TabsTrigger>
                         </TabsList>
                         
                         {['all', 'pending', 'responded'].map((tab) => (
@@ -499,14 +499,14 @@ export default function AdminPanel() {
                                     }`}
                                   >
                                     <CardHeader className="pb-2">
-                                      <div className="flex justify-between items-start">
-                                        <div>
-                                          <CardTitle className="text-lg">{entry.email}</CardTitle>
+                                      <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+                                        <div className="w-full sm:w-auto">
+                                          <CardTitle className="text-lg break-all">{entry.email}</CardTitle>
                                           <CardDescription className="text-zinc-400">
                                             Joined {formatDate(entry.timestamp)}
                                           </CardDescription>
                                         </div>
-                                        <div>
+                                        <div className="w-full sm:w-auto">
                                           <Dialog open={responseDialogOpen && selectedEntry?.id === entry.id} onOpenChange={(open) => {
                                             if (open) {
                                               setSelectedEntry(entry);
@@ -525,7 +525,7 @@ export default function AdminPanel() {
                                                 {entry.responded ? 'Send Another' : 'Respond'}
                                               </Button>
                                             </DialogTrigger>
-                                            <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
+                                            <DialogContent className="bg-zinc-900 border-zinc-800 text-white w-[95vw] max-w-md mx-auto">
                                               <DialogHeader>
                                                 <DialogTitle>Respond to {entry.email}</DialogTitle>
                                                 <DialogDescription className="text-zinc-400">
@@ -610,12 +610,12 @@ export default function AdminPanel() {
                                         <h4 className="text-sm font-medium text-zinc-400">Conversation History:</h4>
                                         {entry.conversations.map((conv, idx) => (
                                           <div key={idx} className="bg-zinc-900 p-3 rounded-md border border-zinc-800">
-                                            <div className="flex justify-between text-xs text-zinc-500 mb-1">
-                                              <span>{conv.from === 'system' ? 'System' : 'You'} → {conv.to}</span>
-                                              <span>{formatDate(conv.timestamp)}</span>
+                                            <div className="flex flex-col sm:flex-row justify-between text-xs text-zinc-500 mb-1">
+                                              <span className="mb-1 sm:mb-0 break-all">{conv.from === 'system' ? 'System' : 'You'} → {conv.to}</span>
+                                              <span className="whitespace-nowrap">{formatDate(conv.timestamp)}</span>
                                             </div>
-                                            <p className="text-sm font-medium mb-1">{conv.subject}</p>
-                                            <p className="text-sm text-zinc-300 whitespace-pre-line">{conv.message}</p>
+                                            <p className="text-sm font-medium mb-1 break-words">{conv.subject}</p>
+                                            <p className="text-sm text-zinc-300 whitespace-pre-line break-words">{conv.message}</p>
                                           </div>
                                         ))}
                                       </div>
@@ -667,9 +667,9 @@ export default function AdminPanel() {
                                 className="bg-zinc-800 border border-green-800"
                               >
                                 <CardHeader className="pb-2">
-                                  <div className="flex justify-between items-start">
+                                  <div className="flex flex-col sm:flex-row justify-between items-start">
                                     <div>
-                                      <CardTitle className="text-lg">{email.to}</CardTitle>
+                                      <CardTitle className="text-lg break-all">{email.to}</CardTitle>
                                       <CardDescription className="text-zinc-400">
                                         Sent {formatDate(email.timestamp)}
                                       </CardDescription>
@@ -682,8 +682,8 @@ export default function AdminPanel() {
                                       <div className="text-xs text-zinc-500 mb-1">
                                         From: connect@beyondmedium.com
                                       </div>
-                                      <p className="text-sm font-medium mb-1">{email.subject}</p>
-                                      <p className="text-sm text-zinc-300 whitespace-pre-line">{email.message}</p>
+                                      <p className="text-sm font-medium mb-1 break-words">{email.subject}</p>
+                                      <p className="text-sm text-zinc-300 whitespace-pre-line break-words">{email.message}</p>
                                     </div>
                                   </div>
                                 </CardContent>
@@ -711,7 +711,7 @@ export default function AdminPanel() {
           }
         }}
       >
-        <DialogContent className="bg-zinc-900 border-zinc-800 text-white">
+        <DialogContent className="bg-zinc-900 border-zinc-800 text-white w-[95vw] max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle>Send New Email</DialogTitle>
             <DialogDescription className="text-zinc-400">
