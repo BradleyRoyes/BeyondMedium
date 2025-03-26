@@ -279,32 +279,42 @@ export default function Hero() {
       constructor(isDiumParticle = false) {
         this.x = Math.random() * canvas.width
         this.y = Math.random() * canvas.height
-        this.baseSize = Math.random() * 2 + 0.1 // Slightly smaller base size
+        this.baseSize = Math.random() * 2 + 0.1
         this.size = this.baseSize
-        this.speedX = Math.random() * 0.8 - 0.4 // Reduced from 1.5 to 0.8
-        this.speedY = Math.random() * 0.8 - 0.4 // Reduced from 1.5 to 0.8
-        this.baseOpacity = Math.random() * 0.4 + 0.1 // Slightly reduced max opacity
+        // Create more stable particles on mobile by reducing speed
+        if (isMobile) {
+          this.speedX = (Math.random() * 0.4 - 0.2) // Lower speed on mobile
+          this.speedY = (Math.random() * 0.4 - 0.2) // Lower speed on mobile
+        } else {
+          this.speedX = Math.random() * 0.8 - 0.4
+          this.speedY = Math.random() * 0.8 - 0.4
+        }
+        this.baseOpacity = Math.random() * 0.4 + 0.1
         this.opacity = this.baseOpacity
         this.originalX = this.x
         this.originalY = this.y
-        this.connectionRadius = Math.random() * 100 + 50 // Reduced from 120 to 100
-        this.hue = Math.random() * 60 - 30 // Subtle hue variation
-        this.saturation = Math.random() * 10 // Very slight saturation
+        this.connectionRadius = Math.random() * 100 + 50
+        this.hue = Math.random() * 60 - 30
+        this.saturation = Math.random() * 10
         this.phase = Math.random() * Math.PI * 2
-        this.phaseSpeed = 0.005 + Math.random() * 0.01 // Reduced from 0.01-0.03 to 0.005-0.015
+        // Slower oscillation on mobile for more stability
+        this.phaseSpeed = isMobile ? 
+          (0.002 + Math.random() * 0.005) : // Slower on mobile
+          (0.005 + Math.random() * 0.01)
         // For "dium" reformation effect
         this.isDiumParticle = isDiumParticle
         this.targetX = 0
         this.targetY = 0
         this.isReturning = false
         // Slower return speed for more gradual movement
-        this.returnSpeed = 0.01 + Math.random() * 0.02 // Reduced from 0.02-0.05 to 0.01-0.03
+        this.returnSpeed = 0.01 + Math.random() * 0.02
         this.angleOffset = Math.random() * Math.PI * 2
         // Add unique ID for stable connection references
         this.id = Math.random() * 100000 | 0
         
         // Add property to determine if this particle ignores repulsion (rare chance)
-        this.ignoresRepulsion = Math.random() < 0.02 // Reduced from 3% to 2%
+        // Reduce the chance on mobile for better performance
+        this.ignoresRepulsion = Math.random() < (isMobile ? 0.01 : 0.02)
       }
 
       update(mouseX: number, mouseY: number, isHovering: boolean, diumPosition: { x: number, y: number, width: number, height: number, active: boolean }) {
@@ -376,8 +386,8 @@ export default function Hero() {
         // Skip dium particle special behavior on mobile completely
         if (isMobile && this.isDiumParticle) {
           // Just use normal particle behavior on mobile
-          this.x += this.speedX + Math.sin(this.phase) * 0.2
-          this.y += this.speedY + Math.cos(this.phase) * 0.2
+          this.x += this.speedX + Math.sin(this.phase) * 0.05 // Reduced oscillation for stability
+          this.y += this.speedY + Math.cos(this.phase) * 0.05 // Reduced oscillation for stability
 
           // Screen wrapping
           if (this.x > canvas.width) this.x = 0
@@ -385,10 +395,10 @@ export default function Hero() {
           if (this.y > canvas.height) this.y = 0
           if (this.y < 0) this.y = canvas.height
           
-          // Regular size and opacity fluctuations
-          const oscillation = Math.sin(this.phase) * 0.2
+          // Regular size and opacity fluctuations with reduced amplitude
+          const oscillation = Math.sin(this.phase) * 0.1 // Reduced oscillation
           this.size = Math.max(0.1, this.baseSize + oscillation)
-          this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.05
+          this.opacity = this.baseOpacity + Math.sin(this.phase) * 0.02 // Less opacity variation
           
           return // Skip the rest of the update logic
         }
@@ -429,8 +439,14 @@ export default function Hero() {
         }
         
         // Normal particle movement with subtle oscillation
-        this.x += this.speedX + Math.sin(this.phase) * 0.1 // Reduced oscillation from 0.2 to 0.1
-        this.y += this.speedY + Math.cos(this.phase) * 0.1 // Reduced oscillation from 0.2 to 0.1
+        if (isMobile) {
+          // Even less oscillation on mobile for stability
+          this.x += this.speedX + Math.sin(this.phase) * 0.05 // Much reduced oscillation for mobile
+          this.y += this.speedY + Math.cos(this.phase) * 0.05 // Much reduced oscillation for mobile
+        } else {
+          this.x += this.speedX + Math.sin(this.phase) * 0.1
+          this.y += this.speedY + Math.cos(this.phase) * 0.1
+        }
 
         // Screen wrapping
         if (this.x > canvas.width) this.x = 0
@@ -684,14 +700,12 @@ export default function Hero() {
       const deltaTime = currentTime - lastFrameTime
       lastFrameTime = currentTime
       
-      // Skip the mobile-specific startup frame positioning
-      // since we're removing the gravity effect on mobile
-      
       // Only clear with a semi-transparent overlay for smoother transitions on connections
       // This creates a trail effect that reduces flickering
       if (isMobile) {
-        // Clear fully on mobile for performance
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+        // Use partial clearing on mobile for smoother animation with less refreshing
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
       } else {
         // Use partial transparency clearing for desktop to reduce flicker
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
@@ -714,11 +728,11 @@ export default function Hero() {
       // and by reducing the frequency of connection updates on mobile
       
       // Create stable subsets for connection drawing to reduce flickering
-      const regularParticlesForConnections = particles.slice(0, isMobile ? 20 : 40); // Reduced from 30/60 to 20/40
-      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 10 : 20); // Reduced from 15/30 to 10/20
+      const regularParticlesForConnections = particles.slice(0, isMobile ? 20 : 40);
+      const diumParticlesForConnections = diumParticles.filter(p => !p.isReturning).slice(0, isMobile ? 10 : 20);
       
-      // On mobile, skip some frames for connections to improve performance
-      const shouldDrawConnections = !isMobile || (Date.now() % 4 === 0); // Increased skip rate from 3 to 4
+      // On mobile, skip more frames for connections to improve performance
+      const shouldDrawConnections = !isMobile || (Date.now() % 6 === 0);
       
       if (shouldDrawConnections) {
         // Draw connections between regular particles
@@ -729,7 +743,7 @@ export default function Hero() {
           // Use a stable subset of returning dium particles
           const returningDiumParticles = diumParticles
             .filter(p => p.isReturning)
-            .slice(0, isMobile ? 20 : 40); // Reduced from 30/60 to 20/40
+            .slice(0, isMobile ? 20 : 40);
             
           drawConnections(returningDiumParticles);
         }
@@ -772,26 +786,31 @@ export default function Hero() {
     
     // Add scroll event listener to update particle positions relative to viewport
     // Modify to avoid refreshing on mobile
-    window.addEventListener("scroll", () => {
+    const handleScroll = () => {
       // Only force redraw on scroll for desktop - skip this for mobile to avoid refresh flicker
       if (!isMobile && canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d")
         if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height)
       }
       
-      // Simply update the center area and dium position on scroll without full redraw
-      updateCenterArea();
-      if (diumTextRef.current) {
-        const rect = diumTextRef.current.getBoundingClientRect();
-        diumPositionRef.current = {
-          ...diumPositionRef.current,
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-          width: rect.width,
-          height: rect.height
-        };
+      // Update positions without affecting particles on mobile
+      if (!isMobile) {
+        // Simply update the center area and dium position on scroll without full redraw on desktop
+        updateCenterArea();
+        if (diumTextRef.current) {
+          const rect = diumTextRef.current.getBoundingClientRect();
+          diumPositionRef.current = {
+            ...diumPositionRef.current,
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            width: rect.width,
+            height: rect.height
+          };
+        }
       }
-    })
+    };
+    
+    window.addEventListener("scroll", handleScroll);
     
     return () => {
       window.removeEventListener("resize", handleResize)
@@ -800,7 +819,7 @@ export default function Hero() {
       canvas.removeEventListener("touchmove", handleTouchMove)
       canvas.removeEventListener("touchend", handleTouchEnd)
       canvas.removeEventListener("touchcancel", handleTouchEnd)
-      window.removeEventListener("scroll", () => {})
+      window.removeEventListener("scroll", handleScroll)
     }
   }, [mousePosition, isHovering, isMobile])
 
@@ -851,7 +870,7 @@ export default function Hero() {
           transition={{ duration: 1.5 }}
           className="absolute top-0 inset-x-0 mt-8 sm:mt-16"
         >
-          <p className="text-xs sm:text-sm tracking-[0.2em] uppercase text-white/60">Unveiling in Berlin • 2025</p>
+          <p className="text-xs sm:text-sm tracking-[0.2em] uppercase text-white/60">Unveiling in Central Berlin • 2025</p>
         </motion.div>
         
         <motion.h1
@@ -883,7 +902,10 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Sensory Integration Center
+          <span className="inline-flex items-baseline">
+            <span className="text-[#a4c2c2] font-light text-sm tracking-wider mr-2 opacity-80 whitespace-nowrap">BERLIN'S NEW</span>
+            <span className="whitespace-nowrap">Sensory Integration Center</span>
+          </span>
         </motion.p>
         
         <motion.div
@@ -891,9 +913,14 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
-          <span className="inline-block py-2 px-6 border border-white/20 text-white/90 text-sm tracking-widest uppercase backdrop-blur-sm bg-black/30 rounded-sm relative glow-pulse-container overflow-hidden">
+          <span 
+            className={`inline-block py-2 px-6 border ${isMobile ? 'border-[#a4c2c2]/40' : 'border-white/20'} 
+            text-white/90 text-sm tracking-widest uppercase backdrop-blur-sm 
+            ${isMobile ? 'bg-black/40 shadow-[0_0_15px_2px_rgba(164,194,194,0.2)]' : 'bg-black/30'} 
+            rounded-sm relative glow-pulse-container overflow-hidden`}
+          >
             <span className="relative z-10">Coming Soon</span>
-            <span className="absolute inset-0 bg-[#a4c2c2]/10 opacity-0 animate-mint-pulse z-0"></span>
+            <span className={`absolute inset-0 bg-[#a4c2c2]/10 ${isMobile ? 'opacity-30 animate-mint-pulse-mobile' : 'opacity-0 animate-mint-pulse'} z-0`}></span>
           </span>
         </motion.div>
       </div>
