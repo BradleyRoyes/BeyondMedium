@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { MailPlus } from 'lucide-react';
+import { MailPlus, Download, List } from 'lucide-react';
 
 import { WaitlistEntry, CustomEmail, getCustomEmails } from '@/lib/db';
 import {
@@ -156,6 +156,70 @@ export default function AdminPanel() {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     router.push('/admin/login');
+  };
+  
+  // Handle download of just email addresses
+  const handleDownloadEmailsOnly = () => {
+    // Create a simple text file with one email per line
+    const emailsText = entries.map(entry => entry.email).join('\n');
+    
+    // Create blob and download link
+    const blob = new Blob([emailsText], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `waitlist-emails-${new Date().toISOString().split('T')[0]}.txt`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+  };
+  
+  // Handle email download
+  const handleDownloadEmails = () => {
+    // Helper function to escape CSV fields
+    const escapeCSV = (field: string) => {
+      // If field contains comma, newline or double quote, wrap in quotes and escape any quotes
+      if (field && (field.includes(',') || field.includes('\n') || field.includes('"'))) {
+        return `"${field.replace(/"/g, '""')}"`;
+      }
+      return field;
+    };
+    
+    // Create CSV content with more information
+    const headers = ["Email", "Date Joined", "Responded", "Conversation Count", "Last Contact"];
+    const csvContent = entries.reduce((acc, entry) => {
+      // Get the most recent conversation timestamp if any exists
+      const lastContactDate = entry.conversations.length > 0 
+        ? formatDate(entry.conversations[entry.conversations.length - 1].timestamp)
+        : "Never";
+      
+      const row = [
+        escapeCSV(entry.email),
+        escapeCSV(formatDate(entry.timestamp)),
+        entry.responded ? "Yes" : "No",
+        entry.conversations.length.toString(),
+        escapeCSV(lastContactDate)
+      ];
+      return acc + row.join(",") + "\n";
+    }, headers.join(",") + "\n");
+    
+    // Create blob and download link
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `waitlist-emails-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL object
+    setTimeout(() => URL.revokeObjectURL(url), 100);
   };
   
   // Handle response submission
@@ -383,10 +447,32 @@ export default function AdminPanel() {
                 <TabsContent value="waitlist">
                   <Card className="bg-zinc-900 border-zinc-800 text-white">
                     <CardHeader>
-                      <CardTitle>Waitlist Subscribers</CardTitle>
-                      <CardDescription className="text-zinc-400">
-                        All subscribers to your waitlist
-                      </CardDescription>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <CardTitle>Waitlist Subscribers</CardTitle>
+                          <CardDescription className="text-zinc-400">
+                            All subscribers to your waitlist
+                          </CardDescription>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center"
+                            onClick={handleDownloadEmailsOnly}
+                          >
+                            <List className="h-4 w-4 mr-2" />
+                            Email Addresses
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center"
+                            onClick={handleDownloadEmails}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download CSV
+                          </Button>
+                        </div>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <Tabs defaultValue="all">
